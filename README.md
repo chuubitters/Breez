@@ -101,5 +101,36 @@ void readCommands() {
 // ถ้าอยากให้จำค่าไว้หลังปิดเครื่อง ใช้ Preferences.h บันทึก gadgetName / gadgetIcon
 ```
 
-## 3. หลังบ้าน (Admin Dashboard)
+## 3. Breath Gadget: ESP32-C3 Super Mini + KY-037
+
+โค้ดบอร์ด: [`esp32/breez_gadget/breez_gadget.ino`](esp32/breez_gadget/breez_gadget.ino)
+
+### ต่อสาย
+| KY-037 | ESP32-C3 Super Mini |
+|---|---|
+| + (VCC) | **3V3** (ห้ามใช้ 5V) |
+| G (GND) | GND |
+| A0 (AO) | **GPIO3** |
+| D0 | ไม่ต้องต่อ |
+
+### Arduino IDE
+1. Settings → Additional boards manager URLs ใส่
+   `https://espressif.github.io/arduino-esp32/package_esp32_index.json`
+2. Boards Manager → ติดตั้ง **esp32 by Espressif Systems**
+3. Tools → Board: **ESP32C3 Dev Module** (หรือ Nologo ESP32C3 Super Mini)
+4. Tools → **USB CDC On Boot: Enabled** (สำคัญ)
+5. เลือก Port (Mac: `/dev/cu.usbmodem…`) แล้ว Upload
+   - ถ้า upload ไม่ได้: กดปุ่ม BOOT ค้างไว้ แล้วเสียบ USB ใหม่ แล้วกด Upload
+6. เปิด Serial Monitor ที่ 115200 ลองเป่า ควรเห็นตัวเลข 0 → 100 แล้ว **ปิด Serial Monitor ก่อนเปิด Unity** (พอร์ตใช้ได้ทีละโปรแกรม)
+
+ปรับความไวที่บรรทัด `FULL_SCALE` (เป่าแรงแล้วไม่ถึง 100 → ลดค่า) และ `NOISE_GATE` (เงียบแล้วยังไม่เป็น 0 → เพิ่มค่า)
+ตอนเปิดบอร์ดจะคาลิเบรตเสียงพื้นหลัง 1-2 วินาที (ไฟบนบอร์ดติด) อย่าเป่าช่วงนั้น
+
+### Unity
+1. เมนู **Breez → Configure Serial for ESP32** — ตั้งทุก scene ที่มี SerialController เป็น 115200 + DTR และใส่ `SerialPortAutoSelect` ให้หาพอร์ต ESP32 เอง
+2. เสียบบอร์ด → **Breez → Show Serial Ports** ต้องเห็น `/dev/cu.usbmodem…`
+3. กด Play ใน PowerRelease / BreathFocus / Rainy Forest — Console จะขึ้น `[Breez] Serial port: …`
+4. ถ้าเกมไวเกิน/ไม่ไวพอ ปรับ `Breath Threshold` ใน GameManager ของแต่ละเกม (ค่าเริ่มต้น 50)
+
+## 4. หลังบ้าน (Admin Dashboard)
 ดู [`admin-dashboard/README.md`](admin-dashboard/README.md) — วิธีตั้ง owner คนแรก และ deploy ขึ้น Vercel

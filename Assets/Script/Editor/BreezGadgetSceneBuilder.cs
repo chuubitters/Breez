@@ -230,20 +230,18 @@ public static class BreezGadgetSceneBuilder
         go.SetActive(false); // ตั้งค่าก่อนเปิด ไม่ให้เชื่อมพอร์ตผิด
         var comp = go.AddComponent(type);
         var so = new SerializedObject(comp);
-        if (settings != null)
-        {
-            so.FindProperty("portName")?.SetValue(settings.port);
-            var baud = so.FindProperty("baudRate");
-            if (baud != null) baud.intValue = settings.baud;
-        }
+        if (settings != null) so.FindProperty("portName")?.SetValue(settings.port);
+        var baud = so.FindProperty("baudRate");
+        if (baud != null) baud.intValue = 115200;      // ESP32-C3
+        var dtr = so.FindProperty("dtrEnable");
+        if (dtr != null) dtr.boolValue = true;
+        go.AddComponent<SerialPortAutoSelect>();       // หาพอร์ต ESP32 อัตโนมัติ
         var listener = so.FindProperty("messageListener");
         if (listener != null) listener.objectReferenceValue = go;
         so.ApplyModifiedPropertiesWithoutUndo();
         go.SetActive(true);
 
-        return settings != null
-            ? $"Serial port copied from game scenes: {settings.port} @ {settings.baud}."
-            : "Added SerialController — set its Port Name to match your ESP32.";
+        return "Added SerialController (115200, port auto-detected at Play).";
     }
 
     static void SetValue(this SerializedProperty p, string v) { if (p != null) p.stringValue = v; }
