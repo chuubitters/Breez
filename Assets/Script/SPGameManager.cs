@@ -41,6 +41,12 @@ public class SPGameManager : MonoBehaviour
     private bool gameStarted = false;
     private bool wasInputActive = false;
 
+    [Header("Save Session")]
+    [Tooltip("บันทึกเป็น Soundscape session เมื่อฝึกนานอย่างน้อยกี่วินาที")]
+    public float minSecondsToSave = 10f;
+    private float sessionStartTime;
+    private bool sessionSaved = false;
+
     private void Start()
     {
         // ตั้งค่า Breathing Bar
@@ -167,6 +173,7 @@ public class SPGameManager : MonoBehaviour
 
         // เริ่มเกมจริง
         gameStarted = true;
+        sessionStartTime = Time.realtimeSinceStartup;
 
         // เริ่มระบบหายใจ
         StartBreathing();
@@ -303,6 +310,33 @@ public class SPGameManager : MonoBehaviour
         {
             breathingBar.value = endValue;
         }
+    }
+
+    // ==================================
+    // บันทึก session ตอนออกจาก scene / ปิดเกม
+    // (เรียก SaveSession() จากปุ่ม Back ก็ได้)
+    // ==================================
+    public void SaveSession()
+    {
+        if (!gameStarted || sessionSaved)
+            return;
+
+        float seconds = Time.realtimeSinceStartup - sessionStartTime;
+        if (seconds < minSecondsToSave)
+            return;
+
+        sessionSaved = true;
+        GameDataRecorder.RecordSoundscape(seconds);
+    }
+
+    private void OnDestroy()
+    {
+        SaveSession();
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveSession();
     }
 
     // ==================================
