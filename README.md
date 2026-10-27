@@ -39,6 +39,13 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
    (ถ้ายังไม่ login จะเด้งไปหน้า Login, ผูกปุ่ม Logout ไปที่ `AccountActions.SignOut`)
 4. กด Play ที่ scene Login → สมัคร → เล่นเกม → ดูข้อมูลในหลังบ้าน
 
+### หน้า Mood Tracking & Weekly Summary
+เมนู **Breez → Create Mood Tracking Scene**
+- สร้าง `Assets/Scenes/MoodTracking.unity` ตามดีไซน์ (เลือกอารมณ์วันนี้, จำนวน session, อารมณ์ที่พบบ่อย, จำนวนแต่ละเกม, streak, การเล่นล่าสุด) ข้อมูลย้อนหลัง 7 วัน
+- ผูกปุ่ม "Mood Tracking & Summary" ใน scene Mode ให้เปิดหน้านี้อัตโนมัติ
+- รูปหน้าอารมณ์ใน `Assets/element/Mood/` เป็น placeholder — เปลี่ยนเป็นไอคอนจาก Figma ได้โดยแทนที่ไฟล์ PNG ชื่อเดิม
+- ถ้า import font ไทย (เช่น Prompt / Noto Sans Thai) แล้วสร้าง TMP Font Asset ไว้ในโปรเจกต์ ให้กดเมนูนี้อีกครั้ง จะใช้ข้อความภาษาไทยให้
+
 ### ข้อมูลที่บันทึกอัตโนมัติ
 | เกม | จุดที่บันทึก | ข้อมูล |
 |---|---|---|

@@ -6,7 +6,21 @@ using UnityEngine;
 [Serializable] public class SummaryMode { public string mode; public int count; public int best_score; }
 [Serializable] public class SummaryMoodCount { public string mood; public int count; }
 [Serializable] public class SummaryMood { public string mood; public string note; public string recorded_at; }
-[Serializable] public class SummarySession { public string mode; public int score; public int duration; public string played_at; }
+[Serializable]
+public class SummarySession
+{
+    public string mode;
+    public int score;
+    public int duration;
+    public string played_at;
+    // -1 = ไม่มีค่า (ไม่ใช่โหมดนั้น)
+    public int flame_out_count = -1;
+    public int balloons_total = -1;
+    public int balloons_popped = -1;
+    public int obstacles_avoided = -1;
+}
+
+[Serializable] public class SummaryModeCounts { public int calm; public int power; public int focus; public int soundscape; public int quick; }
 
 [Serializable]
 public class PlayerSummary
@@ -16,6 +30,9 @@ public class PlayerSummary
     public float total_minutes;
     public int best_score;
     public int streak_days;
+    public string today_mood;   // อารมณ์ที่บันทึกวันนี้ ("" = ยังไม่บันทึก)
+    public string top_mood;     // อารมณ์ที่พบบ่อยที่สุดในช่วงเวลา
+    public SummaryModeCounts mode_counts;
     public SummaryMode[] modes;
     public SummaryMoodCount[] mood_counts;
     public SummaryMood[] recent_moods;
