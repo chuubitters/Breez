@@ -46,6 +46,13 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
 - รูปหน้าอารมณ์ใน `Assets/element/Mood/` เป็น placeholder — เปลี่ยนเป็นไอคอนจาก Figma ได้โดยแทนที่ไฟล์ PNG ชื่อเดิม
 - ถ้า import font ไทย (เช่น Prompt / Noto Sans Thai) แล้วสร้าง TMP Font Asset ไว้ในโปรเจกต์ ให้กดเมนูนี้อีกครั้ง จะใช้ข้อความภาษาไทยให้
 
+### หน้า Gadget Setting (ตั้งชื่อ + ไอคอนอุปกรณ์)
+เมนู **Breez → Create Gadget Setting Scene**
+- สร้าง `Assets/Scenes/GadgetSetting.unity`: แตะไอคอนเพื่อเลือก (แมว ดอกไม้ เมฆ ดาว หัวใจ พระจันทร์), แตะชื่อเพื่อเปลี่ยน, แสดงสถานะเชื่อมต่อ + แบตเตอรี่
+- ทำให้รูป GadgetStatus ในหน้า Home กดแล้วเปิดหน้านี้
+- ใส่ SerialController ใน scene (คัดลอก port จาก scene PowerRelease) เพื่อให้สถานะเป็นแบบสด
+- บันทึกลงตาราง `devices` และส่งไปที่บอร์ด (ดูหัวข้อ ESP32 ด้านล่าง)
+
 ### ข้อมูลที่บันทึกอัตโนมัติ
 | เกม | จุดที่บันทึก | ข้อมูล |
 |---|---|---|
@@ -73,6 +80,26 @@ Serial.print("BAT:");
 Serial.println(pct);
 ```
 ค่าแรงเป่า (`0-100`) ส่งแบบเดิมได้เลย
+
+### ESP32: รับชื่อและไอคอนไปแสดงบนจอ (แบบ AirPods)
+เมื่อบอร์ดเชื่อมต่อ หรือเปลี่ยนค่าในหน้า Gadget Setting เกมจะส่งมา 2 บรรทัด:
+`NAME:<ชื่อ>` และ `ICON:<cat|flower|cloud|star|heart|moon>`
+
+```cpp
+String gadgetName = "Breath Gadget";
+String gadgetIcon = "cat";
+
+void readCommands() {
+  while (Serial.available()) {
+    String line = Serial.readStringUntil('\n');
+    line.trim();
+    if (line.startsWith("NAME:")) { gadgetName = line.substring(5); drawIdentity(); }
+    else if (line.startsWith("ICON:")) { gadgetIcon = line.substring(5); drawIdentity(); }
+  }
+}
+// เรียก readCommands() ใน loop() แล้วเขียน drawIdentity() ให้วาดชื่อ/ไอคอนบนจอ 1.28" (เช่นด้วย TFT_eSPI)
+// ถ้าอยากให้จำค่าไว้หลังปิดเครื่อง ใช้ Preferences.h บันทึก gadgetName / gadgetIcon
+```
 
 ## 3. หลังบ้าน (Admin Dashboard)
 ดู [`admin-dashboard/README.md`](admin-dashboard/README.md) — วิธีตั้ง owner คนแรก และ deploy ขึ้น Vercel

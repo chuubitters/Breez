@@ -4,12 +4,22 @@ using UnityEngine;
 // รูปแบบข้อความที่รองรับ:
 //   "57"       ค่าแรงเป่า 0-100 (เหมือนเดิม)
 //   "BAT:85"   ระดับแบตเตอรี่ % (ไม่บังคับ ใช้แสดงในหลังบ้าน)
+// เมื่อบอร์ดเชื่อมต่อ จะส่ง "NAME:..." และ "ICON:..." กลับไปให้บอร์ดแสดงบนจอ
 public class BreathReceiver : MonoBehaviour
 {
     public int breathLevel;
 
     [Tooltip("แสดงค่าที่ได้รับใน Console")]
     public bool logMessages = false;
+
+    void Awake()
+    {
+        // หา Ardity SerialController (อยู่ที่ GameObject เดียวกันหรือที่ใดก็ได้ใน scene)
+        foreach (var mb in GetComponents<MonoBehaviour>())
+            if (mb != null && mb.GetType().Name == "SerialController") { DeviceService.RegisterSerial(mb.gameObject); return; }
+        foreach (var mb in FindObjectsOfType<MonoBehaviour>())
+            if (mb != null && mb.GetType().Name == "SerialController") { DeviceService.RegisterSerial(mb.gameObject); return; }
+    }
 
     public void OnMessageArrived(string message)
     {
@@ -37,5 +47,10 @@ public class BreathReceiver : MonoBehaviour
     {
         DeviceService.SetSerialConnected(success);
         Debug.Log(success ? "Breath Gadget connected" : "Breath Gadget disconnected");
+
+        if (!success) return;
+        // ส่งชื่อ + ไอคอนให้บอร์ดแสดง (เหมือน AirPods ที่โชว์ชื่อเครื่อง)
+        if (DeviceService.Current != null) DeviceService.PushIdentityToGadget();
+        else DeviceService.Sync(done: _ => DeviceService.PushIdentityToGadget());
     }
 }

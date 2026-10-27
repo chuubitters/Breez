@@ -31,6 +31,41 @@ public static class DeviceService
 
     public static string StatusNow => (SerialConnected || IsReceiving) ? "connected" : "disconnected";
 
+    // ---------- ส่งข้อมูลไปที่ ESP32 (ผ่าน Ardity SerialController) ----------
+    static GameObject serialObject;
+
+    /// <summary>BreathReceiver เรียกเพื่อบอกว่า SerialController อยู่ที่ GameObject ไหน</summary>
+    public static void RegisterSerial(GameObject go) => serialObject = go;
+
+    public static bool CanSendToGadget => serialObject != null && SerialConnected;
+
+    /// <summary>ส่ง 1 บรรทัดไปที่บอร์ด เช่น "NAME:Pim's Gadget"</summary>
+    public static bool SendToGadget(string line)
+    {
+        if (serialObject == null) return false;
+        serialObject.SendMessage("SendSerialMessage", line, SendMessageOptions.DontRequireReceiver);
+        return true;
+    }
+
+    /// <summary>ส่งชื่อและไอคอนไปแสดงบนจอของ Breath Gadget</summary>
+    public static void PushIdentityToGadget()
+    {
+        if (Current == null) return;
+        SendToGadget("NAME:" + (Current.device_name ?? "").Replace("\n", " "));
+        SendToGadget("ICON:" + Current.device_icon);
+    }
+
+    /// <summary>ออนไลน์ตามข้อมูลบนเซิร์ฟเวอร์ (อัปเดตภายใน 2 นาที)</summary>
+    public static bool ServerSaysConnected
+    {
+        get
+        {
+            if (Current == null || Current.connection_status != "connected") return false;
+            if (!DateTime.TryParse(Current.updated_at, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t)) return false;
+            return (DateTime.UtcNow - t.ToUniversalTime()).TotalMinutes < 2;
+        }
+    }
+
     public static void NotifyMessage() => lastMessageTime = Time.realtimeSinceStartup;
     public static void ReportBattery(int percent) => LastBattery = Mathf.Clamp(percent, 0, 100);
     public static void SetSerialConnected(bool connected) => SerialConnected = connected;

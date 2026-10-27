@@ -9,7 +9,7 @@ const loading = ref(true)
 const error = ref('')
 const filter = ref('all')
 
-const ICONS = { cat: '🐱', flower: '✿', cloud: '☁', star: '★' }
+const ICONS = { cat: '🐱', flower: '✿', cloud: '☁', star: '★', heart: '♥', moon: '☾' }
 
 let timer
 async function load() {
