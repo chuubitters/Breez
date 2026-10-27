@@ -189,5 +189,13 @@ public class PWGameManager : MonoBehaviour
             "Time Taken: " +
             timeElapsed.ToString("F2") +
             " Seconds";
+
+        // บันทึกผลขึ้น Supabase (หลังบ้านเห็นในหน้า ประวัติการเล่น)
+        GameDataRecorder.RecordPowerRelease(
+            currentScore,
+            timeElapsed,
+            totalBalloons,
+            poppedCount
+        );
     }
 }

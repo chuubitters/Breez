@@ -240,5 +240,12 @@ public class BFGameManager : MonoBehaviour
             gameOverPanel.SetActive(true);
 
         Time.timeScale = 0f;
+
+        // บันทึกผลขึ้น Supabase (ส่งได้แม้ timeScale = 0)
+        GameDataRecorder.RecordBreatheFocus(
+            currentScore,
+            gameTime,
+            obstaclesPassed
+        );
     }
 }
