@@ -131,8 +131,100 @@ public static class BreezSpriteArt
     }
 
     // ---------------------------------------------------------------
+    // ไอคอนอุปกรณ์ (สีขาว ย้อมสีด้วย Image.color)
+    // ---------------------------------------------------------------
+    public static readonly string[] GadgetIcons = { "cat", "flower", "cloud", "star", "heart", "moon" };
+
+    public static float[] GadgetIcon(string id, int size)
+    {
+        var px = new float[size * size * 4];
+        var w = new Rgba(1, 1, 1);
+        switch (id)
+        {
+            case "cat":
+                Paint(px, size, (x, y) =>
+                    Ellipse(x, y, 0f, -0.12f, 0.62f, 0.52f) ||
+                    Triangle(x, y, -0.58f, 0.05f, -0.5f, 0.68f, -0.12f, 0.3f) ||
+                    Triangle(x, y, 0.58f, 0.05f, 0.5f, 0.68f, 0.12f, 0.3f) ||
+                    Capsule(x, y, -0.92f, -0.1f, -0.66f, -0.1f, 0.045f) ||
+                    Capsule(x, y, -0.92f, -0.3f, -0.62f, -0.28f, 0.045f) ||
+                    Capsule(x, y, 0.92f, -0.1f, 0.66f, -0.1f, 0.045f) ||
+                    Capsule(x, y, 0.92f, -0.3f, 0.62f, -0.28f, 0.045f), w);
+                Erase(px, size, (x, y) =>
+                    Capsule(x, y, -0.24f, 0.0f, -0.24f, -0.16f, 0.06f) ||
+                    Capsule(x, y, 0.24f, 0.0f, 0.24f, -0.16f, 0.06f) ||
+                    Ellipse(x, y, 0f, -0.3f, 0.09f, 0.065f));
+                break;
+            case "flower":
+                return Flower(size);
+            case "cloud":
+                Paint(px, size, (x, y) =>
+                    Dot(x, y, -0.4f, -0.12f, 0.36f) || Dot(x, y, 0.05f, 0.12f, 0.48f) ||
+                    Dot(x, y, 0.5f, -0.12f, 0.34f) ||
+                    (y > -0.46f && y < -0.12f && x > -0.4f && x < 0.5f), w);
+                break;
+            case "star":
+                Paint(px, size, (x, y) => Star(x, y + 0.06f, 0.92f, 0.4f), w);
+                break;
+            case "heart":
+                Paint(px, size, (x, y) => Heart(x, y + 0.08f, 0.62f), w);
+                break;
+            default: // moon
+                Paint(px, size, (x, y) => Dot(x, y, 0f, 0f, 0.8f) && !Dot(x, y, 0.38f, 0.26f, 0.66f), w);
+                break;
+        }
+        return px;
+    }
+
+    // ---------------------------------------------------------------
     // เครื่องมือวาด (พิกัด -1..1, y ชี้ขึ้น)
     // ---------------------------------------------------------------
+
+    static void Erase(float[] px, int size, Shape inside)
+    {
+        for (int j = 0; j < size; j++)
+            for (int i = 0; i < size; i++)
+            {
+                int hits = 0;
+                for (int sy = 0; sy < SS; sy++)
+                    for (int sx = 0; sx < SS; sx++)
+                    {
+                        float x = ((i + (sx + 0.5f) / SS) / size) * 2f - 1f;
+                        float y = ((j + (sy + 0.5f) / SS) / size) * 2f - 1f;
+                        if (inside(x, y)) hits++;
+                    }
+                if (hits > 0) px[(j * size + i) * 4 + 3] *= 1f - (float)hits / (SS * SS);
+            }
+    }
+
+    static bool Ellipse(float x, float y, float cx, float cy, float rx, float ry)
+    {
+        float dx = (x - cx) / rx, dy = (y - cy) / ry;
+        return dx * dx + dy * dy <= 1f;
+    }
+
+    static bool Triangle(float x, float y, float ax, float ay, float bx, float by, float cx, float cy)
+    {
+        float d1 = (x - bx) * (ay - by) - (ax - bx) * (y - by);
+        float d2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy);
+        float d3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay);
+        bool neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
+        return !(neg && pos);
+    }
+
+    static bool Star(float x, float y, float outer, float inner)
+    {
+        // 10 จุดสลับรัศมี แล้วเช็คด้วย triangle fan จากจุดศูนย์กลาง
+        for (int k = 0; k < 10; k++)
+        {
+            double a1 = Math.PI / 2 + k * Math.PI / 5, a2 = Math.PI / 2 + (k + 1) * Math.PI / 5;
+            float r1 = k % 2 == 0 ? outer : inner, r2 = k % 2 == 0 ? inner : outer;
+            if (Triangle(x, y, 0, 0,
+                (float)Math.Cos(a1) * r1, (float)Math.Sin(a1) * r1,
+                (float)Math.Cos(a2) * r2, (float)Math.Sin(a2) * r2)) return true;
+        }
+        return false;
+    }
 
     static void Paint(float[] px, int size, Shape inside, Rgba c)
     {
