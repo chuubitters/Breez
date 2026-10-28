@@ -61,6 +61,15 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
 - หรือลาก prefab ใส่ Canvas เอง / ใช้ **Add Breath Status To Open Scene**, **Add Gadget Status To Open Scene**
 - ข้อความแก้ได้ใน Inspector (ถ้าไม่มี font ไทย จะใช้ Inhale / Exhale, Connected / Not connected)
 
+### Soundscape: Rainy Forest + Windy Mountain
+- **Breez → Upgrade Rainy Forest Rain** — ใส่ `BreathRain` ให้ RainEffect: ฝนเม็ดเล็ก (เส้นฝนบางๆ แทนรูปเม็ดใหญ่) ตกเมื่อเป่า ยิ่งเป่าแรงยิ่งตกหนัก ปรับขนาด/ความหนาแน่น/สีได้ใน Inspector
+- **Breez → Create Windy Mountain Scene** — สร้าง `Windy Mountain.unity` จาก Rainy Forest (ระบบหายใจ 5-5, Start, countdown, บันทึก session เหมือนเดิม)
+  - ฉากภูเขาโทนพาสเทล + เงาดอกแดนดิไลออน 6 ต้น
+  - เป่า = เมล็ดหลุดปลิวไปตามลม ต้นโยกตามแรงเป่า, หยุดเป่า ~2.5 วิ เมล็ดงอกกลับ
+  - เสียง BGM / SFX เว้นว่าง: ใส่ AudioClip ที่ `SPGameManager > Bgm / Sfx`
+  - ผูกปุ่ม "Windy Mountain" ในหน้าเลือก Soundscape ให้อัตโนมัติ
+  - ฉากหลังเป็น placeholder เปลี่ยน sprite ที่ `Background (replace me)` ได้
+
 ### ข้อมูลที่บันทึกอัตโนมัติ
 | เกม | จุดที่บันทึก | ข้อมูล |
 |---|---|---|
