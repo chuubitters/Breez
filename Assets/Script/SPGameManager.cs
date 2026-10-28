@@ -39,6 +39,9 @@ public class SPGameManager : MonoBehaviour
 
     private bool isBreathing = false;
     private bool gameStarted = false;
+
+    /// <summary>เริ่มเล่นแล้ว (ผ่าน countdown) — ให้ effect อื่นๆ เช่น ฝน / แดนดิไลออน ใช้เช็ค</summary>
+    public bool IsPlaying => gameStarted;
     private bool wasInputActive = false;
 
     [Header("Save Session")]
