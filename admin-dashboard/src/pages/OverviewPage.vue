@@ -35,7 +35,7 @@ const chartSeries = [
   { key: 'calm', label: 'Calm Flow', cls: 'sage-bar', legend: 'legend-sage' },
   { key: 'power', label: 'Power Release', cls: 'coral-bar', legend: 'legend-coral' },
   { key: 'focus', label: 'Breathe & Focus', cls: 'lilac-bar', legend: 'legend-lilac' },
-  { key: 'relax', label: 'Soundscape / Quick', cls: 'blue-bar', legend: 'legend-blue' },
+  { key: 'relax', label: 'Soundscape / Quick', cls: 'yellow-bar', legend: 'legend-blue' },
 ]
 const daily = computed(() => data.value?.daily ?? [])
 const chartMax = computed(() => {
@@ -69,7 +69,7 @@ const moodTotal = computed(() => (data.value?.moods ?? []).reduce((a, m) => a + 
     <div>
       <div class="eyebrow"><span class="eyebrow-dot"></span> ADMIN OVERVIEW <span class="date-label">· {{ longDate() }}</span></div>
       <h1>สวัสดี {{ me.name }} ภาพรวมที่ดี เริ่มจาก<span class="highlight">ลมหายใจ</span> <span class="wave">〰</span></h1>
-      <p class="page-description">ติดตามการใช้งาน fuuu และการฝึกหายใจของผู้เล่นได้ในที่เดียว</p>
+      <p class="page-description">ติดตามการใช้งาน breez และการฝึกหายใจของผู้เล่นได้ในที่เดียว</p>
     </div>
     <div class="period-select">
       <span>ช่วงเวลา</span>

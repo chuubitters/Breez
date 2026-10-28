@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { supabase, rpc } from './lib/supabase'
 import LoginView from './views/LoginView.vue'
 import DashboardShell from './views/DashboardShell.vue'
+import BreezFlower from './components/BreezFlower.vue'
 
 const me = ref(null)
 const ready = ref(false)
@@ -39,7 +40,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="!ready" class="boot-screen"><div class="brand-flower spin"><span>✿</span></div></div>
+  <div v-if="!ready" class="boot-screen"><BreezFlower class="spin" :size="56" :petals="5" /></div>
   <LoginView v-else-if="!me" :notice="loginNotice" :resolve-staff="resolveStaff" @clear-notice="loginNotice = ''" />
   <DashboardShell v-else :me="me" @sign-out="signOut" />
 </template>

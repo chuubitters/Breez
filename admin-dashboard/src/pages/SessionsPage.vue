@@ -33,7 +33,7 @@ const periodLabel = computed(() => days.value ? `${days.value} วันล่�
 
 async function exportCsv() {
   const rows = await rpc('dashboard_sessions', args(1000, 0))
-  downloadCsv('fuuu-play-sessions.csv',
+  downloadCsv('breez-play-sessions.csv',
     ['session_id', 'user_id', 'player', 'mode', 'score', 'duration_seconds', 'detail', 'device', 'played_at'],
     rows.map(s => [s.session_id, s.user_id, s.player, s.mode, s.score, s.duration, sessionDetail(s), s.device_name, s.played_at]))
 }

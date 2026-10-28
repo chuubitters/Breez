@@ -8,6 +8,7 @@ import SessionsPage from '../pages/SessionsPage.vue'
 import MoodsPage from '../pages/MoodsPage.vue'
 import DevicesPage from '../pages/DevicesPage.vue'
 import StaffPage from '../pages/StaffPage.vue'
+import BreezFlower from '../components/BreezFlower.vue'
 
 const props = defineProps({ me: { type: Object, required: true } })
 const emit = defineEmits(['sign-out'])
@@ -68,8 +69,9 @@ const notifications = computed(() => {
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-flower"><span>✿</span></div>
-        <div><div class="brand-name">fuuu<span>.</span></div><div class="brand-sub">BREATHE & BLOOM</div></div>
+        <img class="brand-logo" src="/breez-logo.png" alt="breez" />
+        <BreezFlower class="brand-mark" :size="40" :petals="5" />
+        <span class="brand-sub">ADMIN</span>
       </div>
       <div class="workspace-label">WORKSPACE</div>
       <nav class="nav-list">
@@ -80,10 +82,9 @@ const notifications = computed(() => {
       </nav>
       <div class="sidebar-bottom">
         <div class="help-card">
-          <div class="help-spark">✦</div>
-          <strong>Keep growing!</strong>
+          <strong>หายใจเข้า… หายใจออก</strong>
           <p>ทุกลมหายใจคือการเริ่มต้นใหม่</p>
-          <div class="help-flower">✿</div>
+          <BreezFlower class="help-flower" :size="82" :petals="5" />
         </div>
         <div class="admin-profile">
           <button class="admin-avatar" @click="showMenu = !showMenu" aria-label="เมนูบัญชี">{{ initials(me.name) }}</button>
@@ -99,7 +100,7 @@ const notifications = computed(() => {
 
     <main class="main-area">
       <header class="topbar">
-        <div class="breadcrumb"><span>fuuu Admin</span><span class="crumb-slash">/</span><strong>{{ current.title }}</strong></div>
+        <div class="breadcrumb"><span>breez Admin</span><span class="crumb-slash">/</span><strong>{{ current.title }}</strong></div>
         <div class="top-actions">
           <div v-if="current.id !== 'overview' && current.id !== 'staff'" class="search-box">
             <span>⌕</span><input v-model="search" placeholder="ค้นหาผู้เล่น, session..." aria-label="ค้นหา" />
@@ -118,7 +119,7 @@ const notifications = computed(() => {
       <div class="page-content">
         <component :is="current.page" :key="current.id" :me="me" :search="search" :player-filter="playerFilter"
           @navigate="(id, opts) => go(id, opts)" @clear-player="playerFilter = null" />
-        <footer class="page-footer"><span>✿ fuuu admin dashboard</span><span>เชื่อมต่อ Supabase · ข้อมูลจริง</span></footer>
+        <footer class="page-footer"><span><img src="/breez-logo.png" alt="breez" /> admin dashboard</span><span>เชื่อมต่อ Supabase · ข้อมูลจริง</span></footer>
       </div>
     </main>
   </div>

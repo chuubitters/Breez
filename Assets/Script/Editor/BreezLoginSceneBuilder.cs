@@ -68,7 +68,7 @@ public static class BreezLoginSceneBuilder
         var fitter = card.gameObject.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        NewText("Brand", card.transform, "fuuu.", 44, Ink, FontStyles.Bold, 56);
+        NewText("Brand", card.transform, "breez", 44, Ink, FontStyles.Bold, 56);
         var title = NewText("Title", card.transform, "Welcome back", 34, Ink, FontStyles.Normal, 48);
         NewText("Subtitle", card.transform, "Sign in to save your breathing progress", 22, Muted, FontStyles.Normal, 34);
         Spacer(card.transform, 6);
