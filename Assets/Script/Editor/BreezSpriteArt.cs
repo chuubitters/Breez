@@ -131,6 +131,113 @@ public static class BreezSpriteArt
     }
 
     // ---------------------------------------------------------------
+    // Windy Mountain: แดนดิไลออน (สีขาว ย้อมสีด้วย SpriteRenderer.color)
+    // ---------------------------------------------------------------
+
+    /// <summary>เมล็ดแดนดิไลออน ฐานอยู่ล่างกลาง (ตั้ง pivot = 0.5, 0)</summary>
+    public static float[] DandelionSeed(int size)
+    {
+        var px = new float[size * size * 4];
+        var w = new Rgba(1, 1, 1);
+        Paint(px, size, (x, y) =>
+        {
+            if (Ellipse(x, y, 0f, -0.9f, 0.05f, 0.1f)) return true;          // ตัวเมล็ด
+            if (Capsule(x, y, 0f, -0.85f, 0f, 0.15f, 0.022f)) return true;   // ก้าน
+            for (int k = 0; k < 11; k++)                                    // ขนร่ม
+            {
+                double a = (20 + k * 14) * Math.PI / 180;
+                float tx = (float)Math.Cos(a) * 0.72f, ty = 0.15f + (float)Math.Sin(a) * 0.78f;
+                if (Capsule(x, y, 0f, 0.15f, tx, ty, 0.014f)) return true;
+                if (Dot(x, y, tx, ty, 0.03f)) return true;
+            }
+            return false;
+        }, w);
+        return px;
+    }
+
+    /// <summary>ก้านดอก (สี่เหลี่ยมผอมปลายมน) กว้าง x สูง</summary>
+    public static float[] Rect(int width, int height, int radius)
+    {
+        var px = new float[width * height * 4];
+        for (int j = 0; j < height; j++)
+            for (int i = 0; i < width; i++)
+            {
+                float cx = Math.Max(radius, Math.Min(width - radius, i + 0.5f));
+                float cy = Math.Max(radius, Math.Min(height - radius, j + 0.5f));
+                float dx = i + 0.5f - cx, dy = j + 0.5f - cy;
+                float d = (float)Math.Sqrt(dx * dx + dy * dy);
+                float a = Math.Max(0f, Math.Min(1f, radius - d + 0.5f));
+                int k = (j * width + i) * 4;
+                px[k] = px[k + 1] = px[k + 2] = 1f;
+                px[k + 3] = radius > 0 ? a : 1f;
+            }
+        return px;
+    }
+
+    /// <summary>ใบแดนดิไลออนหยักๆ ฐานอยู่ล่างกลาง</summary>
+    public static float[] DandelionLeaf(int size)
+    {
+        var px = new float[size * size * 4];
+        Paint(px, size, (x, y) =>
+        {
+            if (y < -0.98f || y > 0.98f) return false;
+            float t = (y + 1f) / 2f;                                    // 0 ฐาน -> 1 ปลาย
+            float baseW = 0.3f * (float)Math.Sin(Math.PI * Math.Pow(t, 0.8));
+            float saw = (float)((t * 7f) % 1.0);                         // ฟันเลื่อยชี้ลง
+            float wv = baseW * (0.55f + 0.45f * saw);
+            return Math.Abs(x) < wv;
+        }, new Rgba(1, 1, 1));
+        return px;
+    }
+
+    /// <summary>ฉากหลังภูเขาโทนพาสเทล (ไม่จัตุรัส) w x h</summary>
+    public static float[] MountainBackground(int w, int h)
+    {
+        var px = new float[w * h * 4];
+        Rgba skyTop = Rgba.Hex(0xDDEFF6), skyBottom = Rgba.Hex(0xFBF6EC);
+        var layers = new[]
+        {
+            new { c = Rgba.Hex(0xE3DDF2), baseY = 0.46f, amp = 0.16f, f1 = 1.3f, f2 = 3.7f, seed = 0.3f },
+            new { c = Rgba.Hex(0xD3E3C2), baseY = 0.32f, amp = 0.12f, f1 = 1.9f, f2 = 5.1f, seed = 1.7f },
+            new { c = Rgba.Hex(0xBBD3A3), baseY = 0.17f, amp = 0.07f, f1 = 2.6f, f2 = 7.3f, seed = 4.1f },
+        };
+        float sunX = 0.72f, sunY = 0.7f, sunR = 0.085f;
+
+        for (int j = 0; j < h; j++)
+        {
+            float v = (float)j / (h - 1);                                // 0 ล่าง -> 1 บน
+            for (int i = 0; i < w; i++)
+            {
+                float u = (float)i / (w - 1);
+                // ท้องฟ้า
+                float r = Lerp(skyBottom.r, skyTop.r, v), g = Lerp(skyBottom.g, skyTop.g, v), b = Lerp(skyBottom.b, skyTop.b, v);
+                // ดวงอาทิตย์นวลๆ
+                float dx = (u - sunX) * w / h, dy = v - sunY;
+                float sd = (float)Math.Sqrt(dx * dx + dy * dy);
+                float glow = Math.Max(0f, 1f - sd / (sunR * 3.5f)) * 0.35f;
+                float disc = Math.Max(0f, Math.Min(1f, (sunR - sd) * h + 0.5f));
+                r = Lerp(r, 1f, glow); g = Lerp(g, 0.98f, glow); b = Lerp(b, 0.9f, glow);
+                r = Lerp(r, 1f, disc * 0.9f); g = Lerp(g, 0.97f, disc * 0.9f); b = Lerp(b, 0.86f, disc * 0.9f);
+                // ภูเขาแต่ละชั้น (ขอบนุ่มด้วย coverage)
+                foreach (var L in layers)
+                {
+                    double ridge = L.baseY + L.amp * (0.6 * Math.Sin(u * Math.PI * L.f1 + L.seed) + 0.4 * Math.Sin(u * Math.PI * L.f2 + L.seed * 2.3));
+                    float cov = (float)Math.Max(0, Math.Min(1, (ridge - v) * h + 0.5));
+                    if (cov <= 0) continue;
+                    float shade = (float)Math.Max(0, Math.Min(1, (ridge - v) * 3));   // เข้มลงด้านล่างเล็กน้อย
+                    float lr = L.c.r * (1 - 0.06f * shade), lg = L.c.g * (1 - 0.06f * shade), lb = L.c.b * (1 - 0.06f * shade);
+                    r = Lerp(r, lr, cov); g = Lerp(g, lg, cov); b = Lerp(b, lb, cov);
+                }
+                int k = (j * w + i) * 4;
+                px[k] = r; px[k + 1] = g; px[k + 2] = b; px[k + 3] = 1f;
+            }
+        }
+        return px;
+    }
+
+    static float Lerp(float a, float b, float t) => a + (b - a) * t;
+
+    // ---------------------------------------------------------------
     // ไอคอนอุปกรณ์ (สีขาว ย้อมสีด้วย Image.color)
     // ---------------------------------------------------------------
     public static readonly string[] GadgetIcons = { "cat", "flower", "cloud", "star", "heart", "moon" };
