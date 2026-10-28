@@ -460,3 +460,80 @@ td strong { color: var(--ink-strong); font-weight: 800 }
 .orb-butter { left: 9%; top: 12%; width: 140px; height: 140px; background: radial-gradient(circle, #f6c6d6 0%, #eef2c4 70%) }
 .orb-pink { right: 21%; top: 10%; width: 124px; height: 124px; background: radial-gradient(circle at 60% 50%, #fff7ec 0%, #f4bfd1 75%) }
 @media (max-width: 760px) { .login-art .deco, .orb { opacity: .45 } }
+
+/* ===================== insights (overview / players) ===================== */
+.activity-chart .y-labels.right { align-items: flex-start; color: var(--pink-deep) }
+.legend-line { width: 16px; height: 3px; border-radius: 3px; background: var(--ink) }
+.people-layer { position: absolute; inset: 0 0 20px; pointer-events: none }
+.people-layer svg { width: 100%; height: 100%; overflow: visible }
+.people-layer polyline { fill: none; stroke: var(--ink); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; opacity: .75 }
+.people-dot { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); pointer-events: auto }
+.bar.wide { width: 14px }
+.activity-panel .activity-chart { height: 300px }
+.activity-panel { display: flex; flex-direction: column }
+@media (max-width: 560px) { .activity-panel .activity-chart { height: 200px } }
+
+.type-list { display: grid; gap: 10px }
+.type-row { display: flex; align-items: center; gap: 10px }
+.type-row .mode-bullet { flex-shrink: 0 }
+.type-name { flex: 1; min-width: 0; display: grid; gap: 1px }
+.type-name strong { font-size: 11.5px; color: var(--ink-strong); font-weight: 800 }
+.type-name small, .type-num small { font-size: 9.5px; color: var(--faint); font-weight: 600 }
+.type-num { text-align: right; display: grid; gap: 1px }
+.type-num strong { font-size: 13px; color: var(--ink-strong); font-weight: 800 }
+
+.mood-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); margin-bottom: 4px }
+.mood-people { display: grid; gap: 14px; margin-top: 18px }
+.mood-people-row { display: flex; align-items: center; gap: 12px }
+.mood-people-main { flex: 1; min-width: 0 }
+.mood-people-top { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; font-size: 11px }
+.mood-people-top strong { color: var(--ink-strong); font-weight: 800; font-size: 12px }
+.mood-people-top span { color: var(--faint); font-weight: 600 }
+.mood-people-top b { margin-left: auto; color: var(--muted); font-weight: 700 }
+.mood-track { height: 10px; background: #f3f0ea; border-radius: 999px; overflow: hidden }
+.mood-track span { display: block; height: 100%; border-radius: 999px; transition: width .4s }
+.mood-track .mood-happy { background: #f5d36e }
+.mood-track .mood-lovely { background: var(--pink) }
+.mood-track .mood-bored { background: var(--sage) }
+.mood-track .mood-angry { background: #f0a493 }
+.mood-track .mood-stress { background: var(--lavender) }
+.mood-pct { width: 46px; text-align: right; font-size: 17px; font-weight: 800; color: var(--ink-strong) }
+
+.weather-card { position: relative; overflow: hidden; background: radial-gradient(420px 260px at 100% 0%, var(--pink-soft), transparent 70%), #fff }
+.weather-card.good { background: radial-gradient(420px 260px at 100% 0%, #fdf4d4, transparent 70%), #fff }
+.weather-card.tense { background: radial-gradient(420px 260px at 100% 0%, var(--lavender-soft), transparent 70%), #fff }
+.weather-flower { position: absolute; right: -50px; top: -50px; opacity: .55; pointer-events: none }
+.weather-card > *:not(.weather-flower) { position: relative }
+.weather-main { display: flex; align-items: center; gap: 16px; margin: 20px 0 18px }
+.weather-icon { width: 74px; height: 74px; border-radius: 50%; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; font-size: 38px; box-shadow: var(--shadow); flex-shrink: 0 }
+.weather-title { font-size: 11px; font-weight: 800; letter-spacing: .4px; color: var(--pink-deep) }
+.weather-card.good .weather-title { color: var(--butter-deep) }
+.weather-card.tense .weather-title { color: var(--lavender-deep) }
+.weather-headline { font-size: 22px; font-weight: 800; color: var(--ink-strong); line-height: 1.3; margin-top: 3px }
+.tone-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; gap: 3px; background: #f3f0ea }
+.tone-bar span { display: block; height: 100%; transition: width .4s }
+.tone-good { background: linear-gradient(90deg, #f7c9d8, var(--pink)) }
+.tone-neutral { background: var(--sage) }
+.tone-tense { background: var(--lavender) }
+.tone-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 10.5px; color: var(--muted); font-weight: 700 }
+.tone-legend span { display: flex; align-items: center; gap: 6px }
+.tone-legend i { width: 9px; height: 9px; border-radius: 50% }
+.weather-facts { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 6px; font-size: 11.5px; color: var(--muted); font-weight: 600 }
+.weather-facts li::before { content: '✿'; color: var(--pink); margin-right: 8px }
+.weather-facts b { color: var(--ink-strong); font-weight: 800 }
+.weather-facts b.up { color: var(--leaf) }
+.weather-facts b.down { color: var(--coral) }
+.caption-box { margin-top: 16px; background: var(--surface-soft); border: 1px dashed var(--line-strong); border-radius: 18px; padding: 12px 14px }
+.caption-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 10.5px; font-weight: 800; color: var(--muted) }
+.caption-box p { margin: 8px 0 0; font-size: 12px; line-height: 1.7; color: var(--ink); white-space: pre-line }
+.secondary-button.small { height: 30px; padding: 0 14px; font-size: 10.5px }
+
+.funnel { display: grid; gap: 16px; margin-top: 20px }
+.funnel-top { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px }
+.funnel-top b { color: var(--ink-strong); font-weight: 800 }
+.funnel-track { height: 12px; background: #f3f0ea; border-radius: 999px; overflow: hidden }
+.funnel-track span { display: block; height: 100%; border-radius: 999px; transition: width .4s }
+.funnel-note { margin-top: 20px }
+
+@media (max-width: 1150px) { .mood-grid { grid-template-columns: 1fr } }
+@media (max-width: 560px) { .weather-headline { font-size: 18px } .weather-icon { width: 60px; height: 60px; font-size: 30px } }
