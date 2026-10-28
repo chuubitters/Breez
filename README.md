@@ -53,6 +53,14 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
 - ใส่ SerialController ใน scene (คัดลอก port จาก scene PowerRelease) เพื่อให้สถานะเป็นแบบสด
 - บันทึกลงตาราง `devices` และส่งไปที่บอร์ด (ดูหัวข้อ ESP32 ด้านล่าง)
 
+### Element ใช้ซ้ำ: สถานะหายใจ + สถานะ Breath Gadget
+- **Breez → Create Status Elements** สร้าง prefab ใน `Assets/Prefabs/Breez/`
+  - `BreathStatus` — "status : หายใจเข้า / หายใจออก" (เป่า = หายใจออก, กดลูกศรขึ้นก็ได้) มีแถบแรงเป่าเล็กๆ ด้านล่าง
+  - `GadgetStatus` — [ไอคอน] ชื่อเครื่อง · เชื่อมต่อแล้ว / ยังไม่เชื่อมต่อ (ไอคอนและชื่อมาจากหน้า Gadget Setting, กดแล้วไปหน้า Gadget Setting) แบตเตอรี่ซ่อนไว้ เปิดได้ที่ `Show Battery`
+- **Breez → Add Status Elements To Game Scenes** ใส่ BreathStatus ใน PowerRelease / BreathFocus / Rainy Forest และ GadgetStatus ใน Home ให้ในครั้งเดียว
+- หรือลาก prefab ใส่ Canvas เอง / ใช้ **Add Breath Status To Open Scene**, **Add Gadget Status To Open Scene**
+- ข้อความแก้ได้ใน Inspector (ถ้าไม่มี font ไทย จะใช้ Inhale / Exhale, Connected / Not connected)
+
 ### ข้อมูลที่บันทึกอัตโนมัติ
 | เกม | จุดที่บันทึก | ข้อมูล |
 |---|---|---|
