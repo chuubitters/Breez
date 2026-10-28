@@ -6666,6 +6666,7 @@ MonoBehaviour:
   bgm: {fileID: 1702259369}
   sfx: {fileID: 1702259368}
   rainParticles: {fileID: 564511142}
+  minSecondsToSave: 10
 --- !u!82 &1702259368
 AudioSource:
   m_ObjectHideFlags: 0
@@ -6871,6 +6872,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breathLevel: 0
+  logMessages: 0
 --- !u!1 &1859416538
 GameObject:
   m_ObjectHideFlags: 0
@@ -6882,6 +6884,7 @@ GameObject:
   - component: {fileID: 1859416540}
   - component: {fileID: 1859416539}
   - component: {fileID: 1859416541}
+  - component: {fileID: 1859416542}
   m_Layer: 0
   m_Name: SerialController
   m_TagString: Untagged
@@ -6902,14 +6905,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   portName: /dev/cu.usbserial-110
-  baudRate: 9600
+  baudRate: 115200
   messageListener: {fileID: 1702259365}
   reconnectionDelay: 1000
   maxUnreadMessages: 1
   dropOldMessage: 0
   logDroppedMessages: 1
   readAllMessages: 0
-  dtrEnable: 0
+  dtrEnable: 1
   rtsEnable: 1
 --- !u!4 &1859416540
 Transform:
@@ -6939,6 +6942,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breathLevel: 0
+  logMessages: 0
+--- !u!114 &1859416542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859416538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd90d6c4c3fc4aa184a3e9ecd0cb4df2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  autoDetect: 1
+  baudRate: 115200
+  dtrEnable: 1
 --- !u!1 &1933198938
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/praewmuay/uni works/year3/iot/Breez/Assembly-CSharp.csproj",
+      "projectUniqueName": "/Users/praewmuay/uni works/jul/Breez/Assembly-CSharp.csproj",
       "projectName": "Assembly-CSharp",
-      "projectPath": "/Users/praewmuay/uni works/year3/iot/Breez/Assembly-CSharp.csproj",
+      "projectPath": "/Users/praewmuay/uni works/jul/Breez/Assembly-CSharp.csproj",
       "packagesPath": "/Users/praewmuay/.nuget/packages/",
-      "outputPath": "/Users/praewmuay/uni works/year3/iot/Breez/Temp/obj/Debug/Assembly-CSharp/",
+      "outputPath": "/Users/praewmuay/uni works/jul/Breez/Temp/obj/Debug/Assembly-CSharp/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/praewmuay/.nuget/NuGet/NuGet.Config"
