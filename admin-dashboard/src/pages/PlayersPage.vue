@@ -1,82 +1,100 @@
 <script setup>
-import { computed, ref } from 'vue'
+// หน้า ผู้เล่น: ภาพรวมการเติบโตและการกลับมาฝึก (ไม่แสดงรายชื่อรายบุคคล)
+import { computed, ref, watch } from 'vue'
 import { rpc } from '../lib/supabase'
-import { useRemoteList } from '../lib/useRemoteList'
-import { MOODS, STATUS_LABEL, activityStatus, avatarColor, downloadCsv, initials, number, shortId, when } from '../lib/format'
-import Pager from '../components/Pager.vue'
+import { dayOfMonth, number, pct, trend, weekdayShort } from '../lib/format'
 
-const props = defineProps({ me: Object, search: String })
-const emit = defineEmits(['navigate'])
-const isOwner = computed(() => props.me.role === 'owner')
+const props = defineProps({ me: Object })
 
-const list = useRemoteList(
-  ({ limit, offset }) => rpc('dashboard_players', { p_search: props.search || null, p_limit: limit, p_offset: offset }),
-  { pageSize: 20, deps: [() => props.search] },
-)
+const period = ref(30)
+const data = ref(null)
+const loading = ref(true)
+const error = ref('')
 
-const summary = ref(null)
-rpc('dashboard_overview', { p_days: 30 }).then(d => (summary.value = d)).catch(() => {})
-
-async function exportAll() {
-  const rows = await rpc('dashboard_players', { p_search: props.search || null, p_limit: 200, p_offset: 0 })
-  downloadCsv('breez-players.csv',
-    ['user_id', 'name', 'email', 'joined', 'sessions', 'minutes', 'best_score', 'last_mood', 'last_active'],
-    rows.map(p => [p.user_id, p.name, p.email, p.created_at, p.sessions, p.minutes, p.best_score, p.last_mood, p.last_active]))
+async function load() {
+  loading.value = true
+  error.value = ''
+  try { data.value = await rpc('dashboard_insights', { p_days: period.value }) }
+  catch (e) { error.value = e.message }
+  finally { loading.value = false }
 }
+watch(period, load, { immediate: true })
 
-const deleting = ref(null)
-async function removePlayer(p) {
-  if (!window.confirm(`ลบบัญชี "${p.name}" และข้อมูลการเล่นทั้งหมด?\nการลบไม่สามารถย้อนกลับได้`)) return
-  deleting.value = p.user_id
-  try {
-    await rpc('owner_delete_player', { p_user_id: p.user_id })
-    await list.load()
-  } catch (e) {
-    window.alert(e.message)
-  } finally {
-    deleting.value = null
-  }
-}
+const periodLabel = computed(() => period.value ? `${period.value} วันล่าสุด` : 'ทั้งหมด')
+const newTrend = computed(() => trend(data.value?.players_new, data.value?.players_new_prev))
+const returningPct = computed(() => pct(data.value?.returning_players, data.value?.practitioners))
+
+const daily = computed(() => data.value?.daily ?? [])
+const max = computed(() => {
+  const m = Math.max(1, ...daily.value.flatMap(d => [d.people, d.new_players]))
+  return Math.max(1, Math.ceil(m / 4)) * 4
+})
+const yLabels = computed(() => [4, 3, 2, 1, 0].map(i => (max.value / 4) * i))
+const xLabel = d => daily.value.length > 10 ? dayOfMonth(d.day) : weekdayShort(d.day)
+
+// เส้นทางผู้เล่น: สมัคร -> เคยฝึก -> มาฝึกในช่วงนี้ -> กลับมาซ้ำ
+const funnel = computed(() => {
+  const d = data.value
+  if (!d) return []
+  const total = d.players_total || 0
+  const played = total - (d.never_played || 0)
+  return [
+    { label: 'สมัครสมาชิก', value: total, color: 'var(--lavender)' },
+    { label: 'เคยฝึกอย่างน้อย 1 ครั้ง', value: played, color: 'var(--pink)' },
+    { label: `มาฝึกใน ${periodLabel.value}`, value: d.practitioners, color: 'var(--sage)' },
+    { label: 'กลับมาฝึกซ้ำ (≥ 2 วัน)', value: d.returning_players, color: '#e2dc8f' },
+  ].map(s => ({ ...s, percent: pct(s.value, total) }))
+})
 </script>
 
 <template>
   <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> PLAYER DIRECTORY</div><h1>ผู้เล่นของ<span class="highlight">breez</span></h1><p class="page-description">ข้อมูลผู้เล่นที่ลงทะเบียนผ่านเกม{{ isOwner ? '' : ' (อีเมลถูกซ่อนบางส่วนสำหรับผู้ดูแล)' }}</p></div>
-    <div class="header-actions"><button class="secondary-button" @click="exportAll">↓ ส่งออกข้อมูล</button></div>
-  </section>
-
-  <section class="stats-grid compact-stats">
-    <article class="stat-card stat-lilac"><div class="stat-label">ผู้เล่นทั้งหมด</div><div class="stat-value">{{ number(summary?.players_total) }}</div><div class="stat-foot">บัญชีที่ลงทะเบียน</div></article>
-    <article class="stat-card stat-green"><div class="stat-label">ใช้งานอยู่</div><div class="stat-value">{{ number(summary?.active_players) }}</div><div class="stat-foot"><span class="online-dot"></span> เล่นใน 30 วันล่าสุด</div></article>
-    <article class="stat-card stat-peach"><div class="stat-label">ผู้เล่นใหม่</div><div class="stat-value">+{{ number(summary?.players_new) }}</div><div class="stat-foot">ใน 30 วันล่าสุด</div></article>
-    <article class="stat-card stat-yellow"><div class="stat-label">เฉลี่ย session / คน</div><div class="stat-value">{{ summary?.active_players ? number(summary.sessions / summary.active_players, 2) : '0' }}</div><div class="stat-foot">ใน 30 วันล่าสุด</div></article>
-  </section>
-
-  <section class="panel full-panel">
-    <div class="panel-heading"><div><h2>รายชื่อผู้เล่น</h2><p>เรียงตามการใช้งานล่าสุด</p></div></div>
-    <p v-if="list.error.value" class="banner-error">{{ list.error.value }}</p>
-    <div class="table-wrap" :class="{ loading: list.loading.value }">
-      <table class="wide-table">
-        <thead><tr><th>ผู้เล่น</th><th>รหัสผู้ใช้</th><th>จำนวน session</th><th>เวลาฝึกสะสม</th><th>คะแนนสูงสุด</th><th>อารมณ์ล่าสุด</th><th>ใช้งานล่าสุด</th><th>สถานะ</th><th></th></tr></thead>
-        <tbody>
-          <tr v-for="p in list.rows.value" :key="p.user_id">
-            <td><div class="player-cell"><div class="tiny-avatar" :class="avatarColor(p.user_id)">{{ initials(p.name) }}</div><div><strong>{{ p.name }}</strong><small>{{ p.email }}</small></div></div></td>
-            <td class="muted" :title="p.user_id">{{ shortId(p.user_id) }}</td>
-            <td>{{ number(p.sessions) }} ครั้ง</td>
-            <td>{{ number(p.minutes, 1) }} นาที</td>
-            <td>{{ number(p.best_score) }}</td>
-            <td><span v-if="p.last_mood" class="mood-tag" :class="MOODS[p.last_mood]?.cls">{{ MOODS[p.last_mood]?.emoji }} {{ p.last_mood }}</span><span v-else class="muted">—</span></td>
-            <td>{{ when(p.last_active) }}</td>
-            <td><span class="status-label" :class="activityStatus(p.last_active)"><i></i>{{ STATUS_LABEL[activityStatus(p.last_active)] }}</span></td>
-            <td><div class="row-actions">
-              <button class="text-button" @click="emit('navigate', 'sessions', { player: { id: p.user_id, name: p.name } })">ประวัติ ↗</button>
-              <button v-if="isOwner" class="text-button danger" :disabled="deleting === p.user_id" @click="removePlayer(p)">ลบ</button>
-            </div></td>
-          </tr>
-          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="9" class="empty-state">{{ search ? 'ไม่พบผู้เล่นที่ตรงกับคำค้นหา' : 'ยังไม่มีผู้เล่นลงทะเบียน' }}</td></tr>
-        </tbody>
-      </table>
+    <div><div class="eyebrow"><span class="eyebrow-dot"></span> PLAYERS</div><h1>ผู้เล่นของ <span class="highlight">breez</span></h1><p class="page-description">การเติบโตของผู้เล่นและการกลับมาฝึกหายใจ</p></div>
+    <div class="period-select">
+      <span>ช่วงเวลา</span>
+      <select v-model="period"><option :value="7">7 วันล่าสุด</option><option :value="30">30 วันล่าสุด</option><option :value="null">ทั้งหมด</option></select>
     </div>
-    <Pager v-model:page="list.page.value" :page-size="list.pageSize" :total="list.total.value" label="ผู้เล่น" />
+  </section>
+
+  <p v-if="error" class="banner-error">{{ error }}</p>
+
+  <section class="stats-grid compact-stats" :class="{ loading }">
+    <article class="stat-card stat-lilac"><div class="stat-label">ผู้เล่นทั้งหมด</div><div class="stat-value">{{ number(data?.players_total) }}<span class="stat-unit">คน</span></div><div class="stat-foot">บัญชีที่ลงทะเบียนผ่านเกม</div></article>
+    <article class="stat-card stat-green"><div class="stat-label">มาฝึกหายใจ</div><div class="stat-value">{{ number(data?.practitioners) }}<span class="stat-unit">คน</span></div><div class="stat-foot"><span class="online-dot"></span> {{ periodLabel }}</div></article>
+    <article class="stat-card stat-peach"><div class="stat-label">ผู้เล่นใหม่</div><div class="stat-value">+{{ number(data?.players_new) }}</div><div class="stat-foot"><span v-if="newTrend" class="trend" :class="{ down: !newTrend.up }">{{ newTrend.text }}</span><span>{{ periodLabel }}</span></div></article>
+    <article class="stat-card stat-yellow"><div class="stat-label">กลับมาฝึกซ้ำ</div><div class="stat-value">{{ returningPct }}<span class="stat-unit">%</span></div><div class="stat-foot">{{ number(data?.returning_players) }} คน ฝึกมากกว่า 1 วัน</div></article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel">
+      <div class="panel-heading"><div><h2>ผู้เล่นรายวัน</h2><p>จำนวนคนที่มาฝึก และผู้เล่นใหม่ในแต่ละวัน</p></div></div>
+      <div class="chart-legend"><span><i class="legend-dot legend-sage"></i>คนที่มาฝึก</span><span><i class="legend-dot legend-coral"></i>ผู้เล่นใหม่</span></div>
+      <div class="activity-chart">
+        <div class="y-labels"><span v-for="y in yLabels" :key="y">{{ number(y) }}</span></div>
+        <div class="chart-body">
+          <div class="grid-lines"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="bar-groups">
+            <div v-for="d in daily" :key="d.day" class="bar-group" :title="`${d.day}: มาฝึก ${d.people} คน · ใหม่ ${d.new_players} คน`">
+              <div class="bars">
+                <span class="bar sage-bar wide" :style="{ height: (d.people / max) * 100 + '%' }"></span>
+                <span class="bar coral-bar wide" :style="{ height: (d.new_players / max) * 100 + '%' }"></span>
+              </div>
+              <span class="x-label">{{ xLabel(d) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-heading"><div><h2>เส้นทางผู้เล่น</h2><p>เทียบกับผู้เล่นทั้งหมด</p></div></div>
+      <div class="funnel">
+        <div v-for="s in funnel" :key="s.label" class="funnel-row">
+          <div class="funnel-top"><span>{{ s.label }}</span><b>{{ number(s.value) }} คน · {{ s.percent }}%</b></div>
+          <div class="funnel-track"><span :style="{ width: Math.max(s.percent, s.value ? 3 : 0) + '%', background: s.color }"></span></div>
+        </div>
+      </div>
+      <p class="page-description funnel-note">รายชื่อและประวัติรายบุคคลดูได้ในหน้า "ประวัติการเล่น"</p>
+    </article>
   </section>
 </template>

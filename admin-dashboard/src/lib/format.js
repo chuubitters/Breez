@@ -9,11 +9,25 @@ export const MODE_STYLE = {
 }
 
 export const MOODS = {
-  Happy:  { emoji: '☀', cls: 'mood-happy' },
-  Lovely: { emoji: '✿', cls: 'mood-lovely' },
-  Bored:  { emoji: '☁', cls: 'mood-bored' },
-  Angry:  { emoji: '✸', cls: 'mood-angry' },
-  Stress: { emoji: '〰', cls: 'mood-stress' },
+  Happy:  { emoji: '☀', cls: 'mood-happy', th: 'มีความสุข' },
+  Lovely: { emoji: '✿', cls: 'mood-lovely', th: 'อบอุ่นใจ' },
+  Bored:  { emoji: '☁', cls: 'mood-bored', th: 'เบื่อ' },
+  Angry:  { emoji: '✸', cls: 'mood-angry', th: 'โกรธ' },
+  Stress: { emoji: '〰', cls: 'mood-stress', th: 'เครียด' },
+}
+
+// คำอธิบายรูปแบบการฝึก
+export const TRAINING_INFO = {
+  'Calm Flow':       { label: 'เป่าประคองเปลวไฟ' },
+  'Power Release':   { label: 'เป่าลูกโป่งระบายพลัง' },
+  'Breathe & Focus': { label: 'หายใจหลบสิ่งกีดขวาง' },
+  'Soundscape':      { label: 'หายใจเข้า 5 ออก 5 พร้อมเสียง' },
+  'Quick Session':   { label: 'หายใจ 4-7-8 บนตัวเครื่อง' },
+}
+
+export function pct(part, total) {
+  part = Number(part || 0); total = Number(total || 0)
+  return total ? Math.round((part / total) * 100) : 0
 }
 
 const AVATAR_COLORS = ['peach', 'green', 'lilac', 'yellow', 'blue', 'pink']

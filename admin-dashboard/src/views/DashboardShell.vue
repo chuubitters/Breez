@@ -17,7 +17,7 @@ const isOwner = computed(() => props.me.role === 'owner')
 
 const allNav = [
   { id: 'overview', label: 'ภาพรวม', icon: '◫', title: 'ภาพรวมระบบ', page: OverviewPage },
-  { id: 'players', label: 'ผู้เล่น', icon: '♙', title: 'จัดการผู้เล่น', page: PlayersPage },
+  { id: 'players', label: 'ผู้เล่น', icon: '♙', title: 'ผู้เล่น', page: PlayersPage },
   { id: 'sessions', label: 'ประวัติการเล่น', icon: '▷', title: 'ประวัติการเล่น', page: SessionsPage },
   { id: 'moods', label: 'บันทึกอารมณ์', icon: '♡', title: 'บันทึกอารมณ์', page: MoodsPage, owner: true },
   { id: 'devices', label: 'อุปกรณ์', icon: '⌁', title: 'อุปกรณ์ Breath Gadget', page: DevicesPage },
@@ -102,7 +102,7 @@ const notifications = computed(() => {
       <header class="topbar">
         <div class="breadcrumb"><span>breez Admin</span><span class="crumb-slash">/</span><strong>{{ current.title }}</strong></div>
         <div class="top-actions">
-          <div v-if="current.id !== 'overview' && current.id !== 'staff'" class="search-box">
+          <div v-if="!['overview', 'staff', 'players'].includes(current.id)" class="search-box">
             <span>⌕</span><input v-model="search" placeholder="ค้นหาผู้เล่น, session..." aria-label="ค้นหา" />
           </div>
           <button class="icon-button notification-button" @click="showNotifications = !showNotifications" aria-label="การแจ้งเตือน">♧<i v-if="notifications.length"></i></button>
