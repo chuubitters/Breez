@@ -37,7 +37,7 @@ const shown = computed(() => devices.value.filter(d =>
 
 <template>
   <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> DEVICE MANAGEMENT</div><h1>อุปกรณ์<span class="highlight">Breath Gadget</span></h1><p class="page-description">สถานะการเชื่อมต่อและแบตเตอรี่ (ออนไลน์ = เกมส่งสถานะมาภายใน 5 นาที)</p></div>
+    <div><div class="eyebrow"><span class="eyebrow-dot"></span> DEVICE MANAGEMENT</div><h1>อุปกรณ์ <span class="highlight">Breath Gadget</span></h1><p class="page-description">สถานะการเชื่อมต่อและแบตเตอรี่ (ออนไลน์ = เกมส่งสถานะมาภายใน 5 นาที)</p></div>
     <div class="header-actions">
       <select class="filter-select" v-model="filter"><option value="all">ทั้งหมด</option><option value="online">ออนไลน์</option><option value="offline">ออฟไลน์</option><option value="low">แบตต่ำ</option></select>
       <button class="secondary-button" @click="load">↻ รีเฟรช</button>

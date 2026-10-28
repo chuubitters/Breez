@@ -26,7 +26,7 @@ const stressPct = computed(() => {
 
 async function exportCsv() {
   const rows = await rpc('dashboard_moods', { p_days: days.value, p_search: props.search || null, p_limit: 500, p_offset: 0 })
-  downloadCsv('fuuu-mood-logs.csv', ['mood_id', 'user_id', 'player', 'mood', 'note', 'recorded_at'],
+  downloadCsv('breez-mood-logs.csv', ['mood_id', 'user_id', 'player', 'mood', 'note', 'recorded_at'],
     rows.map(m => [m.mood_id, m.user_id, m.player, m.mood, m.note, m.recorded_at]))
 }
 </script>

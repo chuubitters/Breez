@@ -1,4 +1,4 @@
-# Breez (fuuu)
+# Breez
 
 เกมฝึกหายใจ Unity + Breath Gadget (ESP32-C3) + Supabase + Admin Dashboard
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { supabase, translateError } from '../lib/supabase'
+import BreezFlower from '../components/BreezFlower.vue'
 
 const props = defineProps({ notice: String, resolveStaff: Function })
 const emit = defineEmits(['clear-notice'])
@@ -37,14 +38,20 @@ async function submit() {
 <template>
   <div class="login-page">
     <div class="login-art" aria-hidden="true">
-      <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+      <div class="login-hill"></div>
+      <BreezFlower class="deco" style="left:-70px;top:22%" :size="420" :petals="4" color="#c9dcae" center="" :rotate="20" />
+      <BreezFlower class="deco" style="left:-10px;top:32%" :size="300" :petals="4" color="#f4bfd1" center="" :rotate="20" />
+      <BreezFlower class="deco" style="right:6%;top:24%" :size="340" color="#f2b6ca" />
+      <BreezFlower class="deco" style="right:8%;bottom:70px" :size="120" :petals="5" color="#c9c0f0" center="#ffffff" />
+      <BreezFlower class="deco" style="left:14%;bottom:40px" :size="110" :petals="5" color="#c9c0f0" center="#ffffff" />
+      <span class="orb orb-butter"></span>
+      <span class="orb orb-pink"></span>
     </div>
     <form class="login-card" @submit.prevent="submit" novalidate>
-      <div class="brand login-brand">
-        <div class="brand-flower"><span>✿</span></div>
-        <div><div class="brand-name">fuuu<span>.</span></div><div class="brand-sub">BREATHE & BLOOM</div></div>
+      <div class="login-brand">
+        <img class="brand-logo" src="/breez-logo.png" alt="breez" />
+        <span class="brand-sub">ADMIN CONSOLE</span>
       </div>
-      <div class="eyebrow"><span class="eyebrow-dot"></span> ADMIN CONSOLE</div>
       <h1>เข้าสู่ระบบ<span class="highlight">หลังบ้าน</span></h1>
       <p class="page-description">สำหรับเจ้าของระบบและผู้ดูแลเท่านั้น</p>
 

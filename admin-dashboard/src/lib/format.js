@@ -1,11 +1,11 @@
 export const MODES = ['Calm Flow', 'Power Release', 'Breathe & Focus', 'Soundscape', 'Quick Session']
 
 export const MODE_STYLE = {
-  'Calm Flow':       { pill: 'mode-calm',  color: '#a8c997', bar: 'sage-bar' },
-  'Power Release':   { pill: 'mode-power', color: '#f0b49d', bar: 'coral-bar' },
-  'Breathe & Focus': { pill: 'mode-focus', color: '#c4b4e7', bar: 'lilac-bar' },
-  'Soundscape':      { pill: 'mode-relax', color: '#9cc8d6', bar: 'blue-bar' },
-  'Quick Session':   { pill: 'mode-quick', color: '#e5d27f', bar: 'yellow-bar' },
+  'Calm Flow':       { pill: 'mode-calm',  color: '#b5d09a', bar: 'sage-bar' },
+  'Power Release':   { pill: 'mode-power', color: '#f2b6ca', bar: 'coral-bar' },
+  'Breathe & Focus': { pill: 'mode-focus', color: '#c6bdf0', bar: 'lilac-bar' },
+  'Soundscape':      { pill: 'mode-relax', color: '#cfe3ec', bar: 'blue-bar' },
+  'Quick Session':   { pill: 'mode-quick', color: '#e2dc8f', bar: 'yellow-bar' },
 }
 
 export const MOODS = {

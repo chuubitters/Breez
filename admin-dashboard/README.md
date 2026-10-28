@@ -1,4 +1,4 @@
-# fuuu / Breez — Admin Dashboard
+# breez — Admin Dashboard
 
 หลังบ้านสำหรับดูข้อมูลผู้เล่นจากเกม Unity (Vue 3 + Vite + Supabase)
 

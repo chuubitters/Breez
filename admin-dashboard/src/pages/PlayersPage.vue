@@ -19,7 +19,7 @@ rpc('dashboard_overview', { p_days: 30 }).then(d => (summary.value = d)).catch((
 
 async function exportAll() {
   const rows = await rpc('dashboard_players', { p_search: props.search || null, p_limit: 200, p_offset: 0 })
-  downloadCsv('fuuu-players.csv',
+  downloadCsv('breez-players.csv',
     ['user_id', 'name', 'email', 'joined', 'sessions', 'minutes', 'best_score', 'last_mood', 'last_active'],
     rows.map(p => [p.user_id, p.name, p.email, p.created_at, p.sessions, p.minutes, p.best_score, p.last_mood, p.last_active]))
 }
@@ -41,7 +41,7 @@ async function removePlayer(p) {
 
 <template>
   <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> PLAYER DIRECTORY</div><h1>ผู้เล่นของ<span class="highlight">fuuu</span></h1><p class="page-description">ข้อมูลผู้เล่นที่ลงทะเบียนผ่านเกม{{ isOwner ? '' : ' (อีเมลถูกซ่อนบางส่วนสำหรับผู้ดูแล)' }}</p></div>
+    <div><div class="eyebrow"><span class="eyebrow-dot"></span> PLAYER DIRECTORY</div><h1>ผู้เล่นของ<span class="highlight">breez</span></h1><p class="page-description">ข้อมูลผู้เล่นที่ลงทะเบียนผ่านเกม{{ isOwner ? '' : ' (อีเมลถูกซ่อนบางส่วนสำหรับผู้ดูแล)' }}</p></div>
     <div class="header-actions"><button class="secondary-button" @click="exportAll">↓ ส่งออกข้อมูล</button></div>
   </section>
 
