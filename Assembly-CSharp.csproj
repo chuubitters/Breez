@@ -104,6 +104,7 @@
     <Compile Include="Assets/Script/Backend/DeviceService.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TMP_TextSelector_B.cs" />
     <Compile Include="Assets/Script/RFAudioManager.cs" />
+    <Compile Include="Assets/Script/Backend/UI/GadgetStatusUI.cs" />
     <Compile Include="Assets/Script/Backend/GameDataRecorder.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/SkewTextExample.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/WarpTextExample.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Assets/Script/BreathReceiver.cs" />
     <Compile Include="Assets/Script/Balloon.cs" />
     <Compile Include="Assets/Script/Backend/UI/PlayerSummaryUI.cs" />
+    <Compile Include="Assets/Script/Backend/UI/BreathStatusUI.cs" />
     <Compile Include="Assets/Script/ObstacleSetManager.cs" />
     <Compile Include="Assets/Script/Backend/UI/AccountActions.cs" />
     <Compile Include="Assets/Script/Backend/BreezBackend.cs" />
