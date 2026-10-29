@@ -4118,3 +4118,285 @@ AssetImportParameters requested are different than current active one (requested
   custom:scripting/precompiled-assembly-types:Assembly-CSharp-Editor: d88e8057ef59ce36fd26ffff08d3d6e3 -> ce141a49d59fe1da6c1d21dcb0b075e4
   custom:scripting/monoscript/fileName/SerialPortAutoSelect.cs: 84c4949aae62b69b97c968ea52af6eb9 -> 
   custom:scripting/precompiled-assembly-types:Assembly-CSharp: 88da0406d9bbcfdba69565b17f375349 -> d35a075845db4d6955f9c718000a97bb
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+Thread 0x16f94f000 may have been prematurely finalized
+- Loaded All Assemblies, in  1.260 seconds
+Native extension for OSXStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.345 seconds
+Domain Reload Profiling: 2607ms
+	BeginReloadAssembly (573ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (100ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (3ms)
+		CreateAndSetChildDomain (187ms)
+	RebuildCommonClasses (32ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (28ms)
+	LoadAllAssembliesAndSetupDomain (619ms)
+		LoadAssemblies (693ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (73ms)
+			TypeCache.Refresh (39ms)
+				TypeCache.ScanAssembly (2ms)
+			ScanForSourceGeneratedMonoScriptInfo (28ms)
+			ResolveRequiredComponents (7ms)
+	FinalizeReload (1347ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (374ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (14ms)
+			SetLoadedEditorAssemblies (2ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (36ms)
+			ProcessInitializeOnLoadAttributes (302ms)
+			ProcessInitializeOnLoadMethodAttributes (18ms)
+			AfterProcessingInitializeOnLoad (1ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (5ms)
+Refreshing native plugins compatible for Editor in 49.07 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 4457 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 22 unused Assets / (32.9 KB). Loaded Objects now: 5228.
+Memory consumption went from 0.53 GB to 0.53 GB.
+Total: 68.682917 ms (FindLiveObjects: 3.179250 ms CreateObjectMapping: 1.083292 ms MarkObjects: 63.547708 ms  DeleteObjects: 0.870625 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:scripting/monoscript/fileName/GadgetSettingsScreen.cs: 4df737d6d0ae78b02f179880a372e47e -> 
+  custom:scripting/monoscript/fileName/MoodTrackingScreen.cs: 00afd81fa3a17bba42e886d34b266dbe -> 
+  custom:scripting/monoscript/fileName/ThaiShapingTable.cs: fe9a0867aa81a5275416997e085db843 -> 
+  custom:scripting/monoscript/fileName/BreezSoundscapeBuilder.cs: ccd03b5d4963ca993391b2eb9aa57e26 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:scripting/monoscript/fileName/BreezThaiFontInstaller.cs: 4e8717aed9a748091c941029cd5ff34d -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:scripting/monoscript/fileName/GadgetStatusUI.cs: 45cf74ea4974a4ed8a8be52049d7e684 -> 
+  custom:scripting/monoscript/fileName/ThaiText.cs: e2228e4fbf9e44226a72eba87f6bc448 -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/BreezStatusElementsBuilder.cs: 59ef1ce18f2d383e189da984efc38f24 -> 
+  custom:scripting/monoscript/fileName/BreathRain.cs: 5da192da09236f75d097926b529d8c0c -> 
+  custom:scripting/monoscript/fileName/PlayerSummaryUI.cs: 8655d3c78f9dd3aa71deda718b6edfc3 -> 72445648541e4612c7ddb1db72d836e6
+  custom:scripting/monoscript/fileName/ThaiShaper.cs: 9e85c08cf9819f0a48ace0348915ab8d -> 
+  custom:scripting/monoscript/fileName/BreezPowerReleaseRestyle.cs: 32bcfdb89aab73cae62ba92970a66d49 -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:scripting/monoscript/fileName/DandelionField.cs: 0247e32c77aefe715b8073c3d2c36ac5 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:AudioImporter_EditorPlatform: 3918e3fc78b5a79bad01e8451be0beb8 -> 
+  custom:scripting/monoscript/fileName/BreezSerialSetup.cs: a06dbe3954b8871a2330c6301e09b9c7 -> 
+  custom:scripting/monoscript/fileName/BreathStatusUI.cs: e31177f44aba1e65aed796afdf32b496 -> 
+  custom:scripting/monoscript/fileName/BreezGadgetSceneBuilder.cs: cc712d7c01a034bac38df260899fdda0 -> 
+  custom:framework-osx-AVFoundation: e770b220cccbd017edd2c1fefb359320 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/monoscript/fileName/BreezSpriteArt.cs: 6263c1bb08894b9f0591a5b5717f85dc -> 
+  custom:scripting/monoscript/fileName/BreezMoodSceneBuilder.cs: f789274401a06a4b35cbd40f9ac6cccf -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp-Editor: 6db4eeff817f65b5047618e5b8fce574 -> ce141a49d59fe1da6c1d21dcb0b075e4
+  custom:scripting/monoscript/fileName/SerialPortAutoSelect.cs: 84c4949aae62b69b97c968ea52af6eb9 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: b1a23b8ec8bd5e2629f17c5046833b0d -> d35a075845db4d6955f9c718000a97bb
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+Thread 0x16f94f000 may have been prematurely finalized
+- Loaded All Assemblies, in  0.902 seconds
+Native extension for OSXStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.050 seconds
+Domain Reload Profiling: 1957ms
+	BeginReloadAssembly (477ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (45ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (232ms)
+	RebuildCommonClasses (22ms)
+	RebuildNativeTypeToScriptingClass (7ms)
+	initialDomainReloadingComplete (26ms)
+	LoadAllAssembliesAndSetupDomain (374ms)
+		LoadAssemblies (478ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (37ms)
+			TypeCache.Refresh (24ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (11ms)
+	FinalizeReload (1051ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (372ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (3ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (41ms)
+			ProcessInitializeOnLoadAttributes (301ms)
+			ProcessInitializeOnLoadMethodAttributes (19ms)
+			AfterProcessingInitializeOnLoad (1ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (5ms)
+Refreshing native plugins compatible for Editor in 2.92 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 4457 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 22 unused Assets / (32.9 KB). Loaded Objects now: 5233.
+Memory consumption went from 0.54 GB to 0.54 GB.
+Total: 3.685250 ms (FindLiveObjects: 0.246209 ms CreateObjectMapping: 0.049333 ms MarkObjects: 3.340292 ms  DeleteObjects: 0.048917 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:scripting/monoscript/fileName/GadgetSettingsScreen.cs: 4df737d6d0ae78b02f179880a372e47e -> 
+  custom:scripting/monoscript/fileName/MoodTrackingScreen.cs: 00afd81fa3a17bba42e886d34b266dbe -> 
+  custom:scripting/monoscript/fileName/ThaiShapingTable.cs: fe9a0867aa81a5275416997e085db843 -> 
+  custom:scripting/monoscript/fileName/BreezSoundscapeBuilder.cs: ccd03b5d4963ca993391b2eb9aa57e26 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:scripting/monoscript/fileName/BreezThaiFontInstaller.cs: 4e8717aed9a748091c941029cd5ff34d -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:scripting/monoscript/fileName/GadgetStatusUI.cs: 45cf74ea4974a4ed8a8be52049d7e684 -> 
+  custom:scripting/monoscript/fileName/ThaiText.cs: e2228e4fbf9e44226a72eba87f6bc448 -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/BreezStatusElementsBuilder.cs: 59ef1ce18f2d383e189da984efc38f24 -> 
+  custom:scripting/monoscript/fileName/BreathRain.cs: 5da192da09236f75d097926b529d8c0c -> 
+  custom:scripting/monoscript/fileName/PlayerSummaryUI.cs: 8655d3c78f9dd3aa71deda718b6edfc3 -> 72445648541e4612c7ddb1db72d836e6
+  custom:scripting/monoscript/fileName/ThaiShaper.cs: 9e85c08cf9819f0a48ace0348915ab8d -> 
+  custom:scripting/monoscript/fileName/BreezPowerReleaseRestyle.cs: 32bcfdb89aab73cae62ba92970a66d49 -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:scripting/monoscript/fileName/DandelionField.cs: 0247e32c77aefe715b8073c3d2c36ac5 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:AudioImporter_EditorPlatform: 3918e3fc78b5a79bad01e8451be0beb8 -> 
+  custom:scripting/monoscript/fileName/BreezSerialSetup.cs: a06dbe3954b8871a2330c6301e09b9c7 -> 
+  custom:scripting/monoscript/fileName/BreathStatusUI.cs: e31177f44aba1e65aed796afdf32b496 -> 
+  custom:scripting/monoscript/fileName/BreezGadgetSceneBuilder.cs: cc712d7c01a034bac38df260899fdda0 -> 
+  custom:framework-osx-AVFoundation: e770b220cccbd017edd2c1fefb359320 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/monoscript/fileName/BreezSpriteArt.cs: 6263c1bb08894b9f0591a5b5717f85dc -> 
+  custom:scripting/monoscript/fileName/BreezMoodSceneBuilder.cs: f789274401a06a4b35cbd40f9ac6cccf -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp-Editor: 6db4eeff817f65b5047618e5b8fce574 -> ce141a49d59fe1da6c1d21dcb0b075e4
+  custom:scripting/monoscript/fileName/SerialPortAutoSelect.cs: 84c4949aae62b69b97c968ea52af6eb9 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: b1a23b8ec8bd5e2629f17c5046833b0d -> d35a075845db4d6955f9c718000a97bb
+========================================================================
+Received Import Request.
+  Time since last request: 1359.695015 seconds.
+  path: Assets/element/SS/r4.png
+  artifactKey: Guid(44c698952099d4aa3a4a130ef6c6346e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/element/SS/r4.png using Guid(44c698952099d4aa3a4a130ef6c6346e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+ -> (artifact id: 'f4fbb2cb659da69544b87b976fde7284') in 0.572993 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 0.001066 seconds.
+  path: Assets/element/SS/r4-1.png
+  artifactKey: Guid(8ddd1be3b974c42ffafc016b59e3d9b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/element/SS/r4-1.png using Guid(8ddd1be3b974c42ffafc016b59e3d9b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+ -> (artifact id: '8aebe6fa5b1d70fb82de6ee9ef79b806') in 0.011845 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 12.665003 seconds.
+  path: Assets/element/SS/Vector-1.png
+  artifactKey: Guid(dcddb561c1de74fbb9f08c350b002963) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/element/SS/Vector-1.png using Guid(dcddb561c1de74fbb9f08c350b002963) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+ -> (artifact id: '312876e96d02d47525b6857d283a8c0e') in 0.179807 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+Thread 0x16f94f000 may have been prematurely finalized
+- Loaded All Assemblies, in  0.896 seconds
+Native extension for OSXStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.151 seconds
+Domain Reload Profiling: 2051ms
+	BeginReloadAssembly (483ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (24ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (136ms)
+	RebuildCommonClasses (27ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (23ms)
+	LoadAllAssembliesAndSetupDomain (357ms)
+		LoadAssemblies (602ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (41ms)
+			TypeCache.Refresh (20ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (20ms)
+	FinalizeReload (1151ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (348ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (3ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (40ms)
+			ProcessInitializeOnLoadAttributes (275ms)
+			ProcessInitializeOnLoadMethodAttributes (22ms)
+			AfterProcessingInitializeOnLoad (1ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (6ms)
+Refreshing native plugins compatible for Editor in 3.23 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 4456 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 22 unused Assets / (33.0 KB). Loaded Objects now: 5240.
+Memory consumption went from 0.55 GB to 0.55 GB.
+Total: 3.707167 ms (FindLiveObjects: 0.251042 ms CreateObjectMapping: 0.054583 ms MarkObjects: 3.335292 ms  DeleteObjects: 0.065084 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:scripting/monoscript/fileName/GadgetSettingsScreen.cs: 4df737d6d0ae78b02f179880a372e47e -> 
+  custom:scripting/monoscript/fileName/MoodTrackingScreen.cs: 00afd81fa3a17bba42e886d34b266dbe -> 
+  custom:scripting/monoscript/fileName/ThaiShapingTable.cs: fe9a0867aa81a5275416997e085db843 -> 
+  custom:scripting/monoscript/fileName/BreezSoundscapeBuilder.cs: ccd03b5d4963ca993391b2eb9aa57e26 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:scripting/monoscript/fileName/BreezThaiFontInstaller.cs: 4e8717aed9a748091c941029cd5ff34d -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:scripting/monoscript/fileName/GadgetStatusUI.cs: 45cf74ea4974a4ed8a8be52049d7e684 -> 
+  custom:scripting/monoscript/fileName/ThaiText.cs: e2228e4fbf9e44226a72eba87f6bc448 -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/BreezStatusElementsBuilder.cs: 59ef1ce18f2d383e189da984efc38f24 -> 
+  custom:scripting/monoscript/fileName/BreathRain.cs: 5da192da09236f75d097926b529d8c0c -> 
+  custom:scripting/monoscript/fileName/PlayerSummaryUI.cs: 8655d3c78f9dd3aa71deda718b6edfc3 -> 72445648541e4612c7ddb1db72d836e6
+  custom:scripting/monoscript/fileName/ThaiShaper.cs: 9e85c08cf9819f0a48ace0348915ab8d -> 
+  custom:scripting/monoscript/fileName/BreezPowerReleaseRestyle.cs: 32bcfdb89aab73cae62ba92970a66d49 -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:scripting/monoscript/fileName/DandelionField.cs: 0247e32c77aefe715b8073c3d2c36ac5 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:AudioImporter_EditorPlatform: 3918e3fc78b5a79bad01e8451be0beb8 -> 
+  custom:scripting/monoscript/fileName/BreezSerialSetup.cs: a06dbe3954b8871a2330c6301e09b9c7 -> 
+  custom:scripting/monoscript/fileName/BreathStatusUI.cs: e31177f44aba1e65aed796afdf32b496 -> 
+  custom:scripting/monoscript/fileName/BreezGadgetSceneBuilder.cs: cc712d7c01a034bac38df260899fdda0 -> 
+  custom:framework-osx-AVFoundation: e770b220cccbd017edd2c1fefb359320 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/monoscript/fileName/BreezSpriteArt.cs: 6263c1bb08894b9f0591a5b5717f85dc -> 
+  custom:scripting/monoscript/fileName/BreezMoodSceneBuilder.cs: f789274401a06a4b35cbd40f9ac6cccf -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp-Editor: 6db4eeff817f65b5047618e5b8fce574 -> ce141a49d59fe1da6c1d21dcb0b075e4
+  custom:scripting/monoscript/fileName/SerialPortAutoSelect.cs: 84c4949aae62b69b97c968ea52af6eb9 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: b1a23b8ec8bd5e2629f17c5046833b0d -> d35a075845db4d6955f9c718000a97bb

@@ -372,6 +372,7 @@ GameObject:
   - component: {fileID: 742762085}
   - component: {fileID: 742762087}
   - component: {fileID: 742762086}
+  - component: {fileID: 742762088}
   m_Layer: 5
   m_Name: Rainy Forest
   m_TagString: Untagged
@@ -495,6 +496,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 742762084}
   m_CullTransparentMesh: 1
+--- !u!114 &742762088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 742762084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c6bbaf6c497462d87c20f886ae421d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &838358907
 GameObject:
   m_ObjectHideFlags: 0
@@ -957,6 +970,7 @@ GameObject:
   - component: {fileID: 1443385684}
   - component: {fileID: 1443385686}
   - component: {fileID: 1443385685}
+  - component: {fileID: 1443385687}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1080,6 +1094,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1443385683}
   m_CullTransparentMesh: 1
+--- !u!114 &1443385687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443385683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c6bbaf6c497462d87c20f886ae421d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1461231420
 GameObject:
   m_ObjectHideFlags: 0
@@ -1680,6 +1706,7 @@ GameObject:
   - component: {fileID: 2142237376}
   - component: {fileID: 2142237378}
   - component: {fileID: 2142237377}
+  - component: {fileID: 2142237379}
   m_Layer: 5
   m_Name: Windy  Mountain
   m_TagString: Untagged
@@ -1803,6 +1830,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2142237375}
   m_CullTransparentMesh: 1
+--- !u!114 &2142237379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142237375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c6bbaf6c497462d87c20f886ae421d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

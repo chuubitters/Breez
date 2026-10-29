@@ -69,8 +69,10 @@
     <Compile Include="Assets/Script/Editor/BreezSpriteArt.cs" />
     <Compile Include="Assets/Script/Editor/BreezSerialSetup.cs" />
     <Compile Include="Assets/Script/Editor/BreezLoginSceneBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezPowerReleaseRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezStatusElementsBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezMoodSceneBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezThaiFontInstaller.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
