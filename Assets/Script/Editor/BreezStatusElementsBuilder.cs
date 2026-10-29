@@ -242,7 +242,7 @@ public static class BreezStatusElementsBuilder
 
     static void SavePrefab(GameObject go, string path)
     {
-        BreezThaiFontInstaller.Apply(go, null);
+        BreezThaiFontInstaller.Apply(go);
         PrefabUtility.SaveAsPrefabAsset(go, path);
         Object.DestroyImmediate(go);
     }
