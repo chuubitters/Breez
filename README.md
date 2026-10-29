@@ -81,6 +81,15 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 2. ข้อความใหม่ที่มีภาษาไทย: Add Component → `ThaiText` (พิมพ์ไทยตามปกติได้เลย) ถ้าต้องการตัวหนาให้เลือก `Breez Seed TH Bold SDF` แทนการกดปุ่ม B
 3. ฟอนต์สร้างจาก `tools/thai-font/build_thai_font.py`
 
+### Calm Flow (ผ่อนลมหายใจให้ดอกไม้บาน)
+เมนู **Breez → Create Calm Flow Scene** สร้าง `Assets/Scenes/CalmFlow.unity` และผูกปุ่ม Calm Flow ในหน้า BreathPlay ให้
+1. เลือกเวลา Session 1 / 2 / 3 นาที → **Start Session**
+2. เป่า (หรือกดลูกศรขึ้น) = ดอกไม้ค่อยๆ โตและบาน ยิ่งเป่าต่อเนื่องนานยิ่งใหญ่ (8 วินาที = 100%)
+3. หยุดเป่านานกว่า 0.55 วินาที = บันทึกขนาดดอก ปลูกลงสวนด้านล่าง แล้วเริ่มดอกใหม่ (สัญญาณตกแป๊บเดียวไม่นับว่าหยุด)
+4. หมดเวลา = สรุป Flowers Grown / Largest Flower / Longest Exhale / Total Exhale Time และบันทึกขึ้น Supabase
+- ปรับค่าได้ที่ `GameManager > CalmFlowGame`: Breath Threshold, Grace Seconds (0.4–0.7), Seconds To Full Bloom, Min Exhale Seconds
+- สีดอก / ขนาดกลีบ ปรับที่ `Flower > BloomFlower`
+
 ### Power Release (เป่าลูกโป่ง)
 เมนู **Breez → Restyle Power Release** จัดหน้าให้ตรงดีไซน์ (กดซ้ำได้)
 - ลูกโป่งเกิดใน `BalloonLayer` ซึ่งอยู่เหนือ bg/เมฆ แต่อยู่ใต้เวลา, `จำนวนลูกโป่ง : x/20` และป้ายหายใจ

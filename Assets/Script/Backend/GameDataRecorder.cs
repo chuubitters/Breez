@@ -23,8 +23,15 @@ public static class GameDataRecorder
 
     // ---------- ผลเกมแต่ละโหมด ----------
 
-    public static void RecordCalmFlow(int score, float durationSeconds, int flameOutCount, Action<bool> done = null) =>
-        RecordSession(CalmFlow, score, durationSeconds, Json.Obj("flame_out_count", Json.Num(flameOutCount)), done);
+    /// <summary>Calm Flow (ดอกไม้บาน): จำนวนดอก, ดอกใหญ่สุด (%), เป่าต่อเนื่องนานสุด/รวม (วินาที), เวลาที่เลือก (นาที)</summary>
+    public static void RecordCalmFlow(int score, float durationSeconds, int flowersGrown, int largestFlowerPct,
+                                      float longestExhaleSeconds, float totalExhaleSeconds, int sessionMinutes, Action<bool> done = null) =>
+        RecordSession(CalmFlow, score, durationSeconds, Json.Obj(
+            "flowers_grown", Json.Num(flowersGrown),
+            "largest_flower_pct", Json.Num(Mathf.Clamp(largestFlowerPct, 0, 100)),
+            "longest_exhale_ms", Json.Num(Mathf.RoundToInt(longestExhaleSeconds * 1000f)),
+            "total_exhale_ms", Json.Num(Mathf.RoundToInt(totalExhaleSeconds * 1000f)),
+            "session_minutes", Json.Num(sessionMinutes)), done);
 
     public static void RecordPowerRelease(int score, float durationSeconds, int balloonsTotal, int balloonsPopped, Action<bool> done = null) =>
         RecordSession(PowerRelease, score, durationSeconds,

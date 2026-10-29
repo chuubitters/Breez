@@ -171,6 +171,8 @@ public class MoodTrackingScreen : MonoBehaviour
             line2 = thaiText ? $"ข้ามสิ่งกีดขวางได้ทั้งหมด {s.obstacles_avoided} ชิ้น" : $"Obstacles avoided: {s.obstacles_avoided}";
         else if (s.balloons_total >= 0)
             line2 = thaiText ? $"ลูกโป่งที่เป่าได้ {s.balloons_popped}/{s.balloons_total}" : $"Balloons popped: {s.balloons_popped}/{s.balloons_total}";
+        else if (s.mode == GameDataRecorder.CalmFlow && s.flowers_grown > 0)
+            line2 = thaiText ? $"ปลูกดอกไม้ {s.flowers_grown} ดอก · ใหญ่สุด {s.largest_flower_pct}%" : $"Flowers grown: {s.flowers_grown} · largest {s.largest_flower_pct}%";
         else if (s.flame_out_count >= 0)
             line2 = thaiText ? $"เปลวไฟดับ {s.flame_out_count} ครั้ง" : $"Flame went out: {s.flame_out_count}x";
         else if (s.mode == GameDataRecorder.Soundscape)

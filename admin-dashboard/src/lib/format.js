@@ -18,7 +18,7 @@ export const MOODS = {
 
 // คำอธิบายรูปแบบการฝึก
 export const TRAINING_INFO = {
-  'Calm Flow':       { label: 'เป่าประคองเปลวไฟ' },
+  'Calm Flow':       { label: 'ผ่อนลมหายใจให้ดอกไม้บาน' },
   'Power Release':   { label: 'เป่าลูกโป่งระบายพลัง' },
   'Breathe & Focus': { label: 'หายใจหลบสิ่งกีดขวาง' },
   'Soundscape':      { label: 'หายใจเข้า 5 ออก 5 พร้อมเสียง' },
@@ -102,6 +102,8 @@ export function activityStatus(lastActive) {
 export const STATUS_LABEL = { active: 'ใช้งานวันนี้', idle: 'ใช้งานใน 7 วัน', inactive: 'ไม่ได้ใช้งาน' }
 
 export function sessionDetail(s) {
+  if (s.mode === 'Calm Flow' && s.flowers_grown > 0)
+    return `ดอกไม้ ${s.flowers_grown} ดอก · ใหญ่สุด ${s.largest_flower_pct}% · เป่านานสุด ${(s.longest_exhale_ms / 1000).toFixed(1)} วิ`
   if (s.mode === 'Calm Flow' && s.flame_out_count != null) return `เปลวไฟดับ ${s.flame_out_count} ครั้ง`
   if (s.mode === 'Power Release' && s.balloons_total != null) return `เป่าลูกโป่งแตก ${s.balloons_popped}/${s.balloons_total} ลูก`
   if (s.mode === 'Breathe & Focus' && s.obstacles_avoided != null) return `หลบสิ่งกีดขวาง ${s.obstacles_avoided} ครั้ง`
