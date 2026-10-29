@@ -29,6 +29,8 @@ public class DandelionField : MonoBehaviour
     public float seedLifetime = 6f;
     public float regrowDelay = 2.5f;
     public float regrowPerSecond = 8f;
+    [Tooltip("เมล็ดหมดดอกแล้ว => รีเซ็ตให้งอกใหม่ทั้งหมดหลังจากนี้ (วินาที) แม้ยังเป่าอยู่")]
+    public float emptyResetDelay = 1.2f;
 
     /// <summary>แรงเป่า 0-1 (smooth แล้ว)</summary>
     public float Level01 { get; private set; }
@@ -47,8 +49,9 @@ public class DandelionField : MonoBehaviour
     }
 
     readonly List<Seed> seeds = new List<Seed>();
+    bool resetting;
     float[] baseAngles;
-    float detachAcc, regrowAcc, idleTime;
+    float detachAcc, regrowAcc, idleTime, emptyTime;
     SPGameManager game;
     Camera cam;
 
@@ -111,11 +114,31 @@ public class DandelionField : MonoBehaviour
         }
         else idleTime += dt;
 
-        // เมล็ดงอกกลับ
+        // เมล็ดงอกกลับ (ตอนพักเป่า)
         if (!blowing && idleTime > regrowDelay)
         {
             regrowAcc += regrowPerSecond * dt;
             while (regrowAcc >= 1f) { regrowAcc -= 1f; Regrow(PickRandom(2)); }
+        }
+
+        // เมล็ดหมดดอก => รีเซ็ต: ให้เมล็ดที่ปลิวหายไปแล้วงอกกลับทั้งหมด (ไม่ต้องรอหยุดเป่า)
+        // เมล็ดที่ยังปลิวอยู่จะงอกกลับทันทีที่ปลิวพ้นจอ
+        if (SeedsAttached == 0 && seeds.Count > 0)
+        {
+            emptyTime += dt;
+            if (emptyTime >= emptyResetDelay) resetting = true;
+        }
+        else emptyTime = 0f;
+
+        if (resetting)
+        {
+            bool any = false;
+            foreach (var sd in seeds)
+            {
+                if (sd.state == 2) Regrow(sd);
+                if (sd.state == 1) any = true;
+            }
+            if (!any) resetting = false;
         }
 
         UpdateSeeds(dt);

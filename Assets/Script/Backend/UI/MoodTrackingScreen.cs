@@ -76,8 +76,14 @@ public class MoodTrackingScreen : MonoBehaviour
     {
         if (backButton != null) backButton.onClick.AddListener(GoBack);
         if (historyButton != null) historyButton.onClick.AddListener(OpenHistory);
+        // See All: ปุ่มแรก (อารมณ์เฉลี่ย) = ประวัติอารมณ์, ปุ่มที่สอง (เล่นล่าสุด) = ประวัติการเล่น
         if (seeAllButtons != null)
-            foreach (var b in seeAllButtons) if (b != null) b.onClick.AddListener(OpenHistory);
+            for (int i = 0; i < seeAllButtons.Length; i++)
+            {
+                if (seeAllButtons[i] == null) continue;
+                var view = i == 0 ? DailyHistoryPanel.View.Moods : DailyHistoryPanel.View.Plays;
+                seeAllButtons[i].onClick.AddListener(() => OpenHistory(view));
+            }
         if (moodButtons != null)
             foreach (var mb in moodButtons)
             {
@@ -95,9 +101,13 @@ public class MoodTrackingScreen : MonoBehaviour
         if (!string.IsNullOrEmpty(backScene)) SceneManager.LoadScene(backScene);
     }
 
-    public void OpenHistory()
+    public void OpenHistory() => OpenHistory(DailyHistoryPanel.View.Both);
+    public void OpenMoodHistory() => OpenHistory(DailyHistoryPanel.View.Moods);
+    public void OpenPlayHistory() => OpenHistory(DailyHistoryPanel.View.Plays);
+
+    public void OpenHistory(DailyHistoryPanel.View view)
     {
-        if (historyPanel != null) historyPanel.Open(DateTime.Now.Date);
+        if (historyPanel != null) historyPanel.Open(DateTime.Now.Date, view);
     }
 
     public void Refresh()

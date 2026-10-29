@@ -19,8 +19,12 @@ public class BreathGuideUI : MonoBehaviour
     public RectTransform breathCircle;
     public Image breathCircleImage;
 
-    public string inhaleLabel = "หายใจเข้า";
-    public string exhaleLabel = "หายใจออก";
+    public string inhaleLabel = "สูดลมหายใจเข้า";
+    public string exhaleLabel = "ผ่อนลมหายใจออก";
+    [Tooltip("วงแหวน: ลดลงตามเวลาที่เหลือ (ปิด = เต็มขึ้นตามความคืบหน้า)")]
+    public bool ringShowsRemaining = true;
+    [Tooltip("ย้อมสีวงแหวนตามเฟส (ปิด = ใช้สีไล่ของรูปวงแหวน)")]
+    public bool tintProgress = false;
     public string unitLabel = "วินาที";
     public Color inhaleColor = new Color32(0xB9, 0xDA, 0xEC, 255);
     public Color exhaleColor = new Color32(0xD4, 0xE5, 0x9D, 255);
@@ -40,7 +44,12 @@ public class BreathGuideUI : MonoBehaviour
         if (unitText != null) unitText.text = unitLabel;
 
         var col = inhale ? inhaleColor : exhaleColor;
-        if (progressFill != null) { progressFill.fillAmount = Mathf.Clamp01(t); progressFill.color = col; }
+        if (progressFill != null)
+        {
+            float k = Mathf.Clamp01(t);
+            progressFill.fillAmount = ringShowsRemaining ? 1f - k : k;
+            if (tintProgress) progressFill.color = col;
+        }
 
         // วงกลม: หายใจเข้า = ค่อยๆ ขยาย, หายใจออก = ค่อยๆ หด
         float e = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
