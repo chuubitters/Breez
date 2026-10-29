@@ -22,6 +22,10 @@ public class PWGameManager : MonoBehaviour
     [Tooltip("ลูกโป่งที่เป่าได้ เช่น 20/20 (ไม่ใส่ก็ได้)")]
     public TextMeshProUGUI balloonsResultText;
 
+    [Header("วิธีการเล่น (ไม่ใส่ = เริ่มเกมทันที)")]
+    public GameObject howToPanel;
+    public UnityEngine.UI.Button howToStartButton;
+
     [Header("Text Format")]
     [Tooltip("{0} = เป่าแตกแล้ว, {1} = ทั้งหมด")]
     public string progressFormat = "จำนวนลูกโป่ง : {0}/{1}";
@@ -56,18 +60,35 @@ public class PWGameManager : MonoBehaviour
         }
     }
 
+    private bool started = false;
+
     void Start()
     {
         gameOverPanel.SetActive(false);
         EnsureBalloonLayer();
+        UpdateUI();
 
+        if (howToPanel != null)
+        {
+            // แสดงวิธีการเล่นก่อน กด "เริ่ม" แล้วค่อยเริ่มจับเวลา
+            howToPanel.SetActive(true);
+            if (howToStartButton != null) howToStartButton.onClick.AddListener(BeginGame);
+        }
+        else BeginGame();
+    }
+
+    public void BeginGame()
+    {
+        if (started) return;
+        started = true;
+        if (howToPanel != null) howToPanel.SetActive(false);
         SpawnBalloon();
         UpdateUI();
     }
 
     void Update()
     {
-        if (isGameOver)
+        if (isGameOver || !started)
             return;
 
         timeElapsed += Time.deltaTime;

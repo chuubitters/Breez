@@ -39,6 +39,10 @@ public class CalmFlowGame : MonoBehaviour
     public float gardenSpacing = 112f;
     public int gardenPerRow = 15;
 
+    [Header("วิธีการเล่น (ไม่ใส่ = ข้าม)")]
+    public GameObject howToPanel;
+    public Button howToStartButton;
+
     [Header("Select Screen")]
     public GameObject selectPanel;
     public Button[] durationButtons;
@@ -95,6 +99,17 @@ public class CalmFlowGame : MonoBehaviour
         SelectDuration(selectedIndex);
         ShowOnly(selectPanel);
         if (flower != null) flower.SetInstant(0f);
+        if (howToPanel != null)
+        {
+            howToPanel.SetActive(true);
+            if (howToStartButton != null) howToStartButton.onClick.AddListener(CloseHowTo);
+        }
+    }
+
+    /// <summary>ปิดหน้าวิธีการเล่น แล้วไปเลือกเวลา</summary>
+    public void CloseHowTo()
+    {
+        if (howToPanel != null) howToPanel.SetActive(false);
     }
 
     // ---------------------------------------------------------------

@@ -17,6 +17,8 @@ public class SoundscapeCountdownUI : MonoBehaviour
     public TMP_Text caption;
     public string captionText = "เตรียมตัว หายใจตามจังหวะ";
     public string goText = "เริ่ม!";
+    public float numberSize = 150f;
+    public float goSize = 110f;
 
     float popT = 1f, ringFrom = 1f, ringTo = 1f, ringT = 1f, ringDur = 1f;
     float fadeTarget, fade;
@@ -38,14 +40,14 @@ public class SoundscapeCountdownUI : MonoBehaviour
     /// <summary>แสดงตัวเลข และให้วงแหวนลดจาก from ไป to ใน duration วินาที</summary>
     public void Tick(int value, float from, float to, float duration)
     {
-        if (number != null) { number.text = value.ToString(); number.fontSize = 170; }
+        if (number != null) { number.text = value.ToString(); number.fontSize = numberSize; }
         popT = 0f;
         ringFrom = from; ringTo = to; ringT = 0f; ringDur = Mathf.Max(0.05f, duration);
     }
 
     public void Go()
     {
-        if (number != null) { number.text = goText; number.fontSize = 110; }
+        if (number != null) { number.text = goText; number.fontSize = goSize; }
         popT = 0f;
         ringFrom = ringTo = 0f; ringT = 1f;
     }

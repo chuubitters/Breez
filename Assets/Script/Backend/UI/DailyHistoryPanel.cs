@@ -81,9 +81,32 @@ public class DailyHistoryPanel : MonoBehaviour
 
     static DateTime Today => DateTime.Now.Date;
 
-    public void Open(DateTime day)
+    /// <summary>ดูอะไร: ทั้งคู่ / เฉพาะอารมณ์ / เฉพาะการเล่น</summary>
+    public enum View { Both, Moods, Plays }
+    public View CurrentView { get; private set; } = View.Both;
+
+    [Header("แยกดู (ไม่ใส่ก็ได้ จะหาจากชื่อ Title / MoodHeader / PlayHeader)")]
+    public TMP_Text titleText;
+    public TMP_Text moodHeader;
+    public TMP_Text playHeader;
+    public string titleBoth = "ประวัติย้อนหลัง";
+    public string titleMoods = "ประวัติอารมณ์";
+    public string titlePlays = "ประวัติการเล่น";
+
+    RectTransform moodList, playList, moodHead, playHead;
+    Vector2 moodListPos, moodListSize, playListPos, playListSize;
+    bool layoutCached;
+
+    public void OpenMoods(DateTime day) => Open(day, View.Moods);
+    public void OpenPlays(DateTime day) => Open(day, View.Plays);
+
+    public void Open(DateTime day) => Open(day, View.Both);
+
+    public void Open(DateTime day, View view)
     {
         if (panel != null) panel.SetActive(true);
+        CurrentView = view;
+        ApplyView();
         selected = day.Date > Today ? Today : day.Date;
         windowEnd = selected.AddDays(6) > Today ? Today : selected.AddDays(6);
         if (windowEnd < selected) windowEnd = selected;
@@ -158,8 +181,12 @@ public class DailyHistoryPanel : MonoBehaviour
                 if (c.weekday != null) { c.weekday.text = d == Today ? "วันนี้" : BreezText.WeekdayShortOf(d); c.weekday.color = textMuted; }
                 if (c.day != null) { c.day.text = d.Day.ToString(); c.day.color = future ? textMuted : textNormal; }
                 bool hasMood = info != null && !string.IsNullOrEmpty(info.mood);
-                if (c.moodDot != null) { c.moodDot.enabled = hasMood; if (hasMood) c.moodDot.color = MoodColor(info.mood); }
-                if (c.count != null) c.count.text = info != null && info.sessions > 0 ? info.sessions + " ครั้ง" : "";
+                if (c.moodDot != null) { c.moodDot.enabled = hasMood && CurrentView != View.Plays; if (hasMood) c.moodDot.color = MoodColor(info.mood); }
+                if (c.count != null)
+                {
+                    if (CurrentView == View.Moods) c.count.text = hasMood ? BreezText.Mood(info.mood) : "";
+                    else c.count.text = info != null && info.sessions > 0 ? info.sessions + " ครั้ง" : "";
+                }
                 if (c.button != null) c.button.interactable = !future;
             }
 
@@ -180,9 +207,67 @@ public class DailyHistoryPanel : MonoBehaviour
                     if (s.date == iso) { AddSessionRow(s); sessions++; }
         }
         bool loaded = data != null;
-        if (moodEmpty != null) { moodEmpty.gameObject.SetActive(loaded && moods == 0); moodEmpty.text = "ไม่ได้บันทึกอารมณ์ในวันนี้"; }
-        if (sessionEmpty != null) { sessionEmpty.gameObject.SetActive(loaded && sessions == 0); sessionEmpty.text = "ไม่มีการเล่นในวันนี้"; }
+        if (moodEmpty != null) { moodEmpty.gameObject.SetActive(loaded && moods == 0 && CurrentView != View.Plays); moodEmpty.text = "ไม่ได้บันทึกอารมณ์ในวันนี้"; }
+        if (sessionEmpty != null) { sessionEmpty.gameObject.SetActive(loaded && sessions == 0 && CurrentView != View.Moods); sessionEmpty.text = "ไม่มีการเล่นในวันนี้"; }
     }
+
+    // ---------------------------------------------------------------
+    // แยกดู: ซ่อนอีกคอลัมน์ แล้วขยายคอลัมน์ที่ดูให้เต็มความกว้าง
+    // ---------------------------------------------------------------
+    void CacheLayout()
+    {
+        if (layoutCached) return;
+        layoutCached = true;
+        Transform card = panel != null ? panel.transform.Find("Card") : null;
+        if (titleText == null && card != null) titleText = FindText(card, "Title");
+        if (moodHeader == null && card != null) moodHeader = FindText(card, "MoodHeader");
+        if (playHeader == null && card != null) playHeader = FindText(card, "PlayHeader");
+        moodList = ScrollRoot(moodContent);
+        playList = ScrollRoot(sessionContent);
+        moodHead = moodHeader != null ? moodHeader.rectTransform : null;
+        playHead = playHeader != null ? playHeader.rectTransform : null;
+        if (moodList != null) { moodListPos = moodList.anchoredPosition; moodListSize = moodList.sizeDelta; }
+        if (playList != null) { playListPos = playList.anchoredPosition; playListSize = playList.sizeDelta; }
+    }
+
+    void ApplyView()
+    {
+        CacheLayout();
+        bool showMood = CurrentView != View.Plays, showPlay = CurrentView != View.Moods;
+        if (titleText != null) titleText.text = CurrentView == View.Moods ? titleMoods : CurrentView == View.Plays ? titlePlays : titleBoth;
+        if (moodList != null) moodList.gameObject.SetActive(showMood);
+        if (playList != null) playList.gameObject.SetActive(showPlay);
+        if (moodHead != null) moodHead.gameObject.SetActive(CurrentView == View.Both);
+        if (playHead != null) playHead.gameObject.SetActive(CurrentView == View.Both);
+
+        // คืนตำแหน่งเดิม
+        if (moodList != null) { moodList.anchoredPosition = moodListPos; moodList.sizeDelta = moodListSize; }
+        if (playList != null) { playList.anchoredPosition = playListPos; playList.sizeDelta = playListSize; }
+        if (CurrentView == View.Both || moodList == null || playList == null) return;
+
+        // ขยายคอลัมน์เดียวให้กว้างเต็มการ์ด (ขอบซ้ายคอลัมน์อารมณ์ ถึงขอบขวาคอลัมน์การเล่น) และใช้ที่ของหัวคอลัมน์
+        float left = moodListPos.x - moodListSize.x / 2f;
+        float right = playListPos.x + playListSize.x / 2f;
+        float top = Mathf.Max(moodListPos.y + moodListSize.y / 2f, playListPos.y + playListSize.y / 2f) + 50f;
+        float bottom = Mathf.Min(moodListPos.y - moodListSize.y / 2f, playListPos.y - playListSize.y / 2f);
+        var target = CurrentView == View.Moods ? moodList : playList;
+        target.sizeDelta = new Vector2(right - left, top - bottom);
+        target.anchoredPosition = new Vector2((left + right) / 2f, (top + bottom) / 2f);
+    }
+
+    static RectTransform ScrollRoot(RectTransform content)
+    {
+        if (content == null) return null;
+        var sr = content.GetComponentInParent<ScrollRect>(true);
+        return sr != null ? (RectTransform)sr.transform : null;
+    }
+
+    static TMP_Text FindText(Transform root, string name)
+    {
+        var t = root.Find(name);
+        return t != null ? t.GetComponent<TMP_Text>() : null;
+    }
+
 
     HistoryDay FindDay(DateTime d)
     {

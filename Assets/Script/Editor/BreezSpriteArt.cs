@@ -476,6 +476,24 @@ public static class BreezSpriteArt
         return px;
     }
 
+    /// <summary>วงแหวนไล่สี (ซ้าย a -> ขวา b) ใช้กับ Image แบบ Filled Radial</summary>
+    public static float[] GradientRing(int size, float thickness, Rgba a, Rgba b)
+    {
+        var px = Ring(size, thickness);
+        for (int j = 0; j < size; j++)
+            for (int i = 0; i < size; i++)
+            {
+                int k = (j * size + i) * 4;
+                if (px[k + 3] <= 0f) continue;
+                float x = (i + 0.5f) / size * 2f - 1f, y = (j + 0.5f) / size * 2f - 1f;
+                float t = Math.Max(0f, Math.Min(1f, (x * 0.8f - y * 0.35f + 1f) / 2f));   // เฉียงจากซ้ายล่างไปขวาบน
+                px[k] = a.r + (b.r - a.r) * t;
+                px[k + 1] = a.g + (b.g - a.g) * t;
+                px[k + 2] = a.b + (b.b - a.b) * t;
+            }
+        return px;
+    }
+
     delegate float ShadeFn(float x, float y);
 
     static void Shade(float[] px, int size, ShadeFn f)

@@ -85,6 +85,11 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 เมนู **Breez → Update Thai Text (ทั้งเกม)** แปลข้อความในทุก scene + prefab เป็นภาษาไทย (คงชื่อโหมด/ชื่อหัวข้อหลักเป็นภาษาอังกฤษ) และใช้ฟอนต์ LINE Seed ให้ด้วย
 ทุกเมนูที่สร้างหน้าใหม่จะแปลให้อัตโนมัติ
 
+### Breath Play: เลเยอร์ + วิธีการเล่น
+เมนู **Breez → Fix Layers + How To Play (Breath Play)** (Power Release / Breathe & Focus / Calm Flow)
+- ย้ายหน้าวิธีการเล่น / ผลลัพธ์ / พัก / นับถอยหลัง ไปไว้ใน `BreezTopCanvas` (Overlay, Sort Order 100) อยู่บนสุดเสมอ
+- เพิ่มหน้าวิธีการเล่นให้ Power Release และ Calm Flow (กด "เริ่ม" แล้วค่อยเริ่มเกม)
+
 ### Rainy Forest: ฝน
 ถ้า RainEffect หายไปจาก scene เกมจะสร้างฝนให้เองตอนเริ่ม (`SPGameManager.autoCreateRain`)
 หรือกด **Breez → Upgrade Rainy Forest Rain** เพื่อสร้าง/ตั้งค่าฝนลงใน scene ถาวร
@@ -97,7 +102,7 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 
 ### Weekly Summary (สรุปรายสัปดาห์)
 เมนู **Breez → Create Mood Tracking Scene** สร้างหน้าใหม่ตามดีไซน์ (พื้นหลังดอกไม้ `Assets/element/Mood/weekly_bg.png`)
-ลิงก์ **See All** (อารมณ์เฉลี่ย / เล่นล่าสุด) เปิดหน้าประวัติรายวัน
+ลิงก์ **See All** ของ "อารมณ์เฉลี่ย" เปิดประวัติอารมณ์ / ของ "เล่นล่าสุด" เปิดประวัติการเล่น (แยกกัน)
 
 ### Weekly Summary: ดูประวัติย้อนหลัง
 เมนู **Breez → Add Daily History To Mood Tracking** ใส่ปุ่ม "ดูประวัติ" ในการ์ดการเล่นล่าสุด

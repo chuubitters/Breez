@@ -16,13 +16,14 @@ public static class BreezSoundscapeCountdownBuilder
 {
     static readonly string[] Scenes = { "Assets/Scenes/Rainy Forest.unity", "Assets/Scenes/Windy Mountain.unity" };
 
-    static readonly Color Ink = new Color32(51, 51, 51, 255);
+    static readonly Color Ink = new Color32(0x2E, 0x3B, 0x35, 255);
+    static readonly Color RingTrack = new Color(1f, 1f, 1f, 0.55f);
     static readonly Color Grey = new Color32(112, 112, 112, 255);
     static readonly Color Track = new Color32(0xEE, 0xEF, 0xE8, 255);
     static readonly Color Sage = new Color32(0xA9, 0xC7, 0x7E, 255);
 
     static TMP_FontAsset regular, bold;
-    static Sprite pill, circle, ring;
+    static Sprite pill, circle, ring, gradientRing;
 
     [MenuItem("Breez/Restyle Soundscape Countdown")]
     public static void Restyle()
@@ -33,7 +34,9 @@ public static class BreezSoundscapeCountdownBuilder
         if (bold == null) bold = regular;
         pill = BreezStatusElementsBuilder.MakeSprite("ui_pill", BreezSpriteArt.RoundedRect(128, 63), 128, 63);
         circle = BreezStatusElementsBuilder.MakeSprite("ui_circle", BreezSpriteArt.Circle(256), 256, 0);
-        ring = BreezStatusElementsBuilder.MakeSprite("ui_ring", BreezSpriteArt.Ring(512, 0.09f), 512, 0);
+        ring = BreezStatusElementsBuilder.MakeSprite("ui_ring_track", BreezSpriteArt.Ring(512, 0.09f), 512, 0);
+        gradientRing = BreezStatusElementsBuilder.MakeSprite("ui_ring_gradient", BreezSpriteArt.GradientRing(512, 0.09f,
+            BreezSpriteArt.Rgba.Hex(0x7FB8EE), BreezSpriteArt.Rgba.Hex(0x7CD8B2)), 512, 0);
 
         string previous = EditorSceneManager.GetActiveScene().path;
         var log = new System.Text.StringBuilder();
@@ -59,9 +62,10 @@ public static class BreezSoundscapeCountdownBuilder
             sp.breathGuide = BuildGuide(C);
             sp.countdownUI = BuildCountdown(C);
 
-            // ป้าย Start อยู่บนสุด (ถ้ามี) แล้วตามด้วยนับถอยหลัง
+            // ป้ายนับถอยหลังอยู่บนสุด แต่ไม่บังปุ่ม Start (start panel จะถูกยกขึ้นบนสุดอีกที)
             sp.breathGuide.transform.SetAsLastSibling();
             sp.countdownUI.transform.SetAsLastSibling();
+            if (sp.startPanel != null && sp.startPanel.transform.parent == C) sp.startPanel.transform.SetAsLastSibling();
 
             BreezThaiFontInstaller.Apply(canvas.gameObject);
             EditorUtility.SetDirty(sp);
@@ -74,6 +78,24 @@ public static class BreezSoundscapeCountdownBuilder
     }
 
     // ---------------------------------------------------------------
+    // ดีไซน์: ข้อความด้านบน + วงแหวนไล่สี (ฟ้า -> เขียวมิ้นต์) + ตัวเลขใหญ่ตรงกลาง ไม่มีพื้นหลังทึบ
+    const float RingSize = 270f;
+
+    static Image Ring(Transform parent)
+    {
+        var track = Img(parent, "RingTrack", ring, RingTrack); Place(track.rectTransform, 0, 0, RingSize, RingSize);
+        var r = Img(parent, "Ring", gradientRing, Color.white); Place(r.rectTransform, 0, 0, RingSize, RingSize);
+        r.type = Image.Type.Filled;
+        r.fillMethod = Image.FillMethod.Radial360;
+        r.fillOrigin = (int)Image.Origin360.Top;
+        r.fillClockwise = false;
+        r.fillAmount = 1f;
+        var glow = r.gameObject.AddComponent<Shadow>();
+        glow.effectColor = new Color(1f, 1f, 1f, 0.35f);
+        glow.effectDistance = new Vector2(0, -2);
+        return r;
+    }
+
     static SoundscapeCountdownUI BuildCountdown(Transform C)
     {
         var old = C.Find("CountdownOverlay");
@@ -81,30 +103,21 @@ public static class BreezSoundscapeCountdownBuilder
 
         var root = UI("CountdownOverlay", C); Stretch(root);
         var group = root.gameObject.AddComponent<CanvasGroup>();
-        var dim = Img(root, "Dim", null, new Color(0.12f, 0.16f, 0.14f, 0.22f)); Stretch(dim.rectTransform);
+        var hit = Img(root, "Blocker", null, new Color(1f, 1f, 1f, 0.12f)); Stretch(hit.rectTransform);
 
-        var bubble = UI("Bubble", root); Place(bubble, 0, 20, 420, 420);
-        var shadow = Img(bubble, "Shadow", circle, new Color(0, 0, 0, 0.10f)); Place(shadow.rectTransform, 0, -10, 400, 400);
-        var face = Img(bubble, "Face", circle, Color.white); Place(face.rectTransform, 0, 0, 400, 400);
-        var track = Img(bubble, "RingTrack", ring, Track); Place(track.rectTransform, 0, 0, 360, 360);
-        var r = Img(bubble, "Ring", ring, Sage); Place(r.rectTransform, 0, 0, 360, 360);
-        r.type = Image.Type.Filled;
-        r.fillMethod = Image.FillMethod.Radial360;
-        r.fillOrigin = (int)Image.Origin360.Top;
-        r.fillClockwise = false;
-        r.fillAmount = 1f;
-        var num = Text(bubble, "Number", "3", bold, 170, Ink, 0, 4, 360, 220);
-        var cap = Text(root, "Caption", "เตรียมตัว หายใจตามจังหวะ", regular, 36, Color.white, 0, -260, 1000, 60);
-        var capShadow = cap.gameObject.AddComponent<Shadow>();
-        capShadow.effectColor = new Color(0, 0, 0, 0.25f);
-        capShadow.effectDistance = new Vector2(0, -2);
+        var center = UI("Center", root); Place(center, 0, 0, RingSize, RingSize);
+        var r = Ring(center);
+        var num = Text(center, "Number", "3", regular, 150, Ink, 0, 2, RingSize, 200);
+        var cap = Text(root, "Caption", "เตรียมตัว หายใจตามจังหวะ", regular, 54, Ink, 0, 190, 1200, 80);
 
         var ui = root.gameObject.AddComponent<SoundscapeCountdownUI>();
         ui.group = group;
-        ui.bubble = bubble;
+        ui.bubble = center;
         ui.ring = r;
         ui.number = num;
         ui.caption = cap;
+        ui.numberSize = 150;
+        ui.goSize = 96;
         group.alpha = 0f;
         root.gameObject.SetActive(false);
         return ui;
@@ -115,40 +128,23 @@ public static class BreezSoundscapeCountdownBuilder
         var old = C.Find("BreathGuide");
         if (old != null) Object.DestroyImmediate(old.gameObject);
 
-        var card = Img(C, "BreathGuide", pill, Color.white);
-        card.type = Image.Type.Sliced;
-        Place(card.rectTransform, 0, 382, 600, 150);
-        var sh = card.gameObject.AddComponent<Shadow>();
-        sh.effectColor = new Color(0, 0, 0, 0.10f);
-        sh.effectDistance = new Vector2(0, -5);
-        var group = card.gameObject.AddComponent<CanvasGroup>();
-        var T = card.transform;
+        var root = UI("BreathGuide", C);
+        Place(root, 0, 40, 1200, 520);
+        var group = root.gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
 
-        // วงกลมหายใจ
-        var halo = Img(T, "CircleHalo", circle, new Color32(0xF3, 0xF5, 0xEC, 255)); Place(halo.rectTransform, -205, 0, 112, 112);
-        var dot = Img(T, "Circle", circle, new Color32(0xB9, 0xDA, 0xEC, 255)); Place(dot.rectTransform, -205, 0, 112, 112);
+        var phase = Text(root, "Phase", "สูดลมหายใจเข้า", regular, 54, Ink, 0, 188, 1200, 80);
+        var center = UI("Center", root); Place(center, 0, 0, RingSize, RingSize);
+        var r = Ring(center);
+        var secs = Text(center, "Seconds", "5", regular, 150, Ink, 0, 2, RingSize, 200);
 
-        var phase = Text(T, "Phase", "หายใจเข้า", bold, 46, Ink, -10, 18, 260, 64);
-        phase.alignment = TextAlignmentOptions.Left;
-        Place(phase.rectTransform, -130, 18, 260, 64, 0f);
-
-        var trackBar = Img(T, "Track", pill, Track); trackBar.type = Image.Type.Sliced;
-        Place(trackBar.rectTransform, -130, -34, 240, 14, 0f);
-        var fill = Img(trackBar.transform, "Fill", pill, new Color32(0xB9, 0xDA, 0xEC, 255));
-        fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal; fill.fillOrigin = 0;
-        Stretch(fill.rectTransform);
-
-        var secs = Text(T, "Seconds", "5", bold, 84, Ink, 205, 12, 140, 100);
-        var unit = Text(T, "Unit", "วินาที", regular, 24, Grey, 205, -46, 140, 34);
-
-        var ui = card.gameObject.AddComponent<BreathGuideUI>();
+        var ui = root.gameObject.AddComponent<BreathGuideUI>();
         ui.group = group;
         ui.phaseText = phase;
         ui.secondsText = secs;
-        ui.unitText = unit;
-        ui.progressFill = fill;
-        ui.breathCircle = dot.rectTransform;
-        ui.breathCircleImage = dot;
+        ui.progressFill = r;
+        ui.ringShowsRemaining = true;
+        ui.tintProgress = false;
         group.alpha = 0f;
         return ui;
     }
