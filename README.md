@@ -70,11 +70,16 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
   - ผูกปุ่ม "Windy Mountain" ในหน้าเลือก Soundscape ให้อัตโนมัติ
   - ฉากหลังเป็น placeholder เปลี่ยน sprite ที่ `Background (replace me)` ได้
 
-### ฟอนต์ภาษาไทย (Breez Thai)
-TextMeshPro จัดวรรณยุกต์/สระบนให้ไม่ได้ (เช่น ผลลัพธ์ ที่ โป่ง จะลอยหรือทับกัน) จึงมีฟอนต์ **Breez Thai** (จาก Prompt, OFL) ที่จัดตำแหน่งไว้แล้ว + สคริปต์ `ThaiText`
-1. เมนู **Breez → Install Thai Font** (ครั้งเดียว) สร้าง `Assets/Fonts/Breez/Breez Thai SDF` + `Montserrat SDF`, ตั้ง Breez Thai เป็น fallback และใส่ `ThaiText` ให้ข้อความทุกอัน
-2. ข้อความใหม่ที่มีภาษาไทย: ใช้ฟอนต์ Breez Thai SDF แล้ว Add Component → `ThaiText` (พิมพ์ไทยตามปกติได้เลย)
-3. ฟอนต์สร้างจาก `tools/thai-font/build_thai_font.py` (ไม่ต้องรันเองถ้าไม่ได้เปลี่ยนฟอนต์)
+### ฟอนต์ทั้งเกม: LINE Seed Sans TH App
+ทั้งเกมใช้ **LINE Seed Sans TH App** ทั้งไทยและอังกฤษ (Regular + Bold, SIL OFL 1.1)
+TextMeshPro จัดวรรณยุกต์/สระบนเองไม่ได้ จึงใช้เวอร์ชันที่จัดตำแหน่งไว้แล้ว ชื่อไฟล์ **Breez Seed TH** + สคริปต์ `ThaiText`
+1. เมนู **Breez → Install LINE Seed Font (ทั้งเกม)** (กดซ้ำได้)
+   - สร้าง `Assets/Fonts/Breez/Breez Seed TH SDF` และ `Breez Seed TH Bold SDF`
+   - ตั้งเป็นฟอนต์เริ่มต้นของ TextMeshPro (ข้อความใหม่ใช้ฟอนต์นี้อัตโนมัติ)
+   - เปลี่ยนข้อความทุกอันในทุก scene + prefab: ตัวหนา → Bold, นอกนั้น → Regular และใส่ `ThaiText`
+   - ลบฟอนต์เก่า (Breez Thai / Montserrat)
+2. ข้อความใหม่ที่มีภาษาไทย: Add Component → `ThaiText` (พิมพ์ไทยตามปกติได้เลย) ถ้าต้องการตัวหนาให้เลือก `Breez Seed TH Bold SDF` แทนการกดปุ่ม B
+3. ฟอนต์สร้างจาก `tools/thai-font/build_thai_font.py`
 
 ### Power Release (เป่าลูกโป่ง)
 เมนู **Breez → Restyle Power Release** จัดหน้าให้ตรงดีไซน์ (กดซ้ำได้)

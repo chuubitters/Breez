@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEditor;
@@ -7,56 +6,104 @@ using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 
 // =====================================================================
-// Breez > Install Thai Font
-//   1) สร้าง TMP font asset แบบ Dynamic จาก Assets/Fonts/Breez
-//        Breez Thai SDF      (Prompt + glyph ไทยที่จัดตำแหน่งแล้ว)
-//        Montserrat SDF      (ตัวเลข/อังกฤษ ตามดีไซน์)
-//   2) ใส่ Breez Thai เป็น fallback ของ TMP (ทุกฟอนต์แสดงไทยได้)
-//   3) ใส่ component ThaiText ให้ข้อความ TMP ทุกอันใน scene + prefab
-//      และเปลี่ยนฟอนต์ของข้อความที่มีภาษาไทยเป็น Breez Thai
-// กดซ้ำได้ ไม่สร้างซ้ำ
+// ฟอนต์ทั้งเกม: LINE Seed Sans TH App (ไทย + อังกฤษ)
+// ใช้เวอร์ชันที่จัดตำแหน่งวรรณยุกต์ไว้แล้ว ชื่อ "Breez Seed TH" (Regular + Bold)
+// เพราะ TextMeshPro วางวรรณยุกต์/สระบนภาษาไทยเองไม่ได้ (ดู tools/thai-font)
+//
+// Breez > Install LINE Seed Font (ทั้งเกม)
+//   1) สร้าง TMP font asset (Dynamic): Breez Seed TH SDF / Breez Seed TH Bold SDF
+//   2) ตั้งเป็นฟอนต์เริ่มต้น + fallback ของ TextMeshPro
+//   3) เปลี่ยนฟอนต์ข้อความ TMP ทุกอันในทุก scene + prefab
+//        - ข้อความตัวหนา (Bold) หรือเดิมใช้ Montserrat => Bold
+//        - นอกนั้น => Regular
+//      และใส่ ThaiText ให้ (ยกเว้นช่องพิมพ์ TMP_InputField)
+//   4) ลบฟอนต์เก่า (Breez Thai / Montserrat) ที่ไม่ใช้แล้ว
+// กดซ้ำได้
 // =====================================================================
 public static class BreezThaiFontInstaller
 {
     const string Folder = "Assets/Fonts/Breez";
-    public const string ThaiAssetPath = Folder + "/Breez Thai SDF.asset";
-    public const string LatinAssetPath = Folder + "/Montserrat SDF.asset";
+    const string RegularTtf = Folder + "/BreezSeedTH-Regular.ttf";
+    const string BoldTtf = Folder + "/BreezSeedTH-Bold.ttf";
+    public const string ThaiAssetPath = Folder + "/Breez Seed TH SDF.asset";
+    public const string BoldAssetPath = Folder + "/Breez Seed TH Bold SDF.asset";
 
-    [MenuItem("Breez/Install Thai Font")]
+    // ฟอนต์รุ่นก่อน (Prompt / Montserrat) ใช้ตารางจัดวรรณยุกต์คนละชุด => ลบทิ้งหลังย้ายเสร็จ
+    static readonly string[] OldAssets =
+    {
+        Folder + "/Breez Thai SDF.asset", Folder + "/Montserrat SDF.asset",
+        Folder + "/BreezThai-Regular.ttf", Folder + "/Montserrat-SemiBold.ttf",
+        Folder + "/OFL-Prompt.txt", Folder + "/OFL-Montserrat.txt",
+    };
+    const string OldLatinAsset = Folder + "/Montserrat SDF.asset";
+
+    [MenuItem("Breez/Install LINE Seed Font (ทั้งเกม)")]
     public static void InstallMenu()
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-        var thai = EnsureFonts();
-        if (thai == null) return;
-        int n = ApplyToProject(thai);
+        var regular = EnsureFonts();
+        if (regular == null) return;
+        int n = ApplyToProject();
+        int removed = RemoveOldFonts();
         EditorUtility.DisplayDialog("Breez",
-            "ติดตั้งฟอนต์ไทยแล้ว\n\n• " + ThaiAssetPath + "\n• " + LatinAssetPath +
-            "\n• ตั้ง Breez Thai เป็น fallback ของ TextMeshPro\n• ใส่ ThaiText ให้ข้อความ " + n + " อัน", "OK");
-    }
-
-    /// <summary>สร้าง/โหลดฟอนต์ทั้งสอง คืนค่า Breez Thai</summary>
-    public static TMP_FontAsset EnsureFonts()
-    {
-        var thai = Ensure(Folder + "/BreezThai-Regular.ttf", ThaiAssetPath);
-        Ensure(Folder + "/Montserrat-SemiBold.ttf", LatinAssetPath);
-        if (thai == null) return null;
-
-        var settings = TMP_Settings.instance;
-        if (settings != null)
-        {
-            var list = TMP_Settings.fallbackFontAssets;
-            if (list != null && !list.Contains(thai))
-            {
-                list.Insert(0, thai);
-                EditorUtility.SetDirty(settings);
-                AssetDatabase.SaveAssets();
-            }
-        }
-        return thai;
+            "เปลี่ยนฟอนต์ทั้งเกมเป็น LINE Seed Sans TH App แล้ว\n\n" +
+            "• Regular: " + ThaiAssetPath + "\n• Bold: " + BoldAssetPath +
+            "\n• ตั้งเป็นฟอนต์เริ่มต้นของ TextMeshPro" +
+            "\n• อัปเดตข้อความ " + n + " อัน" +
+            (removed > 0 ? "\n• ลบฟอนต์เก่า " + removed + " ไฟล์" : ""), "OK");
     }
 
     public static TMP_FontAsset ThaiFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(ThaiAssetPath);
-    public static TMP_FontAsset LatinFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(LatinAssetPath);
+    public static TMP_FontAsset BoldFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(BoldAssetPath);
+
+    /// <summary>สร้าง/โหลดฟอนต์ Regular + Bold และตั้งค่า TMP Settings คืนค่า Regular</summary>
+    public static TMP_FontAsset EnsureFonts()
+    {
+        var regular = Ensure(RegularTtf, ThaiAssetPath);
+        var bold = Ensure(BoldTtf, BoldAssetPath);
+        if (regular == null) return null;
+        if (bold != null) AddFallback(bold, regular);
+        ConfigureSettings(regular);
+        return regular;
+    }
+
+    static void AddFallback(TMP_FontAsset font, TMP_FontAsset fallback)
+    {
+        if (font.fallbackFontAssetTable == null) font.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset>();
+        if (font.fallbackFontAssetTable.Contains(fallback)) return;
+        font.fallbackFontAssetTable.Add(fallback);
+        EditorUtility.SetDirty(font);
+    }
+
+    static void ConfigureSettings(TMP_FontAsset regular)
+    {
+        var settings = TMP_Settings.instance;
+        if (settings == null) return;
+        var so = new SerializedObject(settings);
+        bool changed = false;
+
+        var def = so.FindProperty("m_defaultFontAsset");
+        if (def != null && def.objectReferenceValue != regular) { def.objectReferenceValue = regular; changed = true; }
+
+        var list = so.FindProperty("m_fallbackFontAssets");
+        if (list != null)
+        {
+            bool has = false;
+            for (int i = list.arraySize - 1; i >= 0; i--)
+            {
+                var el = list.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (el == regular) has = true;
+                else if (el == null || IsOld(AssetDatabase.GetAssetPath(el))) { list.DeleteArrayElementAtIndex(i); changed = true; }
+            }
+            if (!has)
+            {
+                list.InsertArrayElementAtIndex(0);
+                list.GetArrayElementAtIndex(0).objectReferenceValue = regular;
+                changed = true;
+            }
+        }
+        if (changed) { so.ApplyModifiedPropertiesWithoutUndo(); AssetDatabase.SaveAssets(); }
+    }
 
     static TMP_FontAsset Ensure(string ttfPath, string assetPath)
     {
@@ -94,8 +141,8 @@ public static class BreezThaiFontInstaller
         return AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
     }
 
-    /// <summary>ใส่ ThaiText (+ เปลี่ยนฟอนต์ข้อความไทย) ให้ทุก scene ใน Assets/Scenes และทุก prefab</summary>
-    public static int ApplyToProject(TMP_FontAsset thai)
+    /// <summary>เปลี่ยนฟอนต์ + ใส่ ThaiText ให้ทุก scene ใน Assets/Scenes และทุก prefab</summary>
+    public static int ApplyToProject()
     {
         int count = 0;
         string previous = EditorSceneManager.GetActiveScene().path;
@@ -105,7 +152,7 @@ public static class BreezThaiFontInstaller
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (path.StartsWith("Assets/TextMesh Pro")) continue;
             var root = PrefabUtility.LoadPrefabContents(path);
-            int c = Apply(root, thai);
+            int c = Apply(root);
             if (c > 0) PrefabUtility.SaveAsPrefabAsset(root, path);
             PrefabUtility.UnloadPrefabContents(root);
             count += c;
@@ -116,7 +163,7 @@ public static class BreezThaiFontInstaller
             string path = AssetDatabase.GUIDToAssetPath(guid);
             var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
             int c = 0;
-            foreach (var go in scene.GetRootGameObjects()) c += Apply(go, thai);
+            foreach (var go in scene.GetRootGameObjects()) c += Apply(go);
             if (c > 0) EditorSceneManager.SaveScene(scene);
             count += c;
         }
@@ -126,30 +173,66 @@ public static class BreezThaiFontInstaller
         return count;
     }
 
-    /// <summary>ใส่ ThaiText ให้ TMP ใต้ root (ไม่รวมช่องพิมพ์ TMP_InputField)</summary>
-    public static int Apply(GameObject root, TMP_FontAsset thai)
+    /// <summary>
+    /// ใช้ฟอนต์ LINE Seed กับ TMP ทุกตัวใต้ root และใส่ ThaiText (ไม่รวมช่องพิมพ์)
+    /// คืนค่าจำนวนข้อความที่เปลี่ยน
+    /// </summary>
+    public static int Apply(GameObject root)
     {
+        var regular = ThaiFont;
+        if (regular == null) regular = EnsureFonts();
+        var bold = BoldFont;
+        if (bold == null) bold = regular;
+        if (regular == null) return 0;
+
         int c = 0;
         foreach (var t in root.GetComponentsInChildren<TMP_Text>(true))
         {
-            if (t.GetComponentInParent<TMP_InputField>(true) != null) continue;
-            if (t.GetComponent<ThaiText>() != null) continue;
-            if (thai != null && ThaiShaper.HasThai(t.text) && !IsBreezFont(t.font))
+            bool changed = false;
+            string oldPath = t.font != null ? AssetDatabase.GetAssetPath(t.font) : "";
+            bool wantBold = (t.fontStyle & FontStyles.Bold) != 0 || oldPath == OldLatinAsset || oldPath == BoldAssetPath;
+            var target = wantBold ? bold : regular;
+
+            if (t.font != target || (t.fontStyle & FontStyles.Bold) != 0)
             {
-                Undo.RecordObject(t, "Thai font");
-                t.font = thai;
+                Undo.RecordObject(t, "LINE Seed font");
+                t.font = target;
+                t.fontSharedMaterial = target.material;
+                if (target == bold) t.fontStyle &= ~FontStyles.Bold;   // ใช้ตัวหนาจริงแทนตัวหนาปลอม
                 EditorUtility.SetDirty(t);
+                changed = true;
             }
-            Undo.AddComponent<ThaiText>(t.gameObject);
-            c++;
+
+            var input = t.GetComponentInParent<TMP_InputField>(true);
+            if (input != null)
+            {
+                if (input.fontAsset != regular) { Undo.RecordObject(input, "LINE Seed font"); input.fontAsset = regular; EditorUtility.SetDirty(input); }
+            }
+            else if (t.GetComponent<ThaiText>() == null)
+            {
+                Undo.AddComponent<ThaiText>(t.gameObject);
+                changed = true;
+            }
+            if (changed) c++;
         }
         return c;
     }
 
-    static bool IsBreezFont(TMP_FontAsset f)
+    // เดิมเป็น Apply(root, font) — คงไว้ให้โค้ดเก่าเรียกได้
+    public static int Apply(GameObject root, TMP_FontAsset ignored) => Apply(root);
+
+    static bool IsOld(string path)
     {
-        if (f == null) return false;
-        string p = AssetDatabase.GetAssetPath(f);
-        return p == ThaiAssetPath;
+        foreach (var p in OldAssets) if (p == path) return true;
+        return false;
+    }
+
+    static int RemoveOldFonts()
+    {
+        int n = 0;
+        foreach (var p in OldAssets)
+            if (File.Exists(p) && AssetDatabase.DeleteAsset(p)) n++;
+        if (n > 0) AssetDatabase.Refresh();
+        return n;
     }
 }

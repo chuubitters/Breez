@@ -196,7 +196,7 @@ public static class BreezMoodSceneBuilder
         var account = canvasGO.AddComponent<AccountActions>();
         account.requireLogin = true;
 
-        foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot, null);
+        foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings(ScenePath);

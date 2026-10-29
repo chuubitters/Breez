@@ -28,7 +28,7 @@ public static class BreezPowerReleaseRestyle
     static readonly Color ReplayPink = new Color32(242, 189, 201, 255);
     static readonly Color HomeGreen = new Color32(212, 229, 157, 255);
 
-    static TMP_FontAsset thai, latin;
+    static TMP_FontAsset thai, bold;
     static Sprite pill;
 
     [MenuItem("Breez/Restyle Power Release")]
@@ -55,8 +55,8 @@ public static class BreezPowerReleaseRestyle
         Undo.RecordObject(gm, "Restyle Power Release");
 
         thai = BreezThaiFontInstaller.EnsureFonts();
-        latin = BreezThaiFontInstaller.LatinFont;
-        if (latin == null) latin = thai;
+        bold = BreezThaiFontInstaller.BoldFont;
+        if (bold == null) bold = thai;
         pill = BreezStatusElementsBuilder.MakeSprite("ui_pill", BreezSpriteArt.RoundedRect(128, 63), 128, 63);
 
         // ---------- Canvas: สเกลตามจอ (ดีไซน์ 1920x1080) ----------
@@ -104,7 +104,7 @@ public static class BreezPowerReleaseRestyle
                 Stretch((RectTransform)gm.timerText.transform);
             }
             else Place((RectTransform)gm.timerText.transform, 0, 413, 234, 91);
-            Style(gm.timerText, latin, 44, Ink, "02:00");
+            Style(gm.timerText, bold, 44, Ink, "02:00");
             gm.timerText.characterSpacing = 2;
         }
 
@@ -186,7 +186,7 @@ public static class BreezPowerReleaseRestyle
         var hText = header.GetComponentInChildren<TextMeshProUGUI>(true);
         if (hText == null) hText = NewText(header, "Text (TMP)");
         Stretch((RectTransform)hText.transform);
-        Style(hText, thai, 40, Ink, "ผลลัพธ์");
+        Style(hText, bold, 40, Ink, "ผลลัพธ์");
 
         // ข้อความเดิม MISSION COMPLETE! / TIME'S UP! ไม่มีในดีไซน์ => ซ่อน
         if (gm.resultText != null) gm.resultText.gameObject.SetActive(false);
@@ -196,7 +196,7 @@ public static class BreezPowerReleaseRestyle
         if (gm.finalScoreText != null)
         {
             Place((RectTransform)gm.finalScoreText.transform, 0, 84, 700, 170);
-            Style(gm.finalScoreText, latin, 140, Ink, "0");
+            Style(gm.finalScoreText, bold, 140, Ink, "0");
         }
 
         // ระยะเวลาที่ใช้
@@ -204,7 +204,7 @@ public static class BreezPowerReleaseRestyle
         if (gm.timeTakenText != null)
         {
             Place((RectTransform)gm.timeTakenText.transform, -133, -121, 300, 104);
-            Style(gm.timeTakenText, latin, 80, Ink, "00:00");
+            Style(gm.timeTakenText, bold, 80, Ink, "00:00");
         }
         Label(card, "TimeUnit", "นาที", 22, -138, 90, 40, 24, Grey).alignment = TextAlignmentOptions.Left;
 
@@ -213,7 +213,7 @@ public static class BreezPowerReleaseRestyle
         var value = card.Find("BalloonsValue");
         var bv = value != null ? value.GetComponent<TextMeshProUGUI>() : NewText(card, "BalloonsValue");
         Place((RectTransform)bv.transform, 228, -121, 320, 104);
-        Style(bv, latin, 80, Ink, "0/" + gm.totalBalloons);
+        Style(bv, bold, 80, Ink, "0/" + gm.totalBalloons);
         gm.balloonsResultText = bv;
 
         // ปุ่ม: หาจากรูปเดิม rp-bt (เล่นใหม่) / hom-bt (หน้าหลัก)
@@ -258,7 +258,7 @@ public static class BreezPowerReleaseRestyle
         if (label == null) label = NewText(rt, "Label");
         label.gameObject.SetActive(true);
         Stretch((RectTransform)label.transform);
-        Style(label, thai, 34, Color.white, text);
+        Style(label, bold, 34, Color.white, text);
         return b;
     }
 

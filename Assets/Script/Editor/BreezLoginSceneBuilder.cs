@@ -107,7 +107,7 @@ public static class BreezLoginSceneBuilder
         ui.nextScene = BreezConfig.HomeScene;
         nameGroup.SetActive(false);
 
-        foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot, null);
+        foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettingsFirst(ScenePath);

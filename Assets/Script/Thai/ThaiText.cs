@@ -4,7 +4,7 @@ using UnityEngine;
 // =====================================================================
 // ใส่คู่กับ TextMeshPro เพื่อให้ภาษาไทยแสดงถูก (วรรณยุกต์ไม่ลอย/ไม่ทับสระ)
 // ข้อความในช่อง Text ยังเป็นภาษาไทยปกติ แก้ได้ตามเดิม ตั้งค่าจากโค้ดด้วย .text ได้เลย
-// ต้องใช้ฟอนต์ "Breez Thai SDF" (หรือมี Breez Thai เป็น fallback) — เมนู Breez > Install Thai Font
+// ต้องใช้ฟอนต์ Breez Seed TH (LINE Seed Sans TH App) — เมนู Breez > Install LINE Seed Font
 // =====================================================================
 [ExecuteAlways]
 [DisallowMultipleComponent]
