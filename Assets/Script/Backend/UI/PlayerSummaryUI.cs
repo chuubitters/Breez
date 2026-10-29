@@ -15,6 +15,10 @@ public class SummarySession
     public string played_at;
     // -1 = ไม่มีค่า (ไม่ใช่โหมดนั้น)
     public int flame_out_count = -1;
+    public int flowers_grown = -1;
+    public int largest_flower_pct = -1;
+    public int longest_exhale_ms = -1;
+    public int total_exhale_ms = -1;
     public int balloons_total = -1;
     public int balloons_popped = -1;
     public int obstacles_avoided = -1;

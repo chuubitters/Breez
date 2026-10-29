@@ -410,4 +410,75 @@ public static class BreezSpriteArt
         float a = x * x + y * y - 1;
         return a * a * a - x * x * y * y * y <= 0;
     }
+
+    // ---------------------------------------------------------------
+    // Calm Flow: ดอกไม้บาน (สีขาว/เทา ย้อมสีด้วย Image.color)
+    // ---------------------------------------------------------------
+
+    /// <summary>กลีบดอก โคนอยู่ล่างกลาง (pivot 0.5, 0) ไล่เฉดจากโคนเข้มไปปลายสว่าง</summary>
+    public static float[] Petal(int size)
+    {
+        var px = new float[size * size * 4];
+        Paint(px, size, (x, y) =>
+        {
+            float t = (y + 1f) / 2f;                                   // 0 โคน -> 1 ปลาย
+            if (t < 0f || t > 0.985f) return false;
+            float w = 0.78f * (float)Math.Pow(Math.Sin(Math.PI * Math.Pow(t, 0.72)), 0.8);
+            return Math.Abs(x) < w;
+        }, new Rgba(1, 1, 1));
+        Shade(px, size, (x, y) =>
+        {
+            float t = (y + 1f) / 2f;
+            float vein = Math.Max(0f, 1f - Math.Abs(x) * 9f) * 0.06f * (1f - t);
+            return 0.80f + 0.20f * (float)Math.Pow(t, 0.6) + vein;
+        });
+        return px;
+    }
+
+    /// <summary>ใบไม้ปลายแหลม โคนอยู่ล่างกลาง (pivot 0.5, 0)</summary>
+    public static float[] BloomLeaf(int size)
+    {
+        var px = new float[size * size * 4];
+        Paint(px, size, (x, y) =>
+        {
+            float t = (y + 1f) / 2f;
+            if (t < 0f || t > 0.99f) return false;
+            float w = 0.5f * (float)Math.Sin(Math.PI * Math.Pow(t, 0.85));
+            return Math.Abs(x) < w;
+        }, new Rgba(1, 1, 1));
+        Shade(px, size, (x, y) => Math.Abs(x) < 0.025f && y > -0.9f && y < 0.85f ? 0.82f : 0.92f + 0.08f * (y + 1f) / 2f);
+        return px;
+    }
+
+    /// <summary>แสงฟุ้งกลม (ขอบจาง) สำหรับประกายตอนดอกบานเต็มที่</summary>
+    public static float[] Glow(int size)
+    {
+        var px = new float[size * size * 4];
+        for (int j = 0; j < size; j++)
+            for (int i = 0; i < size; i++)
+            {
+                float x = (i + 0.5f) / size * 2f - 1f, y = (j + 0.5f) / size * 2f - 1f;
+                float d = (float)Math.Sqrt(x * x + y * y);
+                float a = Math.Max(0f, 1f - d);
+                int k = (j * size + i) * 4;
+                px[k] = px[k + 1] = px[k + 2] = 1f;
+                px[k + 3] = a * a * (3f - 2f * a);
+            }
+        return px;
+    }
+
+    delegate float ShadeFn(float x, float y);
+
+    static void Shade(float[] px, int size, ShadeFn f)
+    {
+        for (int j = 0; j < size; j++)
+            for (int i = 0; i < size; i++)
+            {
+                int k = (j * size + i) * 4;
+                if (px[k + 3] <= 0f) continue;
+                float x = (i + 0.5f) / size * 2f - 1f, y = (j + 0.5f) / size * 2f - 1f;
+                float v = Math.Max(0f, Math.Min(1f, f(x, y)));
+                px[k] *= v; px[k + 1] *= v; px[k + 2] *= v;
+            }
+    }
 }
