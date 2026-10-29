@@ -37,18 +37,32 @@ public static class BreezSoundscapeBuilder
         var scene = EditorSceneManager.OpenScene(RainyPath, OpenSceneMode.Single);
 
         var ps = FindRain();
-        if (ps == null) { EditorUtility.DisplayDialog("Breez", "No ParticleSystem (RainEffect) found in Rainy Forest.", "OK"); return; }
+        bool created = false;
+        if (ps == null)
+        {
+            // ฝนถูกลบไปจาก scene => สร้างใหม่
+            var mat = AssetDatabase.GetBuiltinExtraResource<Material>("Default-ParticleSystem.mat");
+            if (mat == null) mat = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Particle.mat");
+            ps = BreathRain.Create(mat);
+            Undo.RegisterCreatedObjectUndo(ps.gameObject, "RainEffect");
+            created = true;
+        }
         var rain = ps.GetComponent<BreathRain>();
         if (rain == null) rain = ps.gameObject.AddComponent<BreathRain>(); // อย่าใช้ ?? กับ Component ของ Unity
         var sp = Object.FindObjectOfType<SPGameManager>();
-        if (sp != null) rain.threshold = sp.breathThreshold;
+        if (sp != null)
+        {
+            rain.threshold = sp.breathThreshold;
+            sp.rainParticles = ps;          // ให้ SPGameManager สั่ง Play/Stop ตอนเป่า
+            EditorUtility.SetDirty(sp);
+        }
         rain.breathReceiver = Object.FindObjectOfType<BreathReceiver>();
 
         EditorUtility.SetDirty(rain);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         Selection.activeGameObject = ps.gameObject;
-        EditorUtility.DisplayDialog("Breez", "Rainy Forest now uses fine drizzle (BreathRain on " + ps.name + ").\n\nPress Play and blow — harder blowing = heavier rain.\nTweak drop size / rate on the BreathRain component.", "OK");
+        EditorUtility.DisplayDialog("Breez", (created ? "สร้างเอฟเฟกต์ฝนใหม่ให้แล้ว (RainEffect)\n\n" : "") + "Rainy Forest ใช้ฝนเม็ดเล็ก (BreathRain บน " + ps.name + ")\n\nกด Play แล้วเป่า ยิ่งเป่าแรงฝนยิ่งตกหนัก\nปรับขนาด/ความถี่ได้ที่ BreathRain", "OK");
     }
 
     // ---------------------------------------------------------------

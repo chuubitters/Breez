@@ -6,6 +6,16 @@ public class PlayerController : MonoBehaviour
     public float flySpeed = 6f;
     public float gravityScale = 2f;
 
+    [Header("ตอบสนองทันที (ไม่ดีเลย์)")]
+    [Tooltip("เป่า = ลอยขึ้นทันที, หยุดเป่า = ตกลงทันที (ไม่ใช้แรงโน้มถ่วงที่ค่อยๆ ดึงลง)")]
+    public bool instantControl = true;
+    [Tooltip("ความเร็วลอยขึ้น (หน่วย/วินาที) ตอนเป่า")]
+    public float riseSpeed = 5f;
+    [Tooltip("ความเร็วตก (หน่วย/วินาที) ตอนไม่เป่า")]
+    public float fallSpeed = 4.5f;
+    [Tooltip("ความไวในการเปลี่ยนทิศ (ยิ่งมากยิ่งทันที)")]
+    public float responsiveness = 60f;
+
     [Header("Breath Settings")]
     [Range(0, 100)]
     public int breathThreshold = 50;
@@ -34,7 +44,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 
-        rb.gravityScale = gravityScale;
+        rb.gravityScale = instantControl ? 0f : gravityScale;
 
         if (gameOverUI != null)
         {
@@ -87,7 +97,14 @@ public class PlayerController : MonoBehaviour
         if (isGameOver)
             return;
 
-        if (isFlying)
+        if (instantControl)
+        {
+            // เป่า = ขึ้น, ไม่เป่า = ลง เปลี่ยนทิศแทบทันที (ไม่มีแรงเฉื่อยค้าง)
+            float target = isFlying ? riseSpeed : -fallSpeed;
+            float vy = Mathf.MoveTowards(rb.velocity.y, target, responsiveness * Time.fixedDeltaTime);
+            rb.velocity = new Vector2(rb.velocity.x, vy);
+        }
+        else if (isFlying)
         {
             rb.velocity = new Vector2(
                 rb.velocity.x,

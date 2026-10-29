@@ -21,7 +21,7 @@ const args = (limit, offset) => ({
 })
 
 const list = useRemoteList(
-  ({ limit, offset }) => rpc('dashboard_sessions', args(limit, offset)),
+  ({ limit, offset }) => rpc('dashboard_play_sessions', args(limit, offset)),
   { pageSize: 25, deps: [mode, days, () => props.search, () => props.playerFilter] },
 )
 
@@ -32,7 +32,7 @@ loadSummary()
 const periodLabel = computed(() => days.value ? `${days.value} วันล่าสุด` : 'ทั้งหมด')
 
 async function exportCsv() {
-  const rows = await rpc('dashboard_sessions', args(1000, 0))
+  const rows = await rpc('dashboard_play_sessions', args(1000, 0))
   downloadCsv('breez-play-sessions.csv',
     ['session_id', 'user_id', 'player', 'mode', 'score', 'duration_seconds', 'detail', 'device', 'played_at'],
     rows.map(s => [s.session_id, s.user_id, s.player, s.mode, s.score, s.duration, sessionDetail(s), s.device_name, s.played_at]))

@@ -40,6 +40,8 @@ public class SPGameManager : MonoBehaviour
     public AudioSource bgm;
     public AudioSource sfx;
     public ParticleSystem rainParticles;
+    [Tooltip("ถ้าไม่มี Rain Particles ใน scene ที่ชื่อมีคำว่า Rain ให้สร้างฝนให้อัตโนมัติ")]
+    public bool autoCreateRain = true;
 
     private bool isBreathing = false;
     private bool gameStarted = false;
@@ -69,6 +71,10 @@ public class SPGameManager : MonoBehaviour
         // เล่น BGM
         if (bgm != null)
             bgm.Play();
+
+        // ฝนหายไปจาก scene (เช่น ถูกลบ) => สร้างใหม่ให้อัตโนมัติ
+        if (rainParticles == null && autoCreateRain && gameObject.scene.name.ToLower().Contains("rain"))
+            rainParticles = BreathRain.Create();
 
         // ปิดฝนก่อนเริ่มเกม
         if (rainParticles != null)

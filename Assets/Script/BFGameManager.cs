@@ -22,6 +22,11 @@ public class BFGameManager : MonoBehaviour
     public TMP_Text summaryScoreText;
     public TMP_Text summaryObstacleText;
 
+    [Header("หน้าผลลัพธ์แบบใหม่ (Breez > Restyle Breathe & Focus)")]
+    public TMP_Text resultScoreText;      // 200
+    public TMP_Text resultTimeText;       // 01:56 นาที
+    public TMP_Text resultObstacleText;   // 150 ชิ้น
+
     [Header("Game Settings")]
     public int scorePerObstacle = 10;
 
@@ -235,6 +240,13 @@ public class BFGameManager : MonoBehaviour
             summaryObstacleText.text =
                 "หลบสิ่งกีดขวางได้ " + obstaclesPassed + " ชิ้น";
         }
+
+        if (resultScoreText != null)
+            resultScoreText.text = currentScore.ToString();
+        if (resultTimeText != null)
+            resultTimeText.text = $"{minutes:00}:{seconds:00}<size=40%>  นาที</size>";
+        if (resultObstacleText != null)
+            resultObstacleText.text = $"{obstaclesPassed}<size=40%>  ชิ้น</size>";
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);

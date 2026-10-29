@@ -12,8 +12,6 @@ create table if not exists public.soundscape_results (
 );
 alter table public.soundscape_results enable row level security;
 
-drop policy if exists ss_select on public.soundscape_results;
-drop policy if exists ss_insert on public.soundscape_results;
 create policy ss_select on public.soundscape_results for select to authenticated
   using ((select public.is_owner()) or exists (select 1 from public.play_sessions s where s.session_id = soundscape_results.session_id and s.user_id = (select auth.uid())));
 create policy ss_insert on public.soundscape_results for insert to authenticated
@@ -71,9 +69,8 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------
-drop function if exists public.dashboard_sessions(text, int, text, uuid, int, int);
-
-create or replace function public.dashboard_sessions(
+-- ประวัติการเล่น + ผล Soundscape (ฟังก์ชันใหม่ ไม่ต้อง drop ของเดิม)
+create or replace function public.dashboard_play_sessions(
   p_mode text default null, p_days int default null, p_search text default null,
   p_user_id uuid default null, p_limit int default 50, p_offset int default 0
 ) returns table (
@@ -110,8 +107,8 @@ begin
   limit greatest(least(p_limit, 1000), 1) offset greatest(p_offset, 0);
 end $$;
 
-revoke execute on function public.dashboard_sessions(text, int, text, uuid, int, int) from public, anon;
-grant  execute on function public.dashboard_sessions(text, int, text, uuid, int, int) to authenticated;
+revoke execute on function public.dashboard_play_sessions(text, int, text, uuid, int, int) from public, anon;
+grant  execute on function public.dashboard_play_sessions(text, int, text, uuid, int, int) to authenticated;
 
 -- ---------------------------------------------------------------------
 create or replace function public.my_summary(p_days int default 30)
