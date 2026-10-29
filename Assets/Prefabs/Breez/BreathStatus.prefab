@@ -68,8 +68,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'status : <b>Inhale</b>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f4358f8521ed448f5b06410ea9f2c7d8, type: 2}
+  m_sharedMaterial: {fileID: -6866313779310590309, guid: f4358f8521ed448f5b06410ea9f2c7d8, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
