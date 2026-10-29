@@ -7,6 +7,8 @@ public class PWGameManager : MonoBehaviour
 
     [Header("UI Parent")]
     public Transform canvasTransform;
+    [Tooltip("เลเยอร์ที่ลูกโป่งเกิด (อยู่เหนือ bg/เมฆ แต่ใต้ข้อความ) ถ้าว่างจะสร้างให้อัตโนมัติ")]
+    public Transform balloonLayer;
 
     [Header("Gameplay UI")]
     public TextMeshProUGUI timerText;
@@ -17,6 +19,14 @@ public class PWGameManager : MonoBehaviour
     public TextMeshProUGUI finalScoreText;
     public TextMeshProUGUI timeTakenText;
     public TextMeshProUGUI resultText;
+    [Tooltip("ลูกโป่งที่เป่าได้ เช่น 20/20 (ไม่ใส่ก็ได้)")]
+    public TextMeshProUGUI balloonsResultText;
+
+    [Header("Text Format")]
+    [Tooltip("{0} = เป่าแตกแล้ว, {1} = ทั้งหมด")]
+    public string progressFormat = "จำนวนลูกโป่ง : {0}/{1}";
+    public string winText = "MISSION COMPLETE!";
+    public string loseText = "TIME'S UP!";
 
     [Header("Game Settings")]
     public GameObject redBalloonPrefab;
@@ -49,6 +59,7 @@ public class PWGameManager : MonoBehaviour
     void Start()
     {
         gameOverPanel.SetActive(false);
+        EnsureBalloonLayer();
 
         SpawnBalloon();
         UpdateUI();
@@ -118,7 +129,7 @@ public class PWGameManager : MonoBehaviour
 
         currentBalloon = Instantiate(
             prefabToSpawn,
-            canvasTransform
+            balloonLayer != null ? balloonLayer : canvasTransform
         );
 
         RectTransform rect =
@@ -152,19 +163,53 @@ public class PWGameManager : MonoBehaviour
         SpawnBalloon();
     }
 
+    // ลูกโป่งต้องอยู่เหนือ bg/เมฆ แต่อยู่ใต้ Time / Progress / ป้ายสถานะ
+    // ถ้าไม่ได้ตั้ง balloonLayer จะสร้าง BalloonLayer ต่อจาก bg + เมฆ ให้เอง
+    void EnsureBalloonLayer()
+    {
+        if (balloonLayer != null || canvasTransform == null) return;
+
+        var existing = canvasTransform.Find("BalloonLayer");
+        if (existing != null) { balloonLayer = existing; return; }
+
+        var go = new GameObject("BalloonLayer", typeof(RectTransform));
+        var rt = (RectTransform)go.transform;
+        rt.SetParent(canvasTransform, false);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+        // วางต่อจากภาพพื้นหลังชิ้นแรกๆ (bg, เมฆ) = ก่อน UI ตัวแรกที่ไม่ใช่ภาพพื้นหลัง
+        int index = 0;
+        for (int i = 0; i < canvasTransform.childCount; i++)
+        {
+            var c = canvasTransform.GetChild(i);
+            if (c == rt) continue;
+            if (c.GetComponent<UnityEngine.UI.Image>() != null && c.childCount == 0 &&
+                c.GetComponent<UnityEngine.UI.Selectable>() == null)
+                index = i + 1;
+            else break;
+        }
+        rt.SetSiblingIndex(index);
+        balloonLayer = rt;
+    }
+
+    public static string FormatTime(float seconds)
+    {
+        int s = Mathf.Max(0, Mathf.CeilToInt(seconds - 0.0001f));
+        return (s / 60).ToString("00") + ":" + (s % 60).ToString("00");
+    }
+
     void UpdateUI()
     {
         float timeLeft =
             Mathf.Max(timeLimit - timeElapsed, 0);
 
-        timerText.text =
-            timeLeft.ToString("F1") + " s";
+        if (timerText != null)
+            timerText.text = FormatTime(timeLeft);
 
-        progressText.text =
-            "Popped: " +
-            poppedCount +
-            " / " +
-            totalBalloons;
+        if (progressText != null)
+            progressText.text = string.Format(progressFormat, poppedCount, totalBalloons);
     }
 
     void EndGame(bool isWin)
@@ -179,16 +224,19 @@ public class PWGameManager : MonoBehaviour
 
         gameOverPanel.SetActive(true);
 
-        resultText.text =
-            isWin ? "MISSION COMPLETE!" : "TIME'S UP!";
+        UpdateUI();
 
-        finalScoreText.text =
-            "Total Score: " + currentScore;
+        if (resultText != null)
+            resultText.text = isWin ? winText : loseText;
 
-        timeTakenText.text =
-            "Time Taken: " +
-            timeElapsed.ToString("F2") +
-            " Seconds";
+        if (finalScoreText != null)
+            finalScoreText.text = currentScore.ToString();
+
+        if (timeTakenText != null)
+            timeTakenText.text = FormatTime(Mathf.Min(timeElapsed, timeLimit));
+
+        if (balloonsResultText != null)
+            balloonsResultText.text = poppedCount + "/" + totalBalloons;
 
         // บันทึกผลขึ้น Supabase (หลังบ้านเห็นในหน้า ประวัติการเล่น)
         GameDataRecorder.RecordPowerRelease(

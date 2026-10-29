@@ -31,7 +31,7 @@ public static class BreezStatusElementsBuilder
     [MenuItem("Breez/Create Status Elements")]
     public static void CreatePrefabs() => CreatePrefabs(true);
 
-    static void CreatePrefabs(bool showDialog)
+    internal static void CreatePrefabs(bool showDialog)
     {
         var font = FindThaiFont();
         bool thai = font != null;
@@ -242,12 +242,15 @@ public static class BreezStatusElementsBuilder
 
     static void SavePrefab(GameObject go, string path)
     {
+        BreezThaiFontInstaller.Apply(go, null);
         PrefabUtility.SaveAsPrefabAsset(go, path);
         Object.DestroyImmediate(go);
     }
 
     static TMP_FontAsset FindThaiFont()
     {
+        var breez = BreezThaiFontInstaller.EnsureFonts();
+        if (breez != null) return breez;
         foreach (var guid in AssetDatabase.FindAssets("t:TMP_FontAsset"))
         {
             var f = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetDatabase.GUIDToAssetPath(guid));
@@ -264,7 +267,7 @@ public static class BreezStatusElementsBuilder
         AssetDatabase.CreateFolder(parent, Path.GetFileName(path));
     }
 
-    static Sprite MakeSprite(string name, float[] rgba, int size, int border)
+    internal static Sprite MakeSprite(string name, float[] rgba, int size, int border)
     {
         EnsureFolder(ArtFolder);
         string path = $"{ArtFolder}/{name}.png";

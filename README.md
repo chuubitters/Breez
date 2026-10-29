@@ -70,6 +70,19 @@ ESP32 (MAX9814) --USB Serial--> Unity (Ardity) --HTTPS--> Supabase <-- Admin Das
   - ผูกปุ่ม "Windy Mountain" ในหน้าเลือก Soundscape ให้อัตโนมัติ
   - ฉากหลังเป็น placeholder เปลี่ยน sprite ที่ `Background (replace me)` ได้
 
+### ฟอนต์ภาษาไทย (Breez Thai)
+TextMeshPro จัดวรรณยุกต์/สระบนให้ไม่ได้ (เช่น ผลลัพธ์ ที่ โป่ง จะลอยหรือทับกัน) จึงมีฟอนต์ **Breez Thai** (จาก Prompt, OFL) ที่จัดตำแหน่งไว้แล้ว + สคริปต์ `ThaiText`
+1. เมนู **Breez → Install Thai Font** (ครั้งเดียว) สร้าง `Assets/Fonts/Breez/Breez Thai SDF` + `Montserrat SDF`, ตั้ง Breez Thai เป็น fallback และใส่ `ThaiText` ให้ข้อความทุกอัน
+2. ข้อความใหม่ที่มีภาษาไทย: ใช้ฟอนต์ Breez Thai SDF แล้ว Add Component → `ThaiText` (พิมพ์ไทยตามปกติได้เลย)
+3. ฟอนต์สร้างจาก `tools/thai-font/build_thai_font.py` (ไม่ต้องรันเองถ้าไม่ได้เปลี่ยนฟอนต์)
+
+### Power Release (เป่าลูกโป่ง)
+เมนู **Breez → Restyle Power Release** จัดหน้าให้ตรงดีไซน์ (กดซ้ำได้)
+- ลูกโป่งเกิดใน `BalloonLayer` ซึ่งอยู่เหนือ bg/เมฆ แต่อยู่ใต้เวลา, `จำนวนลูกโป่ง : x/20` และป้ายหายใจ
+- เวลานับถอยหลังแบบ 00:00, ปุ่ม "← กลับ" ไปหน้า BreathPlay
+- หน้าผลลัพธ์: คะแนน / ระยะเวลาที่ใช้ / ลูกโป่งที่เป่าได้ + ปุ่ม **เล่นอีกครั้ง** (เริ่มใหม่) และ **หน้าหลัก** (ไป Home)
+- เวลาเล่นยังเป็น `timeLimit` = 50 วินาทีที่ GameManager (ดีไซน์โชว์ 02:00 ถ้าต้องการ 2 นาทีให้ตั้ง 120)
+
 ### ข้อมูลที่บันทึกอัตโนมัติ
 | เกม | จุดที่บันทึก | ข้อมูล |
 |---|---|---|
