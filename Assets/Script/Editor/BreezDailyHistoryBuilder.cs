@@ -45,7 +45,7 @@ public static class BreezDailyHistoryBuilder
     }
 
     /// <summary>สร้างปุ่ม + หน้าต่างประวัติ แล้วผูกกับ MoodTrackingScreen</summary>
-    public static void Build(MoodTrackingScreen screen)
+    public static void Build(MoodTrackingScreen screen, bool addButton = true)
     {
         regular = BreezThaiFontInstaller.EnsureFonts();
         bold = BreezThaiFontInstaller.BoldFont;
@@ -63,6 +63,12 @@ public static class BreezDailyHistoryBuilder
         Transform host = FindDeep(C, "RecentCard");
         var oldBtn = host != null ? host.Find("HistoryButton") : C.Find("HistoryButton");
         if (oldBtn != null) Object.DestroyImmediate(oldBtn.gameObject);
+        if (!addButton)
+        {
+            screen.historyButton = null;
+        }
+        else
+        {
         var btnImg = Img(host != null ? host : C, "HistoryButton", pill, Green);
         btnImg.type = Image.Type.Sliced;
         btnImg.raycastTarget = true;
@@ -76,6 +82,7 @@ public static class BreezDailyHistoryBuilder
         var bl = Text(btnImg.transform, "Label", "ดูประวัติ", bold, 22, Color.white, 0, 0, 150, 44);
         Stretch(bl.rectTransform);
         screen.historyButton = btn;
+        }
 
         // ---------- หน้าต่างประวัติ ----------
         var old = C.Find("DailyHistory");

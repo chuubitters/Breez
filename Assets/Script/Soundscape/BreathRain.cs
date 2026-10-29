@@ -17,16 +17,42 @@ public class BreathRain : MonoBehaviour
     [Header("Rain")]
     public float lightRate = 220f;       // เม็ด/วินาที ตอนเป่าเบา
     public float heavyRate = 900f;       // เม็ด/วินาที ตอนเป่าแรงสุด
-    public Vector2 dropSize = new Vector2(0.025f, 0.05f);
+    public Vector2 dropSize = new Vector2(0.035f, 0.065f);
     public Vector2 fallSpeed = new Vector2(11f, 15f);
     [Tooltip("ลมพัดฝนเฉียง (หน่วย/วินาที แกน X)")]
     public float wind = -1.2f;
-    public Color dropColor = new Color(0.76f, 0.85f, 0.96f, 0.75f);
+    public Color dropColor = new Color(0.86f, 0.92f, 1f, 0.9f);
     [Tooltip("ความยาวเส้นฝน")]
     public float streak = 0.025f;
 
     ParticleSystem ps;
     float shownRate;
+
+    /// <summary>
+    /// สร้าง RainEffect ใหม่ (ใช้เมื่อ scene ไม่มีฝน เช่น ถูกลบไปโดยไม่ตั้งใจ)
+    /// material = null จะใช้ Sprites/Default (มีในทุก build)
+    /// </summary>
+    public static ParticleSystem Create(Material material = null)
+    {
+        var go = new GameObject("RainEffect");
+        go.SetActive(false);                       // ตั้งค่าให้เสร็จก่อน ไม่ให้เล่นเอง
+        var ps = go.AddComponent<ParticleSystem>();
+        var main = ps.main;
+        main.playOnAwake = false;
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        if (material == null)
+        {
+            var shader = Shader.Find("Sprites/Default");
+            if (shader != null) material = new Material(shader) { name = "Rain (Sprites/Default)" };
+        }
+        r.sharedMaterial = material;
+        r.sortingOrder = 50;                       // อยู่หน้าพื้นหลัง
+        go.transform.position = new Vector3(0f, 0f, 0f);
+        go.AddComponent<BreathRain>();
+        go.SetActive(true);
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return ps;
+    }
 
     void Awake()
     {
@@ -48,6 +74,7 @@ public class BreathRain : MonoBehaviour
         transform.localScale = Vector3.one;
 
         var main = ps.main;
+        main.playOnAwake = false;
         main.loop = true;
         main.duration = 5f;
         main.startLifetime = new ParticleSystem.MinMaxCurve(1.1f, 1.6f);

@@ -7,8 +7,8 @@ using UnityEngine;
 // แปลข้อความในเกมเป็นภาษาไทย (ยกเว้นชื่อโหมด / ชื่อหัวข้อหลัก)
 // ทำงานอัตโนมัติทุกครั้งที่ BreezThaiFontInstaller.Apply ทำงาน (ทุกเมนูสร้างหน้า)
 // และสั่งทั้งเกมได้ด้วยเมนู Breez > Update Thai Text (ทั้งเกม)
-// คงไว้เป็นภาษาอังกฤษ: Calm Flow, Power Release, Breathe & Focus, Soundscape, Rainy Forest,
-//                     Windy Mountain, Breath Play, Weekly Summary, Setting, Breath Gadget ฯลฯ
+// คงไว้เป็นภาษาอังกฤษ: ชื่อโหมด (Calm Flow, Power Release, Breathe & Focus, Soundscape ...), Setting, Breath Gadget,
+//                     ปุ่ม Back / Replay / Home และคำใน Weekly Summary ตามดีไซน์ (Sessions, streak, Days, See All)
 // =====================================================================
 public static class BreezThaiTranslator
 {
@@ -16,9 +16,9 @@ public static class BreezThaiTranslator
     static readonly Dictionary<string, string> Exact = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
     {
         // ทั่วไป
-        { "Start", "เริ่ม" }, { "Back", "กลับ" }, { "Score", "คะแนน" }, { "points", "คะแนน" }, { "Result", "ผลลัพธ์" },
-        { "End Session", "จบการฝึก" }, { "Pause", "พัก" }, { "Resume", "เล่นต่อ" }, { "Replay", "เล่นอีกครั้ง" },
-        { "Home", "หน้าหลัก" }, { "Start Session", "เริ่มฝึก" }, { "Status", "สถานะ" }, { "Obstacle", "สิ่งกีดขวาง" },
+        { "Start", "เริ่ม" }, { "Score", "คะแนน" }, { "points", "คะแนน" }, { "Result", "ผลลัพธ์" },
+        { "End Session", "จบการฝึก" }, { "Pause", "พัก" }, { "Resume", "เล่นต่อ" },
+        { "Start Session", "เริ่มฝึก" }, { "Status", "สถานะ" }, { "Obstacle", "สิ่งกีดขวาง" },
         { "Time", "เวลา" }, { "Loading...", "กำลังโหลด..." }, { "Saving...", "กำลังบันทึก..." },
         { "GO!", "เริ่ม!" }, { "Inhale", "หายใจเข้า" }, { "Exhale", "หายใจออก" },
         { "MISSION COMPLETE!", "สำเร็จ!" }, { "TIME'S UP!", "หมดเวลา!" },
@@ -32,11 +32,9 @@ public static class BreezThaiTranslator
         { "Not connected", "ไม่ได้เชื่อมต่อ" }, { "Connected", "เชื่อมต่อแล้ว" }, { "Device name", "ชื่ออุปกรณ์" }, { "icon", "ไอคอน" },
         { "Breath Gadget · Connected", "Breath Gadget · เชื่อมต่อแล้ว" },
         // Weekly Summary
-        { "How are you feeling today?", "วันนี้คุณรู้สึกอย่างไรบ้าง?" }, { "Sessions", "จำนวนครั้งที่เล่น" },
-        { "Average Mood", "อารมณ์ที่พบบ่อย" }, { "Sessions by game", "จำนวนครั้งแต่ละโหมด" },
-        { "Recent Play", "การเล่นล่าสุด" }, { "No games this week yet", "ยังไม่มีการเล่นในสัปดาห์นี้" },
-        { "streak", "เล่นต่อเนื่อง" }, { "lovely", "อบอุ่นใจ" }, { "happy", "มีความสุข" }, { "bored", "เบื่อ" },
-        { "angry", "โกรธ" }, { "stress", "เครียด" },
+        // (ตามดีไซน์ Weekly Summary คง Sessions / streak / Days / See All / ชื่ออารมณ์ เป็นภาษาอังกฤษ)
+        { "How are you feeling today?", "อารมณ์ของคุณวันนี้เป็นยังไง??" }, { "Weekly Summary", "สรุปรายสัปดาห์" },
+        { "Average Mood", "อารมณ์เฉลี่ย" }, { "Recent Play", "เล่นล่าสุด" }, { "No games this week yet", "ยังไม่มีการเล่นในสัปดาห์นี้" },
         // Calm Flow
         { "1 minute", "1 นาที" }, { "2 minutes", "2 นาที" }, { "3 minutes", "3 นาที" },
         { "เลือก Session Duration", "เลือกระยะเวลาฝึก" },
@@ -47,7 +45,6 @@ public static class BreezThaiTranslator
     // แทนบางส่วนของข้อความ
     static readonly KeyValuePair<string, string>[] Partial =
     {
-        new KeyValuePair<string, string>("<size=22>Sessions</size>", "<size=22>ครั้ง</size>"),
         new KeyValuePair<string, string>("status : ", "สถานะ : "),
         new KeyValuePair<string, string>("<b>Inhale</b>", "<b>หายใจเข้า</b>"),
         new KeyValuePair<string, string>("<b>Exhale</b>", "<b>หายใจออก</b>"),

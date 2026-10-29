@@ -85,17 +85,27 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 เมนู **Breez → Update Thai Text (ทั้งเกม)** แปลข้อความในทุก scene + prefab เป็นภาษาไทย (คงชื่อโหมด/ชื่อหัวข้อหลักเป็นภาษาอังกฤษ) และใช้ฟอนต์ LINE Seed ให้ด้วย
 ทุกเมนูที่สร้างหน้าใหม่จะแปลให้อัตโนมัติ
 
+### Rainy Forest: ฝน
+ถ้า RainEffect หายไปจาก scene เกมจะสร้างฝนให้เองตอนเริ่ม (`SPGameManager.autoCreateRain`)
+หรือกด **Breez → Upgrade Rainy Forest Rain** เพื่อสร้าง/ตั้งค่าฝนลงใน scene ถาวร
+
 ### Soundscape: หน้านับถอยหลัง
 เมนู **Breez → Restyle Soundscape Countdown** ใช้กับ Rainy Forest + Windy Mountain
 - นับถอยหลัง 3 · 2 · 1 · เริ่ม! เป็นวงกลมกลางจอ วงแหวนลดลงทีละวินาที
 - ป้ายนำการหายใจ: วงกลมขยาย/หด + หายใจเข้า/ออก + วินาทีที่เหลือ + แถบความคืบหน้า
 - บันทึกฉาก, จำนวนรอบหายใจ 5-5 ที่ครบ และเวลาที่เป่า ขึ้นหลังบ้าน
 
+### Weekly Summary (สรุปรายสัปดาห์)
+เมนู **Breez → Create Mood Tracking Scene** สร้างหน้าใหม่ตามดีไซน์ (พื้นหลังดอกไม้ `Assets/element/Mood/weekly_bg.png`)
+ลิงก์ **See All** (อารมณ์เฉลี่ย / เล่นล่าสุด) เปิดหน้าประวัติรายวัน
+
 ### Weekly Summary: ดูประวัติย้อนหลัง
 เมนู **Breez → Add Daily History To Mood Tracking** ใส่ปุ่ม "ดูประวัติ" ในการ์ดการเล่นล่าสุด
 กดแล้วเลือกวัน (เลื่อนทีละสัปดาห์) เพื่อดูอารมณ์และการเล่นของวันนั้น (RPC `my_history`)
 
 ### Breathe & Focus
+- เมนู **Breez → Restyle Breathe & Focus**: หน้า "วิธีการเล่น" + หน้า "ผลลัพธ์" แบบใหม่ (Replay / Home / Back)
+- เป่า = ลอยขึ้นทันที, หยุดเป่า = ตกทันที (`PlayerController.instantControl`, `riseSpeed`, `fallSpeed`)
 - เมฆเดี่ยว สุ่มอยู่บน / ล่าง / บางครั้งกลาง ห่างกันมากขึ้น (`ObstacleSetManager`: `singleCloudMode`, `cloudSpacingX`)
 - เป่านานแค่ไหนตัวละครก็ไม่ลอยพ้นขอบบน แต่ถ้าไม่เป่าจะตกลงได้ (`PlayerController.clampToTop`)
 

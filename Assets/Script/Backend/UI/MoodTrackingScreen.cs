@@ -34,6 +34,11 @@ public class MoodTrackingScreen : MonoBehaviour
     [Header("Settings")]
     public int days = 7;
     public string backScene = "Mode";
+    [Tooltip("หน่วยตามดีไซน์ Weekly Summary")]
+    public string sessionsUnit = "Sessions";
+    public string streakUnit = "Days";
+    [Tooltip("แสดงชื่ออารมณ์เป็นภาษาไทย (ปิด = Lovely / Happy ... ตามดีไซน์)")]
+    public bool thaiMoodNames = false;
 
     [Header("Top")]
     public Button backButton;
@@ -60,6 +65,8 @@ public class MoodTrackingScreen : MonoBehaviour
 
     [Header("History (ดูประวัติวันอื่น)")]
     public Button historyButton;
+    [Tooltip("ลิงก์ See All (อารมณ์เฉลี่ย / เล่นล่าสุด) เปิดหน้าประวัติ")]
+    public Button[] seeAllButtons;
     public DailyHistoryPanel historyPanel;
 
     PlayerSummary data;
@@ -69,6 +76,8 @@ public class MoodTrackingScreen : MonoBehaviour
     {
         if (backButton != null) backButton.onClick.AddListener(GoBack);
         if (historyButton != null) historyButton.onClick.AddListener(OpenHistory);
+        if (seeAllButtons != null)
+            foreach (var b in seeAllButtons) if (b != null) b.onClick.AddListener(OpenHistory);
         if (moodButtons != null)
             foreach (var mb in moodButtons)
             {
@@ -134,7 +143,7 @@ public class MoodTrackingScreen : MonoBehaviour
 
         HighlightMood(string.IsNullOrEmpty(d.today_mood) ? null : d.today_mood);
 
-        Set(sessionsText, Big(d.total_sessions.ToString(), "ครั้ง"));
+        Set(sessionsText, Big(d.total_sessions.ToString(), sessionsUnit));
 
         // อารมณ์ที่พบบ่อยที่สุด
         bool hasMood = !string.IsNullOrEmpty(d.top_mood);
@@ -143,14 +152,14 @@ public class MoodTrackingScreen : MonoBehaviour
             topMoodIcon.enabled = hasMood;
             if (hasMood) topMoodIcon.sprite = IconFor(d.top_mood);
         }
-        Set(topMoodText, hasMood ? BreezText.Mood(d.top_mood) : "ยังไม่มีข้อมูล");
+        Set(topMoodText, hasMood ? (thaiMoodNames ? BreezText.Mood(d.top_mood) : Capitalize(d.top_mood)) : "ยังไม่มีข้อมูล");
 
         var c = d.mode_counts ?? new SummaryModeCounts();
         Set(calmCountText, Big(c.calm.ToString(), "Calm Flow", 20));
         Set(powerCountText, Big(c.power.ToString(), "Power Release", 20));
         Set(focusCountText, Big(c.focus.ToString(), "Breathe & Focus", 20));
 
-        Set(streakText, Big(d.streak_days.ToString(), "วัน", 26, 96));
+        Set(streakText, Big(d.streak_days.ToString(), streakUnit, 26, 96));
 
         // การเล่นล่าสุด
         int n = d.recent_sessions != null ? d.recent_sessions.Length : 0;
@@ -197,6 +206,8 @@ public class MoodTrackingScreen : MonoBehaviour
                     return mb.icon.sprite;
         return null;
     }
+
+    static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1).ToLowerInvariant();
 
     static string Big(string number, string unit, int unitSize = 22, int numberSize = 80) =>
         $"<size={numberSize}>{number}</size>  <size={unitSize}>{unit}</size>";

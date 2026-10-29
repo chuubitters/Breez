@@ -48,7 +48,7 @@ public static class BreezText
                                        int flowersGrown, int largestFlowerPct, int flameOutCount,
                                        string scene = null, int breathCycles = -1)
     {
-        if (obstaclesAvoided >= 0) return $"ข้ามสิ่งกีดขวางได้ {obstaclesAvoided} ชิ้น";
+        if (obstaclesAvoided >= 0) return $"ข้ามสิ่งกีดขวางได้ทั้งหมด {obstaclesAvoided} ชิ้น";
         if (balloonsTotal >= 0) return $"ลูกโป่งที่เป่าได้ {balloonsPopped}/{balloonsTotal}";
         if (mode == GameDataRecorder.CalmFlow)
             return flowersGrown > 0 ? $"ปลูกดอกไม้ {flowersGrown} ดอก · ใหญ่สุด {largestFlowerPct}%" : "ยังไม่มีดอกไม้บาน";

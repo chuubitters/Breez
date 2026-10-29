@@ -32,9 +32,15 @@ public static class BreezMoodSceneBuilder
     static readonly Color Ink = new Color32(30, 30, 30, 255);
     static readonly Color Muted = new Color32(70, 70, 70, 255);
     static readonly Color Green = new Color32(155, 184, 58, 255);
-    static readonly Color RowBg = new Color32(251, 249, 221, 255);
-    static readonly Color RowTitle = new Color32(126, 156, 106, 255);
+    static readonly Color RowBg = new Color32(0xFC, 0xFF, 0xE4, 255);
+    static readonly Color RowTitle = new Color32(0x7F, 0x99, 0x84, 255);
     static readonly Color RowText = new Color32(110, 110, 95, 255);
+    // ตามดีไซน์ Weekly Summary
+    static readonly Color PanelColor = new Color32(0xFF, 0xFF, 0xFB, 255);
+    static readonly Color TitleColor = new Color32(0xEF, 0xF1, 0xBC, 255);
+    static readonly Color TitleInk = new Color32(0x6F, 0x7B, 0x52, 255);
+    static readonly Color FrameGrey = new Color32(0xA4, 0xA4, 0xA4, 255);
+    static readonly Color BackInk = new Color32(0x55, 0x55, 0x55, 255);
 
     static TMP_FontAsset font;
     static bool thai;
@@ -76,70 +82,82 @@ public static class BreezMoodSceneBuilder
 
         // พื้นหลัง + วงกลมฟุ้งๆ ตามดีไซน์
         var root = canvasGO.transform;
-        var bg = Img("Background", root, null, Bg, 0, 0, 1920, 1080);
+
+        // พื้นหลังครีม + ดอกไม้ฟุ้งๆ + เนินเขา (Assets/element/Mood/weekly_bg.png)
+        var bgSprite = LoadSprite(ArtFolder + "/weekly_bg.png");
+        var bg = Img("Background", root, bgSprite, bgSprite != null ? Color.white : Bg, 0, 0, 1920, 1080);
+        bg.preserveAspect = false;
         Stretch(bg.rectTransform);
-        Img("Blob Yellow", root, circle, new Color32(250, 226, 160, 70), 120, 300, 260, 260);
-        Img("Blob Blue", root, circle, new Color32(176, 214, 230, 80), -60, 480, 380, 380);
-        Img("Blob Green", root, circle, new Color32(214, 230, 170, 90), 1560, 520, 460, 460);
-        Img("Blob Green 2", root, flower, new Color32(220, 236, 190, 255), 205, 800, 150, 150);
 
-        // ปุ่ม Back
-        var back = Img("BackButton", root, null, new Color(1, 1, 1, 0), 110, 55, 260, 80);
+        // ปุ่มกลับ (pill ขาว)
+        var pillSprite = BreezStatusElementsBuilder.MakeSprite("ui_pill", BreezSpriteArt.RoundedRect(128, 63), 128, 63);
+        var back = Img("BackButton", root, pillSprite, Color.white, 120, 48, 243, 72);
+        back.type = Image.Type.Sliced;
+        back.preserveAspect = false;
+        back.raycastTarget = true;
+        var backOutline = back.gameObject.AddComponent<Outline>();
+        backOutline.effectColor = new Color32(0xE6, 0xE6, 0xE2, 255);
+        backOutline.effectDistance = new Vector2(1.5f, -1.5f);
         var backBtn = back.gameObject.AddComponent<Button>();
-        Img("Arrow", back.transform, arrow, Green, 8, 22, 44, 36);
-        Txt("Label", back.transform, "Back", 54, Green, FontStyles.Bold, 62, 4, 190, 70);
+        backBtn.targetGraphic = back;
+        var backArrow = Img("Arrow", back.transform, arrow, BackInk, 68, 23, 30, 26);
+        backArrow.preserveAspect = true;
+        Txt("Label", back.transform, "กลับ", 36, BackInk, FontStyles.Bold, 104, 8, 120, 56);
 
-        // แผงใหญ่
-        Card("Panel", root, Panel, 242, 161, 1436, 960, false);
+        // แผงใหญ่สีขาวครีม
+        var panelImg = Card("Panel", root, PanelColor, 242, 163, 1436, 960, false).GetComponent<Image>();
+        panelImg.pixelsPerUnitMultiplier = 0.55f;   // มุมโค้งใหญ่ตามดีไซน์
 
         var status = Txt("Status", root, "", 18, RowTitle, FontStyles.Normal, 381, 1038, 637, 30);
         status.alignment = TextAlignmentOptions.Center;
 
         // ---------- คอลัมน์ซ้าย ----------
-        var title = Card("TitleCard", root, CardColor, 381, 288, 637, 101);
-        var t = Txt("Title", title, "Weekly Summary", 56, Ink, FontStyles.Bold, 0, 12, 637, 80);
+        var title = Card("TitleCard", root, TitleColor, 381, 280, 637, 107);
+        var t = Txt("Title", title, "สรุปรายสัปดาห์", 60, TitleInk, FontStyles.Bold, 0, 10, 637, 86);
         t.alignment = TextAlignmentOptions.Center;
 
-        var moodCard = Card("MoodCard", root, CardColor, 381, 415, 637, 216);
-        Txt("Question", moodCard, thai ? "อารมณ์ของคุณวันนี้เป็นยังไง??" : "How are you feeling today?", 21, Muted, FontStyles.Normal, 36, 26, 420, 36);
-        var date = Txt("Date", moodCard, "26/08/2026", 21, Muted, FontStyles.Normal, 430, 26, 172, 36);
+        var moodCard = Card("MoodCard", root, CardColor, 381, 414, 637, 216);
+        Txt("Question", moodCard, "อารมณ์ของคุณวันนี้เป็นยังไง??", 22, Muted, FontStyles.Normal, 36, 24, 440, 38);
+        var date = Txt("Date", moodCard, "26/08/2026", 22, Muted, FontStyles.Normal, 420, 24, 182, 38);
         date.alignment = TextAlignmentOptions.MidlineRight;
 
         var moodButtons = new List<MoodTrackingScreen.MoodButton>();
         for (int i = 0; i < Moods.Length; i++)
         {
             float x = 36 + i * 119;
-            var frame = Img($"Mood {Moods[i]}", moodCard, rounded, new Color32(226, 228, 220, 255), x, 70, 91, 91);
+            var frame = Img($"Mood {Moods[i]}", moodCard, rounded, FrameGrey, x, 72, 91, 91);
             frame.type = Image.Type.Sliced;
-            frame.pixelsPerUnitMultiplier = 4f;
-            var inner = Img("Inner", frame.transform, rounded, Color.white, 3, 3, 85, 85);
+            frame.pixelsPerUnitMultiplier = 6f;
+            frame.preserveAspect = false;
+            var inner = Img("Inner", frame.transform, rounded, Color.white, 2, 2, 87, 87);
             inner.type = Image.Type.Sliced;
-            inner.pixelsPerUnitMultiplier = 4f;
+            inner.pixelsPerUnitMultiplier = 6f;
+            inner.preserveAspect = false;
             inner.raycastTarget = false;
             var icon = Img("Icon", frame.transform, faces[Moods[i]], Color.white, 16, 16, 59, 59);
             icon.raycastTarget = false;
             var btn = frame.gameObject.AddComponent<Button>();
             btn.targetGraphic = frame;
-            var label = Txt("Label", moodCard, Moods[i].ToLower(), 17, Muted, FontStyles.Normal, x - 10, 166, 111, 28);
+            var label = Txt("Label", moodCard, Moods[i].ToLower(), 17, Muted, FontStyles.Normal, x - 10, 168, 111, 28);
             label.alignment = TextAlignmentOptions.Center;
             moodButtons.Add(new MoodTrackingScreen.MoodButton { mood = Moods[i], button = btn, frame = frame, icon = icon });
         }
 
-        var sessCard = Card("SessionsCard", root, CardColor, 381, 645, 312, 163);
+        var sessCard = Card("SessionsCard", root, CardColor, 381, 653, 312, 155);
         Txt("Label", sessCard, "Sessions", 22, Muted, FontStyles.Normal, 40, 22, 240, 34);
-        var sessions = Txt("Value", sessCard, "<size=80>0</size>  <size=22>Sessions</size>", 22, Ink, FontStyles.Normal, 40, 58, 260, 92);
-        sessions.alignment = TextAlignmentOptions.BottomLeft;
+        var sessions = Txt("Value", sessCard, "<size=80>0</size>  <size=22>Sessions</size>", 22, Ink, FontStyles.Normal, 40, 56, 260, 92);
 
-        var moodAvg = Card("AverageMoodCard", root, CardColor, 705, 645, 313, 163);
-        Txt("Label", moodAvg, thai ? "อารมณ์ที่พบบ่อย" : "Average Mood", 22, Muted, FontStyles.Normal, 40, 22, 250, 34);
-        var avgIcon = Img("Icon", moodAvg, faces["Lovely"], Color.white, 36, 68, 62, 62);
-        var avgText = Txt("Value", moodAvg, "—", 24, Ink, FontStyles.Normal, 120, 80, 180, 40);
+        var moodAvg = Card("AverageMoodCard", root, CardColor, 705, 653, 313, 155);
+        Txt("Label", moodAvg, "อารมณ์เฉลี่ย", 22, Muted, FontStyles.Normal, 40, 22, 200, 34);
+        var seeAllMood = SeeAll(moodAvg, 196, 22);
+        var avgIcon = Img("Icon", moodAvg, faces["Lovely"], Color.white, 36, 64, 58, 58);
+        var avgText = Txt("Value", moodAvg, "—", 22, Ink, FontStyles.Normal, 113, 74, 180, 40);
 
-        var modes = Card("GamesCard", root, CardColor, 381, 828, 637, 156);
-        Txt("Label", modes, thai ? "จำนวนครั้งแต่ละเกม" : "Sessions by game", 22, Muted, FontStyles.Normal, 40, 22, 400, 34);
-        var calm = Txt("CalmFlow", modes, "", 20, Ink, FontStyles.Normal, 40, 56, 200, 88);
-        var power = Txt("PowerRelease", modes, "", 20, Ink, FontStyles.Normal, 230, 56, 210, 88);
-        var focus = Txt("BreatheFocus", modes, "", 20, Ink, FontStyles.Normal, 430, 56, 200, 88);
+        var modes = Card("GamesCard", root, CardColor, 381, 830, 637, 154);
+        Txt("Label", modes, "Sessions", 22, Muted, FontStyles.Normal, 40, 22, 400, 34);
+        var calm = Txt("CalmFlow", modes, "", 20, Ink, FontStyles.Normal, 40, 54, 190, 88);
+        var power = Txt("PowerRelease", modes, "", 20, Ink, FontStyles.Normal, 214, 54, 210, 88);
+        var focus = Txt("BreatheFocus", modes, "", 20, Ink, FontStyles.Normal, 412, 54, 220, 88);
         foreach (var label in new[] { calm, power, focus, sessions })
         {
             label.alignment = TextAlignmentOptions.BottomLeft;
@@ -147,30 +165,31 @@ public static class BreezMoodSceneBuilder
         }
 
         // ---------- คอลัมน์ขวา ----------
-        var streakCard = Card("StreakCard", root, new Color32(250, 252, 255, 255), 1053, 285, 476, 168);
-        Img("Flower Blue", streakCard, flower, new Color32(206, 230, 238, 255), 352, -8, 118, 118);
-        Img("Flower Yellow", streakCard, flower, new Color32(250, 226, 160, 255), 282, 108, 72, 72);
-        Img("Flower Green", streakCard, flower, new Color32(200, 226, 140, 255), 390, 96, 56, 56);
-        Txt("Label", streakCard, "streak", 22, Muted, FontStyles.Normal, 40, 26, 200, 34);
-        var streak = Txt("Value", streakCard, "", 26, Ink, FontStyles.Normal, 40, 54, 260, 104);
+        var streakCard = Card("StreakCard", root, CardColor, 1053, 288, 476, 164);
+        Img("Flower Green", streakCard, flower, new Color32(0xD5, 0xE7, 0x9A, 255), 336, 10, 88, 88);
+        Img("Flower Yellow", streakCard, flower, new Color32(0xEF, 0xF1, 0xBC, 255), 313, 96, 54, 54);
+        Img("Flower Pink", streakCard, flower, new Color32(0xF7, 0xC6, 0xD0, 255), 402, 99, 38, 38);
+        Txt("Label", streakCard, "streak", 22, Muted, FontStyles.Normal, 40, 22, 200, 34);
+        var streak = Txt("Value", streakCard, "", 26, Ink, FontStyles.Normal, 40, 50, 260, 104);
         streak.alignment = TextAlignmentOptions.BottomLeft;
         streak.enableWordWrapping = false;
 
-        var recent = Card("RecentCard", root, CardColor, 1053, 470, 476, 514);
-        Txt("Label", recent, "Recent Play", 22, Muted, FontStyles.Normal, 36, 22, 300, 34);
-        var empty = Txt("Empty", recent, thai ? "ยังไม่มีการเล่นในสัปดาห์นี้" : "No games this week yet", 20, RowText, FontStyles.Normal, 30, 200, 416, 40);
+        var recent = Card("RecentCard", root, CardColor, 1053, 475, 476, 509);
+        Txt("Label", recent, "เล่นล่าสุด", 22, Muted, FontStyles.Normal, 36, 20, 300, 34);
+        var seeAllRecent = SeeAll(recent, 360, 20);
+        var empty = Txt("Empty", recent, "ยังไม่มีการเล่นในสัปดาห์นี้", 20, RowText, FontStyles.Normal, 30, 200, 416, 40);
         empty.alignment = TextAlignmentOptions.Center;
 
         var rows = new List<MoodTrackingScreen.RecentRow>();
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 3; i++)
         {
-            var row = Card($"Row {i + 1}", recent, RowBg, 30, 70 + i * 106, 416, 92);
-            var rt = Txt("Title", row, "Breathe & Focus", 24, RowTitle, FontStyles.Bold, 22, 10, 290, 34);
-            var rd = Txt("Detail", row, "", 13, RowText, FontStyles.Normal, 22, 44, 300, 42);
+            var row = Card($"Row {i + 1}", recent, RowBg, 29, 65 + i * 105, 413, 90);
+            var rt = Txt("Title", row, "Breathe & Focus", 25, RowTitle, FontStyles.Bold, 22, 8, 290, 36);
+            var rd = Txt("Detail", row, "", 13, RowText, FontStyles.Normal, 22, 44, 300, 40);
             rd.alignment = TextAlignmentOptions.TopLeft;
-            var rs = Txt("Score", row, "0", 30, RowText, FontStyles.Normal, 300, 8, 96, 40);
+            var rs = Txt("Score", row, "0", 28, RowText, FontStyles.Normal, 290, 8, 100, 40);
             rs.alignment = TextAlignmentOptions.MidlineRight;
-            var rl = Txt("ScoreLabel", row, thai ? "คะแนน" : "points", 14, RowText, FontStyles.Normal, 300, 50, 96, 24);
+            var rl = Txt("ScoreLabel", row, "คะแนน", 15, RowText, FontStyles.Normal, 290, 50, 100, 26);
             rl.alignment = TextAlignmentOptions.MidlineRight;
             rows.Add(new MoodTrackingScreen.RecentRow { root = row.gameObject, title = rt, detail = rd, score = rs });
         }
@@ -191,12 +210,13 @@ public static class BreezMoodSceneBuilder
         screen.streakText = streak;
         screen.recentRows = rows.ToArray();
         screen.emptyRecentText = empty;
+        screen.seeAllButtons = new[] { seeAllMood, seeAllRecent };
 
         var account = canvasGO.AddComponent<AccountActions>();
         account.requireLogin = true;
 
-        // ปุ่ม "ดูประวัติ" + หน้าต่างประวัติรายวัน
-        BreezDailyHistoryBuilder.Build(screen);
+        // หน้าต่างประวัติรายวัน (เปิดจากปุ่ม See All)
+        BreezDailyHistoryBuilder.Build(screen, addButton: false);
 
         foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot);
         EditorSceneManager.MarkSceneDirty(scene);
@@ -279,6 +299,31 @@ public static class BreezMoodSceneBuilder
         importer.spriteBorder = new Vector4(border, border, border, border);
         importer.SaveAndReimport();
         return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    static Sprite LoadSprite(string path)
+    {
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null) return null;
+        if (importer.textureType != TextureImporterType.Sprite)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    /// <summary>ลิงก์ "See All" ขีดเส้นใต้ มุมขวาบนของการ์ด (x,y จากซ้ายบน)</summary>
+    static Button SeeAll(Transform card, float x, float y)
+    {
+        var t = Txt("SeeAll", card, "<u>See All</u>", 18, Muted, FontStyles.Normal, x, y, 90, 34);
+        t.alignment = TextAlignmentOptions.MidlineRight;
+        t.raycastTarget = true;
+        var b = t.gameObject.AddComponent<Button>();
+        b.targetGraphic = t;
+        return b;
     }
 
     static void AddToBuildSettings(string path)
