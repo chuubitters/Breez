@@ -27,6 +27,10 @@ public class SPGameManager : MonoBehaviour
     public TMP_Text breathingText;
     public Slider breathingBar;
 
+    [Header("UI ใหม่ (Breez > Restyle Soundscape Countdown)")]
+    public SoundscapeCountdownUI countdownUI;
+    public BreathGuideUI breathGuide;
+
     [Header("Breathing Audio")]
     public AudioSource audioSource;
     public AudioClip inhaleSound;
@@ -49,6 +53,8 @@ public class SPGameManager : MonoBehaviour
     public float minSecondsToSave = 10f;
     private float sessionStartTime;
     private bool sessionSaved = false;
+    private int breathCycles = 0;       // จำนวนรอบ เข้า-ออก ที่ครบ
+    private float exhaleSeconds = 0f;   // เวลาที่เป่า (เซนเซอร์/ลูกศร) รวม
 
     private void Start()
     {
@@ -126,6 +132,8 @@ public class SPGameManager : MonoBehaviour
             StopInputEffect();
         }
 
+        if (inputActive) exhaleSeconds += Time.deltaTime;
+
         wasInputActive = inputActive;
     }
 
@@ -150,14 +158,19 @@ public class SPGameManager : MonoBehaviour
     // ==================================
     private IEnumerator StartCountdown()
     {
-        if (countdownText != null)
-            countdownText.gameObject.SetActive(true);
+        int total = Mathf.Max(1, Mathf.CeilToInt(countdownTime));
+        int count = total;
 
-        int count = Mathf.CeilToInt(countdownTime);
+        if (countdownUI != null)
+            countdownUI.Show();
+        else if (countdownText != null)
+            countdownText.gameObject.SetActive(true);
 
         while (count > 0)
         {
-            if (countdownText != null)
+            if (countdownUI != null)
+                countdownUI.Tick(count, count / (float)total, (count - 1) / (float)total, 1f);
+            else if (countdownText != null)
                 countdownText.text = count.ToString();
 
             yield return new WaitForSeconds(1f);
@@ -165,13 +178,17 @@ public class SPGameManager : MonoBehaviour
             count--;
         }
 
-        // แสดง GO!
-        if (countdownText != null)
-            countdownText.text = "GO!";
+        // แสดง เริ่ม!
+        if (countdownUI != null)
+            countdownUI.Go();
+        else if (countdownText != null)
+            countdownText.text = "เริ่ม!";
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.6f);
 
-        if (countdownText != null)
+        if (countdownUI != null)
+            countdownUI.Hide();
+        else if (countdownText != null)
             countdownText.gameObject.SetActive(false);
 
         // เริ่มเกมจริง
@@ -236,7 +253,7 @@ public class SPGameManager : MonoBehaviour
 
             yield return StartCoroutine(
                 BreathingPhase(
-                    "Inhale",
+                    "หายใจเข้า",
                     inhaleDuration,
                     0f,
                     1f
@@ -250,12 +267,14 @@ public class SPGameManager : MonoBehaviour
 
             yield return StartCoroutine(
                 BreathingPhase(
-                    "Exhale",
+                    "หายใจออก",
                     exhaleDuration,
                     1f,
                     0f
                 )
             );
+
+            breathCycles++;
         }
     }
 
@@ -286,13 +305,18 @@ public class SPGameManager : MonoBehaviour
                     Mathf.CeilToInt(remainingTime)
                 );
 
-            // Text
-            if (breathingText != null)
+            // ป้ายนำการหายใจแบบใหม่
+            if (breathGuide != null)
+            {
+                breathGuide.SetPhase(startValue < endValue, secondsLeft, progress);
+            }
+            // Text แบบเดิม
+            else if (breathingText != null)
             {
                 breathingText.text =
                     phaseName + " " +
                     secondsLeft +
-                    " Second";
+                    " วินาที";
             }
 
             // Slider
@@ -329,7 +353,7 @@ public class SPGameManager : MonoBehaviour
             return;
 
         sessionSaved = true;
-        GameDataRecorder.RecordSoundscape(seconds);
+        GameDataRecorder.RecordSoundscape(seconds, gameObject.scene.name, breathCycles, exhaleSeconds);
     }
 
     private void OnDestroy()

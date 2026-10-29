@@ -70,7 +70,7 @@ public class CalmFlowGame : MonoBehaviour
     public TextMeshProUGUI largestFlowerText;
     public TextMeshProUGUI longestExhaleText;
     public TextMeshProUGUI totalExhaleText;
-    public string subtitleFormat = "{0}-Minute Session Complete";
+    public string subtitleFormat = "ฝึกครบ {0} นาทีแล้ว";
 
     // ---------------- ผล ----------------
     public State Current { get; private set; } = State.Select;
@@ -144,7 +144,7 @@ public class CalmFlowGame : MonoBehaviour
         if (Current != State.Playing) return;
         Current = State.Paused;
         if (pausePanel != null) pausePanel.SetActive(true);
-        if (pauseButtonText != null) pauseButtonText.text = "Resume";
+        if (pauseButtonText != null) pauseButtonText.text = "เล่นต่อ";
         if (flower != null) flower.breathing = false;
     }
 
@@ -154,7 +154,7 @@ public class CalmFlowGame : MonoBehaviour
         Current = State.Playing;
         belowFor = 0f;
         if (pausePanel != null) pausePanel.SetActive(false);
-        if (pauseButtonText != null) pauseButtonText.text = "Pause";
+        if (pauseButtonText != null) pauseButtonText.text = "พัก";
     }
 
     /// <summary>จบก่อนเวลา (ปุ่มใน Pause) สรุปผลเท่าที่เล่นไป</summary>
@@ -251,8 +251,8 @@ public class CalmFlowGame : MonoBehaviour
         if (summarySubtitle != null) summarySubtitle.text = string.Format(subtitleFormat, minutes);
         if (flowersGrownText != null) flowersGrownText.text = FlowersGrown.ToString();
         if (largestFlowerText != null) largestFlowerText.text = largestPct + "%";
-        if (longestExhaleText != null) longestExhaleText.text = LongestExhale.ToString("0.0") + " s";
-        if (totalExhaleText != null) totalExhaleText.text = Mathf.RoundToInt(TotalExhale) + " s";
+        if (longestExhaleText != null) longestExhaleText.text = LongestExhale.ToString("0.0") + " วิ";
+        if (totalExhaleText != null) totalExhaleText.text = Mathf.RoundToInt(TotalExhale) + " วิ";
         ShowOnly(summaryPanel);
         if (hud != null) hud.SetActive(false);
 
@@ -276,7 +276,7 @@ public class CalmFlowGame : MonoBehaviour
         if (hud != null) hud.SetActive(panel == hud);
         if (pausePanel != null) pausePanel.SetActive(false);
         if (summaryPanel != null) summaryPanel.SetActive(panel == summaryPanel);
-        if (pauseButtonText != null) pauseButtonText.text = "Pause";
+        if (pauseButtonText != null) pauseButtonText.text = "พัก";
     }
 
     public static string Format(float seconds)

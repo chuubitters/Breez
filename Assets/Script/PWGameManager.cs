@@ -25,8 +25,8 @@ public class PWGameManager : MonoBehaviour
     [Header("Text Format")]
     [Tooltip("{0} = เป่าแตกแล้ว, {1} = ทั้งหมด")]
     public string progressFormat = "จำนวนลูกโป่ง : {0}/{1}";
-    public string winText = "MISSION COMPLETE!";
-    public string loseText = "TIME'S UP!";
+    public string winText = "สำเร็จ!";
+    public string loseText = "หมดเวลา!";
 
     [Header("Game Settings")]
     public GameObject redBalloonPrefab;

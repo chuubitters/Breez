@@ -34,10 +34,10 @@ const t = computed(() => ({
 
 // ---------- กราฟกิจกรรมรายวัน: แท่ง = จำนวนครั้งแต่ละโหมด, เส้น = จำนวนคน ----------
 const chartSeries = [
-  { key: 'calm', label: 'Calm Flow', cls: 'sage-bar', legend: 'legend-sage' },
-  { key: 'power', label: 'Power Release', cls: 'coral-bar', legend: 'legend-coral' },
-  { key: 'focus', label: 'Breathe & Focus', cls: 'lilac-bar', legend: 'legend-lilac' },
-  { key: 'relax', label: 'Soundscape / Quick', cls: 'yellow-bar', legend: 'legend-blue' },
+  { key: 'calm', label: 'Calm Flow', color: MODE_STYLE['Calm Flow'].color },
+  { key: 'power', label: 'Power Release', color: MODE_STYLE['Power Release'].color },
+  { key: 'focus', label: 'Breathe & Focus', color: MODE_STYLE['Breathe & Focus'].color },
+  { key: 'relax', label: 'Soundscape / Quick Session', color: MODE_STYLE['Soundscape'].color },
 ]
 const daily = computed(() => data.value?.daily ?? [])
 const niceMax = v => { const step = Math.max(1, Math.ceil(v / 4)); return step * 4 }
@@ -126,10 +126,10 @@ const moods = computed(() => {
     <article class="panel activity-panel">
       <div class="panel-heading">
         <div><h2>กิจกรรมการฝึกหายใจ</h2><p>แท่ง = จำนวนครั้งแต่ละรูปแบบ · เส้น = จำนวนคนที่มาฝึกในแต่ละวัน</p></div>
-        <button class="text-button" @click="emit('navigate', 'sessions')">ดูประวัติ <span>↗</span></button>
+        <button class="text-button" @click="emit('navigate', 'modes')">ดูแยกตามโหมด <span>↗</span></button>
       </div>
       <div class="chart-legend">
-        <span v-for="s in chartSeries" :key="s.key"><i class="legend-dot" :class="s.legend"></i>{{ s.label }}</span>
+        <span v-for="s in chartSeries" :key="s.key"><i class="legend-dot" :style="{ background: s.color }"></i>{{ s.label }}</span>
         <span><i class="legend-line"></i>จำนวนคน</span>
       </div>
       <div class="activity-chart">
@@ -138,7 +138,7 @@ const moods = computed(() => {
           <div class="grid-lines"><i></i><i></i><i></i><i></i><i></i></div>
           <div class="bar-groups">
             <div v-for="d in daily" :key="d.day" class="bar-group" :title="`${d.day}: ${d.people} คน · ` + chartSeries.map(s => s.label + ' ' + d[s.key]).join(', ')">
-              <div class="bars"><span v-for="s in chartSeries" :key="s.key" class="bar" :class="s.cls" :style="{ height: (d[s.key] / barMax) * 100 + '%' }"></span></div>
+              <div class="bars"><span v-for="s in chartSeries" :key="s.key" class="bar" :style="{ height: (d[s.key] / barMax) * 100 + '%', background: s.color }"></span></div>
               <span class="x-label">{{ xLabel(d) }}</span>
             </div>
           </div>

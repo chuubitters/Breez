@@ -151,7 +151,6 @@ public static class BreezGadgetSceneBuilder
 
         // ---------- ต่อสาย ----------
         var screen = canvasGO.AddComponent<GadgetSettingsScreen>();
-        screen.thaiText = thai;
         screen.backScene = "Home";
         screen.backButton = backBtn;
         screen.iconButton = ringBtn;

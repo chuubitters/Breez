@@ -113,7 +113,7 @@ public static class BreezCalmFlowBuilder
 
         // ---------- ปุ่มกลับ ----------
         var backArt = AssetDatabase.LoadAssetAtPath<Sprite>(BackArtPath);
-        var back = Button(C, "BackButton", backArt != null ? backArt : pill, Color.white, -744, 424, 249, 79, backArt != null ? "" : "← กลับ", Ink, 30);
+        var back = Button(C, "BackButton", backArt != null ? backArt : pill, Color.white, -744, 424, 249, 79, backArt != null ? "" : "< กลับ", Ink, 30);
         if (backArt != null) back.GetComponent<Image>().preserveAspect = true;
         LoadScene(back, "BreathPlay");
 
@@ -134,7 +134,7 @@ public static class BreezCalmFlowBuilder
         countPill.type = Image.Type.Sliced;
         Place(countPill.rectTransform, 744, 320, 230, 72);
         game.flowerCountText = Text(countPill.transform, "Count", "ดอกไม้ 0", regular, 30, Ink, 0, 0, 230, 72);
-        var pauseBtn = Button(hud, "PauseButton", pill, Color.white, 744, 424, 200, 72, "Pause", Ink, 30);
+        var pauseBtn = Button(hud, "PauseButton", pill, Color.white, 744, 424, 200, 72, "พัก", Ink, 30);
         game.pauseButtonText = pauseBtn.GetComponentInChildren<TextMeshProUGUI>();
         UnityEventTools.AddVoidPersistentListener(pauseBtn.onClick, game.TogglePause);
 
@@ -224,9 +224,9 @@ public static class BreezCalmFlowBuilder
         game.selectPanel = panel.gameObject;
 
         Text(P, "Title", "Calm Flow", bold, 56, Ink, 0, 215, 800, 70);
-        Text(P, "Subtitle", "เลือก Session Duration", regular, 28, Grey, 0, 160, 800, 44);
+        Text(P, "Subtitle", "เลือกระยะเวลาฝึก", regular, 28, Grey, 0, 160, 800, 44);
 
-        string[] labels = { "1 minute", "2 minutes", "3 minutes" };
+        string[] labels = { "1 นาที", "2 นาที", "3 นาที" };
         var buttons = new Button[3];
         for (int i = 0; i < 3; i++)
         {
@@ -242,7 +242,7 @@ public static class BreezCalmFlowBuilder
         ready.characterSpacing = 12;
         game.readyTimerText = Text(P, "ReadyTimer", "02:00", bold, 88, Ink, 0, -98, 500, 100);
 
-        var start = Button(P, "StartButton", pill, Pink, 0, -212, 320, 90, "Start Session", Color.white, 34, bold);
+        var start = Button(P, "StartButton", pill, Pink, 0, -212, 320, 90, "เริ่มฝึก", Color.white, 34, bold);
         AddShadow(start.gameObject);
         UnityEventTools.AddVoidPersistentListener(start.onClick, game.StartSession);
     }
@@ -257,9 +257,9 @@ public static class BreezCalmFlowBuilder
         Place(box.rectTransform, 0, 0, 640, 420);
         Text(box.transform, "Title", "พักสักครู่", bold, 52, Ink, 0, 110, 560, 70);
         Text(box.transform, "Body", "หายใจตามสบาย พร้อมแล้วค่อยเล่นต่อ", regular, 28, Grey, 0, 40, 560, 44);
-        var resume = Button(box.transform, "ResumeButton", pill, Pink, -135, -100, 240, 90, "Resume", Color.white, 32, bold);
+        var resume = Button(box.transform, "ResumeButton", pill, Pink, -135, -100, 240, 90, "เล่นต่อ", Color.white, 32, bold);
         UnityEventTools.AddVoidPersistentListener(resume.onClick, game.Resume);
-        var end = Button(box.transform, "EndButton", pill, Green, 135, -100, 240, 90, "End Session", Color.white, 32, bold);
+        var end = Button(box.transform, "EndButton", pill, Green, 135, -100, 240, 90, "จบการฝึก", Color.white, 32, bold);
         UnityEventTools.AddVoidPersistentListener(end.onClick, game.FinishNow);
         dim.gameObject.SetActive(false);
     }
@@ -278,10 +278,10 @@ public static class BreezCalmFlowBuilder
         header.type = Image.Type.Sliced;
         Place(header.rectTransform, 0, 280, 620, 100);
         Text(header.transform, "Text", "Your Garden Has Grown!", bold, 42, Ink, 0, 0, 620, 100);
-        game.summarySubtitle = Text(B, "Subtitle", "2-Minute Session Complete", regular, 30, Grey, 0, 190, 900, 46);
+        game.summarySubtitle = Text(B, "Subtitle", "ฝึกครบ 2 นาทีแล้ว", regular, 30, Grey, 0, 190, 900, 46);
 
-        string[] labels = { "Flowers Grown", "Largest Flower", "Longest Exhale", "Total Exhale Time" };
-        string[] samples = { "0", "0%", "0.0 s", "0 s" };
+        string[] labels = { "ดอกไม้ที่ปลูก", "ดอกใหญ่ที่สุด", "หายใจออกนานสุด", "เวลาหายใจออกรวม" };
+        string[] samples = { "0", "0%", "0.0 วิ", "0 วิ" };
         var values = new TextMeshProUGUI[4];
         for (int i = 0; i < 4; i++)
         {

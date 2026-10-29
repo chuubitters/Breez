@@ -40,8 +40,12 @@ public static class GameDataRecorder
     public static void RecordBreatheFocus(int score, float durationSeconds, int obstaclesAvoided, Action<bool> done = null) =>
         RecordSession(BreatheFocus, score, durationSeconds, Json.Obj("obstacles_avoided", Json.Num(obstaclesAvoided)), done);
 
-    public static void RecordSoundscape(float durationSeconds, Action<bool> done = null) =>
-        RecordSession(Soundscape, 0, durationSeconds, "{}", done);
+    /// <summary>Soundscape: ฉาก (Rainy Forest / Windy Mountain), จำนวนรอบหายใจ 5-5 ที่ครบ, เวลาที่เป่า (วินาที)</summary>
+    public static void RecordSoundscape(float durationSeconds, string scene = null, int breathCycles = 0, float exhaleSeconds = 0f, Action<bool> done = null) =>
+        RecordSession(Soundscape, 0, durationSeconds, Json.Obj(
+            "scene", Json.Str(scene ?? ""),
+            "breath_cycles", Json.Num(Mathf.Max(0, breathCycles)),
+            "exhale_ms", Json.Num(Mathf.RoundToInt(Mathf.Max(0f, exhaleSeconds) * 1000f))), done);
 
     public static void RecordQuickSession(float durationSeconds, Action<bool> done = null) =>
         RecordSession(QuickSession, 0, durationSeconds, "{}", done);
@@ -74,7 +78,7 @@ public static class GameDataRecorder
         backend.Rpc("record_play_session", body, (ok, msg) =>
         {
             Debug.Log(ok ? $"[Breez] Saved {mode}: score {score}, {seconds}s" : $"[Breez] {mode}: {msg}");
-            Saved?.Invoke(ok, ok ? "Result saved" : msg);
+            Saved?.Invoke(ok, ok ? "บันทึกผลแล้ว" : msg);
             done?.Invoke(ok);
         }, queueOnFailure: true);
     }
@@ -99,7 +103,7 @@ public static class GameDataRecorder
 
         backend.Rpc("log_mood", body, (ok, msg) =>
         {
-            Saved?.Invoke(ok, ok ? "Mood saved" : msg);
+            Saved?.Invoke(ok, ok ? "บันทึกอารมณ์แล้ว" : msg);
             done?.Invoke(ok);
         }, queueOnFailure: true);
     }

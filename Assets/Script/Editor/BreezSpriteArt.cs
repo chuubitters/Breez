@@ -467,6 +467,15 @@ public static class BreezSpriteArt
         return px;
     }
 
+    /// <summary>วงแหวนสีขาว (ใช้กับ Image แบบ Filled Radial) thickness = ความหนาเทียบรัศมี 0-1</summary>
+    public static float[] Ring(int size, float thickness)
+    {
+        var px = new float[size * size * 4];
+        float inner = 0.96f - thickness;
+        Paint(px, size, (x, y) => { float d = x * x + y * y; return d <= 0.96f * 0.96f && d >= inner * inner; }, new Rgba(1, 1, 1));
+        return px;
+    }
+
     delegate float ShadeFn(float x, float y);
 
     static void Shade(float[] px, int size, ShadeFn f)

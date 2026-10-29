@@ -23,7 +23,7 @@ public class BreathStatusUI : MonoBehaviour
 
     [Header("Text")]
     public TMP_Text label;
-    public string prefix = "status : ";
+    public string prefix = "สถานะ : ";
     public string inhaleText = "หายใจเข้า";
     public string exhaleText = "หายใจออก";
 

@@ -81,6 +81,24 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 2. ข้อความใหม่ที่มีภาษาไทย: Add Component → `ThaiText` (พิมพ์ไทยตามปกติได้เลย) ถ้าต้องการตัวหนาให้เลือก `Breez Seed TH Bold SDF` แทนการกดปุ่ม B
 3. ฟอนต์สร้างจาก `tools/thai-font/build_thai_font.py`
 
+### ภาษาไทยทั้งเกม
+เมนู **Breez → Update Thai Text (ทั้งเกม)** แปลข้อความในทุก scene + prefab เป็นภาษาไทย (คงชื่อโหมด/ชื่อหัวข้อหลักเป็นภาษาอังกฤษ) และใช้ฟอนต์ LINE Seed ให้ด้วย
+ทุกเมนูที่สร้างหน้าใหม่จะแปลให้อัตโนมัติ
+
+### Soundscape: หน้านับถอยหลัง
+เมนู **Breez → Restyle Soundscape Countdown** ใช้กับ Rainy Forest + Windy Mountain
+- นับถอยหลัง 3 · 2 · 1 · เริ่ม! เป็นวงกลมกลางจอ วงแหวนลดลงทีละวินาที
+- ป้ายนำการหายใจ: วงกลมขยาย/หด + หายใจเข้า/ออก + วินาทีที่เหลือ + แถบความคืบหน้า
+- บันทึกฉาก, จำนวนรอบหายใจ 5-5 ที่ครบ และเวลาที่เป่า ขึ้นหลังบ้าน
+
+### Weekly Summary: ดูประวัติย้อนหลัง
+เมนู **Breez → Add Daily History To Mood Tracking** ใส่ปุ่ม "ดูประวัติ" ในการ์ดการเล่นล่าสุด
+กดแล้วเลือกวัน (เลื่อนทีละสัปดาห์) เพื่อดูอารมณ์และการเล่นของวันนั้น (RPC `my_history`)
+
+### Breathe & Focus
+- เมฆเดี่ยว สุ่มอยู่บน / ล่าง / บางครั้งกลาง ห่างกันมากขึ้น (`ObstacleSetManager`: `singleCloudMode`, `cloudSpacingX`)
+- เป่านานแค่ไหนตัวละครก็ไม่ลอยพ้นขอบบน แต่ถ้าไม่เป่าจะตกลงได้ (`PlayerController.clampToTop`)
+
 ### Calm Flow (ผ่อนลมหายใจให้ดอกไม้บาน)
 เมนู **Breez → Create Calm Flow Scene** สร้าง `Assets/Scenes/CalmFlow.unity` และผูกปุ่ม Calm Flow ในหน้า BreathPlay ให้
 1. เลือกเวลา Session 1 / 2 / 3 นาที → **Start Session**
