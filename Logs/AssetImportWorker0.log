@@ -7347,3 +7347,13 @@ AssetImportParameters requested are different than current active one (requested
   custom:scripting/monoscript/fileName/SoundscapeCountdownUI.cs: b28513655de9ba24f85468c438b50355 -> 
   custom:scripting/precompiled-assembly-types:Assembly-CSharp: 9291bc4ad8ddfe66ddfd433b1eceb019 -> d35a075845db4d6955f9c718000a97bb
   custom:scripting/monoscript/fileName/BreezBreathFocusRestyle.cs: 5d21fcef4ecedfde91cca32e78ce5baa -> 
+========================================================================
+Received Import Request.
+  Time since last request: 514.363371 seconds.
+  path: Assets/element/RF/endbt.png
+  artifactKey: Guid(12633c86453e049a9932c7192c71c1af) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/element/RF/endbt.png using Guid(12633c86453e049a9932c7192c71c1af) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 8 workers.
+ -> (artifact id: '7a35428bc4d8d0e362ccc7607234ac34') in 2.311520 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
