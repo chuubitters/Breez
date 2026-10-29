@@ -24,7 +24,6 @@ public class GadgetSettingsScreen : MonoBehaviour
     }
 
     [Header("Settings")]
-    public bool thaiText;
     public string backScene = "Home";
     public int maxNameLength = 20;
 
@@ -81,7 +80,7 @@ public class GadgetSettingsScreen : MonoBehaviour
 
     void Load()
     {
-        if (!BreezBackend.Instance.IsLoggedIn) { Toast(thaiText ? "กรุณาเข้าสู่ระบบ" : "Please sign in"); return; }
+        if (!BreezBackend.Instance.IsLoggedIn) { Toast("กรุณาเข้าสู่ระบบ"); return; }
         if (DeviceService.Current != null) Apply(DeviceService.Current);
         DeviceService.Sync(done: d => { if (this != null && d != null) Apply(d); });
     }
@@ -121,17 +120,15 @@ public class GadgetSettingsScreen : MonoBehaviour
 
     void Save(string name, string icon)
     {
-        Toast(thaiText ? "กำลังบันทึก..." : "Saving...");
+        Toast("กำลังบันทึก...");
         DeviceService.Sync(name: name, icon: icon, done: d =>
         {
             if (this == null) return;
-            if (d == null) { Toast(thaiText ? "บันทึกไม่สำเร็จ" : "Could not save"); return; }
+            if (d == null) { Toast("บันทึกไม่สำเร็จ"); return; }
             Apply(d);
             bool sent = DeviceService.CanSendToGadget;
             if (sent) DeviceService.PushIdentityToGadget();
-            Toast(thaiText
-                ? (sent ? "บันทึกแล้ว และอัปเดตบนอุปกรณ์แล้ว" : "บันทึกแล้ว")
-                : (sent ? "Saved and sent to your gadget" : "Saved"));
+            Toast(sent ? "บันทึกแล้ว และอัปเดตบนอุปกรณ์แล้ว" : "บันทึกแล้ว");
         });
     }
 
@@ -152,8 +149,8 @@ public class GadgetSettingsScreen : MonoBehaviour
         bool connected = DeviceService.StatusNow == "connected" || DeviceService.ServerSaysConnected;
         if (statusText != null)
             statusText.text = connected
-                ? (thaiText ? "เชื่อมต่ออยู่" : "Connected")
-                : (thaiText ? "ไม่ได้เชื่อมต่อ" : "Not connected");
+                ? "เชื่อมต่ออยู่"
+                : "ไม่ได้เชื่อมต่อ";
         if (statusDot != null) statusDot.color = connected ? connectedColor : disconnectedColor;
 
         if (batteryText != null)
@@ -161,7 +158,7 @@ public class GadgetSettingsScreen : MonoBehaviour
             int? b = DeviceService.LastBattery;
             if (!b.HasValue && DeviceService.Current != null && DeviceService.ServerSaysConnected && DeviceService.Current.battery_level > 0)
                 b = DeviceService.Current.battery_level;
-            batteryText.text = b.HasValue ? (thaiText ? $"แบตเตอรี่ {b}%" : $"Battery {b}%") : "";
+            batteryText.text = b.HasValue ? $"แบตเตอรี่ {b}%" : "";
         }
     }
 

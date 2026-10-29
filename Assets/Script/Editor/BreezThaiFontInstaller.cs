@@ -185,10 +185,10 @@ public static class BreezThaiFontInstaller
         if (bold == null) bold = regular;
         if (regular == null) return 0;
 
-        int c = 0;
+        int c = BreezThaiTranslator.ApplyComponents(root);
         foreach (var t in root.GetComponentsInChildren<TMP_Text>(true))
         {
-            bool changed = false;
+            bool changed = BreezThaiTranslator.Apply(t);
             string oldPath = t.font != null ? AssetDatabase.GetAssetPath(t.font) : "";
             bool wantBold = (t.fontStyle & FontStyles.Bold) != 0 || oldPath == OldLatinAsset || oldPath == BoldAssetPath;
             var target = wantBold ? bold : regular;

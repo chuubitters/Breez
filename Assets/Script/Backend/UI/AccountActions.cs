@@ -5,14 +5,14 @@ using UnityEngine.SceneManagement;
 // =====================================================================
 // ใส่ใน scene ไหนก็ได้ (เช่น Home / Setting)
 // - requireLogin: ถ้ายังไม่ login จะเด้งกลับหน้า Login
-// - playerNameText: แสดงชื่อผู้เล่น เช่น "Hi, Pim"
+// - playerNameText: แสดงชื่อผู้เล่น เช่น "สวัสดี พิม"
 // - ผูกปุ่ม Logout ไปที่ SignOut()
 // =====================================================================
 public class AccountActions : MonoBehaviour
 {
     public bool requireLogin = true;
     public TMP_Text playerNameText;
-    public string greetingFormat = "Hi, {0}";
+    public string greetingFormat = "สวัสดี {0}";
 
     void Start()
     {

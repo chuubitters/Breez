@@ -16,6 +16,12 @@ public class PlayerController : MonoBehaviour
     [Header("UI Settings")]
     public GameObject gameOverUI;
 
+    [Header("ขอบจอบน")]
+    [Tooltip("เป่านานแค่ไหนก็ไม่ลอยพ้นขอบจอบน (ไม่เป่า = ตกลงได้ตามปกติ)")]
+    public bool clampToTop = true;
+    [Tooltip("เว้นระยะจากขอบจอบน (หน่วย world)")]
+    public float topMargin = 0.15f;
+
     private Rigidbody2D rb;
     private Animator anim;
 
@@ -88,6 +94,35 @@ public class PlayerController : MonoBehaviour
                 flySpeed
             );
         }
+
+        ClampTop();
+    }
+
+    // กันไม่ให้ลอยพ้นขอบจอบน: หยุดที่ขอบ (ความเร็วขาขึ้น = 0) แต่ตกลงได้ปกติ
+    void ClampTop()
+    {
+        if (!clampToTop) return;
+        float limit = TopLimit();
+        if (rb.position.y < limit) return;
+        rb.position = new Vector2(rb.position.x, limit);
+        if (rb.velocity.y > 0f) rb.velocity = new Vector2(rb.velocity.x, 0f);
+    }
+
+    float TopLimit()
+    {
+        var cam = Camera.main;
+        float top = cam != null && cam.orthographic ? cam.transform.position.y + cam.orthographicSize : 5f;
+        float half = 0.5f;
+        var col = GetComponent<Collider2D>();
+        if (col != null) half = col.bounds.extents.y;
+        else
+        {
+            var sr = GetComponentInChildren<SpriteRenderer>();
+            if (sr != null) half = sr.bounds.extents.y;
+        }
+        // offset ระหว่างจุดหมุนกับกึ่งกลางตัวละคร
+        float centerOffset = col != null ? col.bounds.center.y - rb.position.y : 0f;
+        return top - half - centerOffset - topMargin;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

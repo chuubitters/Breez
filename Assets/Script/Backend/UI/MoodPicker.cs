@@ -24,13 +24,13 @@ public class MoodPicker : MonoBehaviour
     {
         if (busy) return;
         busy = true;
-        if (statusText != null) statusText.text = "Saving...";
+        if (statusText != null) statusText.text = "กำลังบันทึก...";
 
         string note = noteInput != null ? noteInput.text : null;
         GameDataRecorder.LogMood(mood, note, ok =>
         {
             busy = false;
-            if (statusText != null) statusText.text = ok ? $"Feeling {mood} — saved" : "Saved offline, will sync later";
+            if (statusText != null) statusText.text = ok ? $"บันทึกอารมณ์ \"{BreezText.Mood(mood)}\" แล้ว" : "บันทึกแบบออฟไลน์ จะส่งเมื่อออนไลน์";
             if (noteInput != null) noteInput.text = "";
             if (hideAfterSave != null) hideAfterSave.SetActive(false);
         });

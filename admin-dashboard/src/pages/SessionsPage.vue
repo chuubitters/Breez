@@ -41,21 +41,21 @@ async function exportCsv() {
 
 <template>
   <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> SESSION ACTIVITY</div><h1>ประวัติการ<span class="highlight">เล่นเกม</span></h1><p class="page-description">ผลการเล่นแต่ละ session และผลลัพธ์เฉพาะของแต่ละโหมด</p></div>
+    <div><div class="eyebrow"><span class="eyebrow-dot"></span> SESSION ACTIVITY</div><h1>ประวัติการ<span class="highlight">เล่นเกม</span></h1><p class="page-description">ผลการเล่นแต่ละครั้ง และข้อมูลเฉพาะของแต่ละโหมด</p></div>
     <button class="secondary-button" @click="exportCsv">↓ ส่งออก CSV</button>
   </section>
 
   <section class="stats-grid compact-stats">
-    <article class="stat-card stat-lilac"><div class="stat-label">Sessions</div><div class="stat-value">{{ number(summary?.sessions) }}</div><div class="stat-foot">{{ periodLabel }}</div></article>
+    <article class="stat-card stat-lilac"><div class="stat-label">จำนวนครั้งที่เล่น</div><div class="stat-value">{{ number(summary?.sessions) }}</div><div class="stat-foot">{{ periodLabel }}</div></article>
     <article class="stat-card stat-green"><div class="stat-label">คะแนนเฉลี่ย (เกม)</div><div class="stat-value">{{ number(summary?.avg_score, 1) }}</div><div class="stat-foot">Calm Flow · Power Release · Breathe & Focus</div></article>
-    <article class="stat-card stat-peach"><div class="stat-label">เวลาเฉลี่ยต่อครั้ง</div><div class="stat-value">{{ duration(summary?.avg_duration) }}</div><div class="stat-foot">นาทีต่อ session</div></article>
+    <article class="stat-card stat-peach"><div class="stat-label">เวลาเฉลี่ยต่อครั้ง</div><div class="stat-value">{{ duration(summary?.avg_duration) }}</div><div class="stat-foot">นาทีต่อครั้ง</div></article>
     <article class="stat-card stat-yellow"><div class="stat-label">เวลาฝึกรวม</div><div class="stat-value">{{ number(summary?.minutes, 1) }}<span class="stat-unit">นาที</span></div><div class="stat-foot">{{ periodLabel }}</div></article>
   </section>
 
   <section class="panel full-panel">
     <div class="panel-heading">
       <div>
-        <h2>Session ทั้งหมด</h2>
+        <h2>การเล่นทั้งหมด</h2>
         <p v-if="playerFilter">เฉพาะผู้เล่น <strong>{{ playerFilter.name }}</strong> · <button class="text-button" @click="emit('clear-player')">ล้างตัวกรอง ✕</button></p>
         <p v-else>เลือกดูข้อมูลตามโหมดเกมและช่วงเวลา</p>
       </div>
@@ -67,7 +67,7 @@ async function exportCsv() {
     <p v-if="list.error.value" class="banner-error">{{ list.error.value }}</p>
     <div class="table-wrap" :class="{ loading: list.loading.value }">
       <table class="wide-table">
-        <thead><tr><th>Session</th><th>ผู้เล่น</th><th>โหมดเกม</th><th>คะแนน</th><th>ระยะเวลา</th><th>ผลลัพธ์เฉพาะโหมด</th><th>อุปกรณ์</th><th>เวลาเล่น</th></tr></thead>
+        <thead><tr><th>รหัส</th><th>ผู้เล่น</th><th>โหมดเกม</th><th>คะแนน</th><th>ระยะเวลา</th><th>ผลลัพธ์เฉพาะโหมด</th><th>อุปกรณ์</th><th>เวลาเล่น</th></tr></thead>
         <tbody>
           <tr v-for="s in list.rows.value" :key="s.session_id">
             <td class="muted">#{{ s.session_id }}</td>
@@ -79,10 +79,10 @@ async function exportCsv() {
             <td class="muted">{{ s.device_name || '—' }}</td>
             <td>{{ when(s.played_at) }}</td>
           </tr>
-          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="8" class="empty-state">ไม่พบ session ที่ตรงกับเงื่อนไข</td></tr>
+          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="8" class="empty-state">ไม่พบการเล่นที่ตรงกับเงื่อนไข</td></tr>
         </tbody>
       </table>
     </div>
-    <Pager v-model:page="list.page.value" :page-size="list.pageSize" :total="list.total.value" label="session" />
+    <Pager v-model:page="list.page.value" :page-size="list.pageSize" :total="list.total.value" label="ครั้ง" />
   </section>
 </template>

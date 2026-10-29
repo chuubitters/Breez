@@ -69,9 +69,9 @@ public class LoginUI : MonoBehaviour
         registerMode = register;
         if (nameGroup != null) nameGroup.SetActive(register);
         else if (nameInput != null) nameInput.gameObject.SetActive(register);
-        if (titleText != null) titleText.text = register ? "Create account" : "Welcome back";
-        if (submitLabel != null) submitLabel.text = register ? "Create account" : "Sign in";
-        if (switchModeLabel != null) switchModeLabel.text = register ? "Have an account? Sign in" : "New here? Create account";
+        if (titleText != null) titleText.text = register ? "สร้างบัญชีใหม่" : "ยินดีต้อนรับกลับ";
+        if (submitLabel != null) submitLabel.text = register ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
+        if (switchModeLabel != null) switchModeLabel.text = register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก";
         SetStatus("", false);
     }
 
@@ -83,12 +83,12 @@ public class LoginUI : MonoBehaviour
         string password = passwordInput != null ? passwordInput.text : "";
         string displayName = nameInput != null ? nameInput.text.Trim() : "";
 
-        if (string.IsNullOrEmpty(email) || !email.Contains("@")) { SetStatus("Please enter a valid email.", true); return; }
-        if (password.Length < 6) { SetStatus("Password must be at least 6 characters.", true); return; }
-        if (registerMode && string.IsNullOrEmpty(displayName)) { SetStatus("Please enter your name.", true); return; }
+        if (string.IsNullOrEmpty(email) || !email.Contains("@")) { SetStatus("กรุณากรอกอีเมลให้ถูกต้อง", true); return; }
+        if (password.Length < 6) { SetStatus("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร", true); return; }
+        if (registerMode && string.IsNullOrEmpty(displayName)) { SetStatus("กรุณากรอกชื่อของคุณ", true); return; }
 
         SetBusy(true);
-        SetStatus(registerMode ? "Creating account..." : "Signing in...", false);
+        SetStatus(registerMode ? "กำลังสร้างบัญชี..." : "กำลังเข้าสู่ระบบ...", false);
 
         if (registerMode)
             BreezBackend.Instance.SignUp(email, password, displayName, OnAuthResult);

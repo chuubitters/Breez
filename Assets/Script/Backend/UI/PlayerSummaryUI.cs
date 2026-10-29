@@ -13,6 +13,8 @@ public class SummarySession
     public int score;
     public int duration;
     public string played_at;
+    public string date;   // my_history: วันที่ (เวลาไทย) yyyy-MM-dd
+    public string time;   // my_history: เวลา HH:mm
     // -1 = ไม่มีค่า (ไม่ใช่โหมดนั้น)
     public int flame_out_count = -1;
     public int flowers_grown = -1;
@@ -22,6 +24,8 @@ public class SummarySession
     public int balloons_total = -1;
     public int balloons_popped = -1;
     public int obstacles_avoided = -1;
+    public string scene;           // Soundscape: ชื่อฉาก
+    public int breath_cycles = -1; // Soundscape: รอบหายใจที่ครบ
 }
 
 [Serializable] public class SummaryModeCounts { public int calm; public int power; public int focus; public int soundscape; public int quick; }
@@ -69,15 +73,15 @@ public class PlayerSummaryUI : MonoBehaviour
 
     public void Refresh()
     {
-        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("Please sign in"); return; }
-        SetStatus("Loading...");
+        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("กรุณาเข้าสู่ระบบ"); return; }
+        SetStatus("กำลังโหลด...");
 
         string body = Json.Obj("p_days", days > 0 ? Json.Num(days) : "null");
         BreezBackend.Instance.Rpc("my_summary", body, (ok, text) =>
         {
             if (!ok) { SetStatus(text); return; }
             try { Data = JsonUtility.FromJson<PlayerSummary>(text); }
-            catch (Exception e) { SetStatus("Could not read summary"); Debug.LogWarning(e); return; }
+            catch (Exception e) { SetStatus("อ่านข้อมูลสรุปไม่ได้"); Debug.LogWarning(e); return; }
             SetStatus("");
             Render();
             Loaded?.Invoke(Data);
@@ -89,24 +93,24 @@ public class PlayerSummaryUI : MonoBehaviour
         var d = Data;
         Set(nameText, d.name);
         Set(sessionsText, d.total_sessions.ToString());
-        Set(minutesText, d.total_minutes.ToString("0.#") + " min");
+        Set(minutesText, d.total_minutes.ToString("0.#") + " นาที");
         Set(bestScoreText, d.best_score.ToString());
-        Set(streakText, d.streak_days + (d.streak_days == 1 ? " day" : " days"));
+        Set(streakText, d.streak_days + " วัน");
 
         var sb = new StringBuilder();
-        if (d.modes != null) foreach (var m in d.modes) sb.AppendLine($"{m.mode}: {m.count}x (best {m.best_score})");
-        Set(modesText, sb.Length > 0 ? sb.ToString() : "No games yet");
+        if (d.modes != null) foreach (var m in d.modes) sb.AppendLine($"{m.mode}: {m.count} ครั้ง (สูงสุด {m.best_score})");
+        Set(modesText, sb.Length > 0 ? sb.ToString() : "ยังไม่มีการเล่น");
 
         sb.Clear();
-        if (d.mood_counts != null) foreach (var m in d.mood_counts) sb.AppendLine($"{m.mood}: {m.count}");
-        Set(moodsText, sb.Length > 0 ? sb.ToString() : "No moods yet");
+        if (d.mood_counts != null) foreach (var m in d.mood_counts) sb.AppendLine($"{BreezText.Mood(m.mood)}: {m.count} ครั้ง");
+        Set(moodsText, sb.Length > 0 ? sb.ToString() : "ยังไม่มีการบันทึกอารมณ์");
 
         sb.Clear();
         if (d.recent_sessions != null)
             foreach (var s in d.recent_sessions)
             {
-                string when = DateTime.TryParse(s.played_at, out var t) ? t.ToLocalTime().ToString("dd MMM HH:mm") : "";
-                sb.AppendLine($"{when}  {s.mode}  {s.score}  ({s.duration / 60}:{s.duration % 60:00})");
+                string when = DateTime.TryParse(s.played_at, out var t) ? t.ToLocalTime().ToString("dd/MM HH:mm") : "";
+                sb.AppendLine($"{when}  {s.mode}  {s.score} คะแนน  ({s.duration / 60}:{s.duration % 60:00})");
             }
         Set(recentText, sb.ToString());
     }

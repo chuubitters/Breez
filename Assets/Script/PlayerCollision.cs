@@ -5,6 +5,8 @@ public class PlayerCollision : MonoBehaviour
     [Header("ขอบเขตหน้าจอ")]
     public float topBound = 5.5f;    // พิกัดขอบจอบน
     public float bottomBound = -5.5f; // พิกัดขอบจอล่าง
+    [Tooltip("ชนขอบบนแล้วแพ้ไหม (ปิดไว้: ตัวละครถูกกันไม่ให้ลอยพ้นขอบบนอยู่แล้ว)")]
+    public bool dieAtTop = false;
 
     private bool isDead = false;
 
@@ -13,7 +15,7 @@ public class PlayerCollision : MonoBehaviour
         if (isDead) return;
 
         // เช็คว่าตัวละครหลุดขอบจอบน หรือตกขอบจอล่างหรือไม่
-        if (transform.position.y > topBound || transform.position.y < bottomBound)
+        if ((dieAtTop && transform.position.y > topBound) || transform.position.y < bottomBound)
         {
             Die();
         }

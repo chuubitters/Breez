@@ -177,7 +177,6 @@ public static class BreezMoodSceneBuilder
 
         // ---------- ต่อสาย ----------
         var screen = canvasGO.AddComponent<MoodTrackingScreen>();
-        screen.thaiText = thai;
         screen.backScene = "Mode";
         screen.backButton = backBtn;
         screen.dateText = date;
@@ -195,6 +194,9 @@ public static class BreezMoodSceneBuilder
 
         var account = canvasGO.AddComponent<AccountActions>();
         account.requireLogin = true;
+
+        // ปุ่ม "ดูประวัติ" + หน้าต่างประวัติรายวัน
+        BreezDailyHistoryBuilder.Build(screen);
 
         foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot);
         EditorSceneManager.MarkSceneDirty(scene);

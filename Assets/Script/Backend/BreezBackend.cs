@@ -142,13 +142,13 @@ public class BreezBackend : MonoBehaviour
         {
             // สมัครสำเร็จแต่ project เปิด "Confirm email" อยู่
             done?.Invoke(isSignUp, isSignUp
-                ? "Account created. Please confirm your email, then sign in."
-                : "Sign in failed. Please try again.");
+                ? "สร้างบัญชีแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ"
+                : "เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง");
             yield break;
         }
 
         SetSession(s);
-        done?.Invoke(true, isSignUp ? "Account created!" : "Signed in!");
+        done?.Invoke(true, isSignUp ? "สร้างบัญชีสำเร็จ!" : "เข้าสู่ระบบแล้ว!");
         LoginStateChanged?.Invoke(true);
         DeviceService.Sync(DeviceService.LastBattery, DeviceService.StatusNow);
         StartCoroutine(FlushQueue());
@@ -216,7 +216,7 @@ public class BreezBackend : MonoBehaviour
     {
         if (!IsLoggedIn)
         {
-            done?.Invoke(false, "Not signed in");
+            done?.Invoke(false, "ยังไม่ได้เข้าสู่ระบบ");
             yield break;
         }
         string owner = UserId;
@@ -228,7 +228,7 @@ public class BreezBackend : MonoBehaviour
         if (!ok && queueOnFailure && (code == 0 || code >= 500 || code == 401))
         {
             Enqueue(owner, fn, body);
-            done?.Invoke(false, "Saved offline. Will sync when online.");
+            done?.Invoke(false, "บันทึกแบบออฟไลน์ จะส่งเมื่อออนไลน์");
             yield break;
         }
 
@@ -239,7 +239,7 @@ public class BreezBackend : MonoBehaviour
     IEnumerator CallOnce(string fn, string body, Action<long, string> onDone)
     {
         yield return EnsureFreshToken();
-        if (!IsLoggedIn) { onDone(401, "Not signed in"); yield break; }
+        if (!IsLoggedIn) { onDone(401, "ยังไม่ได้เข้าสู่ระบบ"); yield break; }
 
         long code = 0; string text = null;
         yield return Send("POST", "/rest/v1/rpc/" + fn, body, Session.access_token, (c, t) => { code = c; text = t; });
@@ -343,7 +343,7 @@ public class BreezBackend : MonoBehaviour
 
     static string FriendlyError(string text, long code)
     {
-        if (code == 0) return "No internet connection.";
+        if (code == 0) return "ไม่มีการเชื่อมต่ออินเทอร์เน็ต";
         string msg = null;
         try
         {
@@ -355,11 +355,11 @@ public class BreezBackend : MonoBehaviour
         }
         catch { /* ใช้ข้อความ default */ }
 
-        if (string.IsNullOrEmpty(msg)) return $"Server error ({code}).";
-        if (msg.Contains("Invalid login credentials")) return "Incorrect email or password.";
-        if (msg.Contains("already registered")) return "This email is already registered. Please sign in.";
-        if (msg.Contains("Email not confirmed")) return "Please confirm your email first.";
-        if (msg.Contains("Unable to validate email")) return "Please enter a valid email.";
+        if (string.IsNullOrEmpty(msg)) return $"เซิร์ฟเวอร์ขัดข้อง ({code})";
+        if (msg.Contains("Invalid login credentials")) return "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+        if (msg.Contains("already registered")) return "อีเมลนี้สมัครไว้แล้ว กรุณาเข้าสู่ระบบ";
+        if (msg.Contains("Email not confirmed")) return "กรุณายืนยันอีเมลก่อน";
+        if (msg.Contains("Unable to validate email")) return "กรุณากรอกอีเมลให้ถูกต้อง";
         return msg;
     }
 

@@ -142,7 +142,7 @@ public class BFGameManager : MonoBehaviour
 
         // GO!
         if (countdownText != null)
-            countdownText.text = "GO!";
+            countdownText.text = "เริ่ม!";
 
         yield return new WaitForSecondsRealtime(0.5f);
 
@@ -184,7 +184,7 @@ public class BFGameManager : MonoBehaviour
         int seconds = Mathf.FloorToInt(gameTime % 60f);
 
         timeText.text =
-            string.Format("Time: {0:00}:{1:00}", minutes, seconds);
+            string.Format("เวลา {0:00}:{1:00}", minutes, seconds);
     }
 
     // =========================================
@@ -194,7 +194,7 @@ public class BFGameManager : MonoBehaviour
     {
         if (scoreText != null)
         {
-            scoreText.text = "Score: " + currentScore;
+            scoreText.text = "คะแนน " + currentScore;
         }
 
         UpdateTimeUI();
@@ -218,7 +218,7 @@ public class BFGameManager : MonoBehaviour
         {
             summaryTimeText.text =
                 string.Format(
-                    "Time: {0:00}:{1:00}",
+                    "เวลา {0:00}:{1:00}",
                     minutes,
                     seconds
                 );
@@ -227,13 +227,13 @@ public class BFGameManager : MonoBehaviour
         if (summaryScoreText != null)
         {
             summaryScoreText.text =
-                "Total Score: " + currentScore;
+                "คะแนนรวม " + currentScore;
         }
 
         if (summaryObstacleText != null)
         {
             summaryObstacleText.text =
-                "Obstacles Avoided: " + obstaclesPassed;
+                "หลบสิ่งกีดขวางได้ " + obstaclesPassed + " ชิ้น";
         }
 
         if (gameOverPanel != null)
