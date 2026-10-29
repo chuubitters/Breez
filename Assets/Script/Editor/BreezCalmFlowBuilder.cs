@@ -302,7 +302,7 @@ public static class BreezCalmFlowBuilder
         UnityEventTools.AddVoidPersistentListener(replay.onClick, loader.ReloadCurrent);
         var home = Button(B, "HomeButton", pill, Green, 140, -245, 250, 96, "หน้าหลัก", Color.white, 34, bold);
         AddShadow(home.gameObject);
-        LoadScene(home, SceneInBuild("Home") ? "Home" : "BreathPlay");
+        LoadScene(home, SceneInBuild("Mode") ? "Mode" : "BreathPlay");   // หน้าหลัก = หน้าเลือกโหมด
         dim.gameObject.SetActive(false);
     }
 

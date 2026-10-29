@@ -20,7 +20,7 @@ public static class BreezPowerReleaseRestyle
     const string ScenePath = "Assets/Scenes/PowerRelease.unity";
     const string BreathPrefab = "Assets/Prefabs/Breez/BreathStatus.prefab";
     const string BackScene = "BreathPlay";
-    const string HomeScene = "Home";
+    const string HomeScene = "Mode";   // ปุ่มหน้าหลักหลังจบเกม = หน้าเลือกโหมด
 
     static readonly Color Ink = new Color32(51, 51, 51, 255);
     static readonly Color Grey = new Color32(112, 112, 112, 255);

@@ -122,7 +122,7 @@ public static class BreezBreathFocusRestyle
         var loader = replay.gameObject.AddComponent<SceneLoader>();
         UnityEventTools.AddVoidPersistentListener(replay.onClick, loader.ReloadCurrent);
         var home = Button(R, "HomeButton", Green, 134, -274, 238, 96, "Home", 36);
-        LoadScene(home, SceneInBuild("Home") ? "Home" : "BreathPlay");
+        LoadScene(home, SceneInBuild("Mode") ? "Mode" : "BreathPlay");   // หน้าหลัก = หน้าเลือกโหมด
         BackButton(res);
         res.gameObject.SetActive(false);
 
