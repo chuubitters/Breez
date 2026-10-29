@@ -196,6 +196,7 @@ public static class BreezMoodSceneBuilder
         var account = canvasGO.AddComponent<AccountActions>();
         account.requireLogin = true;
 
+        foreach (var sceneRoot in scene.GetRootGameObjects()) BreezThaiFontInstaller.Apply(sceneRoot, null);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings(ScenePath);
@@ -239,6 +240,8 @@ public static class BreezMoodSceneBuilder
     // ---------------------------------------------------------------
     static TMP_FontAsset FindThaiFont()
     {
+        var breez = BreezThaiFontInstaller.EnsureFonts();
+        if (breez != null) return breez;
         foreach (var guid in AssetDatabase.FindAssets("t:TMP_FontAsset"))
         {
             var f = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetDatabase.GUIDToAssetPath(guid));
