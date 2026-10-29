@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'status : <b>Inhale</b>'
+  m_text: "\u0E2A\u0E16\u0E32\u0E19\u0E30 : <b>\u0E2B\u0E32\u0E22\u0E43\u0E08\u0E40\u0E02\u0E49\u0E32</b>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f4358f8521ed448f5b06410ea9f2c7d8, type: 2}
   m_sharedMaterial: {fileID: -6866313779310590309, guid: f4358f8521ed448f5b06410ea9f2c7d8, type: 2}
@@ -259,7 +259,7 @@ MonoBehaviour:
   holdTime: 0.12
   arrowKeyAlsoExhales: 1
   label: {fileID: 6139490599397675948}
-  prefix: 'status : '
+  prefix: "\u0E2A\u0E16\u0E32\u0E19\u0E30 : "
   inhaleText: Inhale
   exhaleText: Exhale
   background: {fileID: 1723503905805943621}

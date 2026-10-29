@@ -41,4 +41,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Windy Mountain.unity
     guid: 4c93bf41a994e43c4a6becadfa7f7972
+  - enabled: 1
+    path: Assets/Scenes/CalmFlow.unity
+    guid: eb4299254dbec4122bcb8d09576eedd5
   m_configObjects: {}

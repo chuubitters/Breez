@@ -64,6 +64,8 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.62f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Script/Editor/BreezDailyHistoryBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezBreathFocusRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezGadgetSceneBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezSoundscapeBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezSpriteArt.cs" />
@@ -72,7 +74,10 @@
     <Compile Include="Assets/Script/Editor/BreezPowerReleaseRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezStatusElementsBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezMoodSceneBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezSoundscapeCountdownBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezThaiFontInstaller.cs" />
+    <Compile Include="Assets/Script/Editor/BreezThaiTranslator.cs" />
+    <Compile Include="Assets/Script/Editor/BreezCalmFlowBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
