@@ -38,7 +38,9 @@ static const uint16_t YELLOW_PALE = rgb(0xFFF9E3);
 static const uint16_t GOLD        = rgb(0xE9C55A);
 static const uint16_t WHITE       = rgb(0xFFFFFF);
 
-static uint16_t *fb = nullptr;           // 240*240
+// วาดเป็นแถบ (band) ทีละ BAND แถว แล้วส่งขึ้นจอ => ใช้ RAM น้อย (ไม่ต้องจองทั้งจอ 115KB)
+static uint16_t *fb = nullptr;           // บัฟเฟอร์ของแถบปัจจุบัน (W * (bandY1-bandY0))
+static int bandY0 = 0, bandY1 = 240;
 static uint16_t DIST[120 * 120];         // ระยะจากจุดกลาง หน่วย 1/16 พิกเซล (1 ควอดแรนต์)
 static uint8_t ANG[120 * 120];           // มุมในควอดแรนต์ 0..255 = 0..90°
 
@@ -54,19 +56,29 @@ static inline uint16_t blend(uint16_t fg, uint16_t bg, uint32_t a)
 }
 static inline uint16_t mix(uint16_t a, uint16_t b, int t32) { return blend(b, a, (uint32_t)(t32 < 0 ? 0 : t32 > 32 ? 32 : t32)); }
 
+static inline uint16_t &px(int x, int y) { return fb[(y - bandY0) * W + x]; }
+
 static inline void put(int x, int y, uint16_t c, uint32_t a)
 {
-  if ((unsigned)x >= (unsigned)W || (unsigned)y >= (unsigned)H || a == 0) return;
-  uint16_t &p = fb[y * W + x];
+  if ((unsigned)x >= (unsigned)W || y < bandY0 || y >= bandY1 || a == 0) return;
+  uint16_t &p = px(x, y);
   p = blend(c, p, a);
 }
 
 static inline int clampi(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 // ---------- เตรียมตาราง ----------
-static void begin(uint16_t *framebuffer)
+/// ตั้งแถบที่จะวาด: buf ขนาด W*h, ครอบคลุมแถว y0..y0+h-1
+static void setBand(uint16_t *buf, int y0, int h)
 {
-  fb = framebuffer;
+  fb = buf;
+  bandY0 = y0;
+  bandY1 = y0 + h > H ? H : y0 + h;
+}
+
+static void begin(uint16_t *framebuffer, int bandHeight = 240)
+{
+  setBand(framebuffer, 0, bandHeight);
   for (int y = 0; y < 120; y++)
     for (int x = 0; x < 120; x++)
     {
@@ -97,7 +109,8 @@ static inline int angleAt(int X, int Y)
 // ---------- รูปทรง ----------
 static void clear(uint16_t c)
 {
-  for (int i = 0; i < W * H; i++) fb[i] = c;
+  int n = W * (bandY1 - bandY0);
+  for (int i = 0; i < n; i++) fb[i] = c;
 }
 
 /// วงกลมตรงกลางจอ ไล่สีจากกลาง (cin) ไปขอบ (cout)  r = รัศมีพิกเซล
@@ -106,14 +119,15 @@ static void disc(float r, uint16_t cin, uint16_t cout)
   int R = (int)(r * 16.0f);
   if (R <= 0) return;
   int y0 = clampi(C - (int)r - 2, 0, H - 1), y1 = clampi(C + (int)r + 2, 0, H - 1);
-  for (int y = y0; y <= y1; y++)
+  int ys = y0 < bandY0 ? bandY0 : y0, ye = y1 > bandY1 - 1 ? bandY1 - 1 : y1;
+  for (int y = ys; y <= ye; y++)
     for (int x = y0; x <= y1; x++)
     {
       int d = distAt(x, y);
       if (d > R + 8) continue;
       int a = clampi((R - d + 8) * 2, 0, 32);
       uint16_t col = mix(cin, cout, d * 32 / R);
-      uint16_t &p = fb[y * W + x];
+      uint16_t &p = px(x, y);
       p = blend(col, p, a);
     }
 }
@@ -125,14 +139,15 @@ static void halo(float r, float w, uint16_t color, int strength)
   if (strength <= 0 || Wd <= 0) return;
   int lim = (int)(r + w) + 2;
   int y0 = clampi(C - lim, 0, H - 1), y1 = clampi(C + lim, 0, H - 1);
-  for (int y = y0; y <= y1; y++)
+  int ys = y0 < bandY0 ? bandY0 : y0, ye = y1 > bandY1 - 1 ? bandY1 - 1 : y1;
+  for (int y = ys; y <= ye; y++)
     for (int x = y0; x <= y1; x++)
     {
       int d = distAt(x, y);
       if (d < R - 8 || d > R + Wd) continue;
       int f = clampi((R + Wd - d) * 32 / Wd, 0, 32);
       int a = (f * f >> 5) * strength >> 5;
-      uint16_t &p = fb[y * W + x];
+      uint16_t &p = px(x, y);
       p = blend(color, p, (uint32_t)a);
     }
 }
@@ -146,7 +161,8 @@ static void ring(float rIn, float rOut, uint16_t color, float from = 0.f, float 
   if (!full && a1 <= a0) return;
   int lim = (int)rOut + 2;
   int y0 = clampi(C - lim, 0, H - 1), y1 = clampi(C + lim, 0, H - 1);
-  for (int y = y0; y <= y1; y++)
+  int ys = y0 < bandY0 ? bandY0 : y0, ye = y1 > bandY1 - 1 ? bandY1 - 1 : y1;
+  for (int y = ys; y <= ye; y++)
     for (int x = y0; x <= y1; x++)
     {
       int d = distAt(x, y);
@@ -159,7 +175,7 @@ static void ring(float rIn, float rOut, uint16_t color, float from = 0.f, float 
       }
       int a = clampi((d - Ri + 8) * 2, 0, 32);
       int b = clampi((Ro - d + 8) * 2, 0, 32);
-      uint16_t &p = fb[y * W + x];
+      uint16_t &p = px(x, y);
       p = blend(color, p, (uint32_t)(a < b ? a : b));
     }
 }
@@ -210,7 +226,7 @@ static void blit(const UiBitmap &b, int x0, int y0, uint16_t color, int alpha = 
   for (int y = 0; y < b.h; y++)
   {
     int Y = y0 + y;
-    if ((unsigned)Y >= (unsigned)H) continue;
+    if (Y < bandY0 || Y >= bandY1) continue;
     for (int x = 0; x < b.w; x++)
     {
       uint8_t v = pgm_read_byte(&b.data[y * stride + (x >> 1)]);

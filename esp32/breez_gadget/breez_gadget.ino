@@ -82,8 +82,10 @@ const uint32_t DONE_SCREEN_MS = 30000;   // หน้าจบค้างไว
 // ---------------- จอ ----------------
 Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED);
 Arduino_GFX *gfx = new Arduino_GC9A01(bus, TFT_RST, TFT_ROTATION, true /* IPS */);
-uint16_t *frame = nullptr;
+const int BAND_H = 40;           // วาดจอทีละ 40 แถว (6 แถบ) ใช้ RAM แค่ 19KB
+static uint16_t band[240 * BAND_H];
 bool displayOk = false;
+uint32_t lastDiag = 0;
 
 // ---------------- สถานะ ----------------
 enum State { ST_CAL, ST_IDLE, ST_READY, ST_INHALE, ST_HOLD, ST_EXHALE, ST_DONE, ST_STOPPED };
@@ -122,9 +124,19 @@ int readLoudness()
   return hi - lo;
 }
 
+void drawCurrent(uint32_t now);
+
+/// วาดทั้งจอทีละแถบ แล้วส่งขึ้นจอ
 void showFrame()
 {
-  if (displayOk) gfx->draw16bitRGBBitmap(0, 0, frame, 240, 240);
+  if (!displayOk) return;
+  uint32_t now = millis();
+  for (int y = 0; y < 240; y += BAND_H)
+  {
+    ui::setBand(band, y, BAND_H);
+    drawCurrent(now);
+    gfx->draw16bitRGBBitmap(0, y, band, 240, BAND_H);
+  }
 }
 
 void calibrate()
@@ -136,7 +148,7 @@ void calibrate()
   for (int i = 0; i < n; i++)
   {
     sum += readLoudness();
-    if (displayOk && i % 4 == 0) { ui::drawCalibrating(millis()); showFrame(); }
+    if (i % 4 == 0) showFrame();   // state = ST_CAL => หน้าปรับเสียง
   }
   baseline = (float)sum / n;
   level = 0;
@@ -221,71 +233,50 @@ void readButton()
   }
 }
 
-/// เดินเวลาแต่ละเฟส แล้ววาดจอ
-void updateSession(uint32_t dt)
+/// เดินเวลาแต่ละเฟส (ไม่วาด)
+void updateState(uint32_t dt)
 {
   uint32_t now = millis();
-  float t = (now - stateAt) / 1000.f;
-  int lv = (int)(level + 0.5f);
-
+  uint32_t el = now - stateAt;
   switch (state)
   {
-  case ST_READY:
-    if (t >= READY_S) { enter(ST_INHALE); t = 0; }
-    else { ui::drawReady(READY_S - (int)t, t / READY_S); return; }
-    // fallthrough
-  case ST_INHALE:
-    if (state == ST_INHALE)
-    {
-      if (t >= INHALE_S) { enter(ST_HOLD); t = 0; }
-      else { ui::drawPhase(ui::PH_INHALE, t / INHALE_S, INHALE_S - (int)t, round_, ROUNDS, lv, false); return; }
-    }
-    // fallthrough
-  case ST_HOLD:
-    if (state == ST_HOLD)
-    {
-      if (t >= HOLD_S) { enter(ST_EXHALE); t = 0; }
-      else { ui::drawPhase(ui::PH_HOLD, t / HOLD_S, HOLD_S - (int)t, round_, ROUNDS, lv, false); return; }
-    }
-    // fallthrough
+  case ST_READY:  if (el >= READY_S * 1000UL) enter(ST_INHALE); break;
+  case ST_INHALE: if (el >= INHALE_S * 1000UL) enter(ST_HOLD); break;
+  case ST_HOLD:   if (el >= HOLD_S * 1000UL) enter(ST_EXHALE); break;
   case ST_EXHALE:
-    if (state == ST_EXHALE)
+    if (el >= EXHALE_S * 1000UL)
     {
-      if (t >= EXHALE_S)
-      {
-        round_++;
-        if (round_ >= ROUNDS) { finishSession(); ui::drawDone(0, lastBlowPct, sessionsDone); return; }
-        enter(ST_INHALE);
-        ui::drawPhase(ui::PH_INHALE, 0.f, INHALE_S, round_, ROUNDS, lv, false);
-        return;
-      }
-      bool blowing = lv >= BLOW_MIN;
-      exhaleMs += dt;
-      if (blowing) blowMs += dt;
-      ui::drawPhase(ui::PH_EXHALE, t / EXHALE_S, EXHALE_S - (int)t, round_, ROUNDS, lv, blowing);
+      round_++;
+      if (round_ >= ROUNDS) finishSession();
+      else enter(ST_INHALE);
     }
-    return;
-  default:
-    return;
+    else
+    {
+      exhaleMs += dt;
+      if (level >= BLOW_MIN) blowMs += dt;
+    }
+    break;
+  case ST_DONE:    if (el > DONE_SCREEN_MS) enter(ST_IDLE); break;
+  case ST_STOPPED: if (el > 1500) enter(ST_IDLE); break;
+  default: break;
   }
 }
 
-void render()
+/// วาดหน้าจอตามสถานะปัจจุบัน (ถูกเรียกครั้งละแถบ)
+void drawCurrent(uint32_t now)
 {
-  uint32_t now = millis();
+  float t = (now - stateAt) / 1000.f;
+  int lv = (int)(level + 0.5f);
   switch (state)
   {
-  case ST_IDLE: ui::drawIdle(now, (int)(level + 0.5f), sessionsDone); break;
-  case ST_DONE:
-    if (now - stateAt > DONE_SCREEN_MS) { enter(ST_IDLE); ui::drawIdle(now, 0, sessionsDone); }
-    else ui::drawDone(now - stateAt, lastBlowPct, sessionsDone);
-    break;
-  case ST_STOPPED:
-    if (now - stateAt > 1500) { enter(ST_IDLE); ui::drawIdle(now, 0, sessionsDone); }
-    else ui::drawStopped();
-    break;
-  case ST_CAL: ui::drawCalibrating(now); break;
-  default: break;   // เฟสฝึก วาดใน updateSession
+  case ST_CAL:     ui::drawCalibrating(now); break;
+  case ST_IDLE:    ui::drawIdle(now, lv, sessionsDone); break;
+  case ST_READY:   ui::drawReady(max(1, READY_S - (int)t), min(1.f, t / READY_S)); break;
+  case ST_INHALE:  ui::drawPhase(ui::PH_INHALE, min(1.f, t / INHALE_S), max(1, INHALE_S - (int)t), round_, ROUNDS, lv, false); break;
+  case ST_HOLD:    ui::drawPhase(ui::PH_HOLD, min(1.f, t / HOLD_S), max(1, HOLD_S - (int)t), round_, ROUNDS, lv, false); break;
+  case ST_EXHALE:  ui::drawPhase(ui::PH_EXHALE, min(1.f, t / EXHALE_S), max(1, EXHALE_S - (int)t), round_, ROUNDS, lv, lv >= BLOW_MIN); break;
+  case ST_DONE:    ui::drawDone(now - stateAt, lastBlowPct, sessionsDone); break;
+  case ST_STOPPED: ui::drawStopped(); break;
   }
 }
 
@@ -355,17 +346,9 @@ void setup()
   gadgetIcon = prefs.getString("icon", gadgetIcon);
   sessionsDone = prefs.getInt("qs_count", 0);
 
-  frame = (uint16_t *)malloc(240 * 240 * sizeof(uint16_t));
-  if (frame != nullptr) ui::begin(frame);
-  if (frame != nullptr && gfx->begin(TFT_SPI_HZ))
-  {
-    displayOk = true;
-    gfx->fillScreen(0xFFFF);
-  }
-  else
-  {
-    Serial.println("# display init failed (เช็คสายจอ) — ยังส่งค่าแรงเป่าได้ตามปกติ");
-  }
+  ui::begin(band, BAND_H);
+  displayOk = gfx->begin(TFT_SPI_HZ);
+  if (displayOk) gfx->fillScreen(0xFFFF);
 
   delay(300);
   enter(ST_CAL);
@@ -390,15 +373,14 @@ void loop()
   uint32_t dt = now - lastLoop;
   lastLoop = now;
 
-  if (displayOk)
+  updateState(dt);
+  showFrame();
+
+  // ข้อความตรวจสอบ (Unity ไม่สนใจบรรทัดที่ขึ้นต้นด้วย #)
+  if (now - lastDiag >= 10000)
   {
-    if (state >= ST_READY && state <= ST_EXHALE) updateSession(dt);
-    else render();
-    showFrame();
-  }
-  else if (frame != nullptr && state >= ST_READY && state <= ST_EXHALE)
-  {
-    updateSession(dt);   // ไม่มีจอก็ยังเดินเวลา (ดูผ่าน Serial ได้)
+    lastDiag = now;
+    Serial.printf("# display=%s state=%d heap=%u\n", displayOk ? "ok" : "FAILED", (int)state, (unsigned)ESP.getFreeHeap());
   }
 
   if (now - lastSend >= (unsigned long)SEND_EVERY_MS)
