@@ -337,6 +337,7 @@ public class DailyHistoryPanel : MonoBehaviour
         playHead = playHeader != null ? playHeader.rectTransform : null;
         if (moodList != null) { moodListPos = moodList.anchoredPosition; moodListSize = moodList.sizeDelta; }
         if (playList != null) { playListPos = playList.anchoredPosition; playListSize = playList.sizeDelta; }
+        SwapStaticTexts();
     }
 
     void ApplyView()
@@ -392,14 +393,17 @@ public class DailyHistoryPanel : MonoBehaviour
         var go = Instantiate(moodTemplate, moodContent);
         go.SetActive(true);
         rows.Add(go);
+        HideTemplateTexts(go);
         var icon = Find<Image>(go, "Icon");
         if (icon != null) { var sp = IconFor(m.mood); icon.sprite = sp; icon.enabled = sp != null; }
         var dot = Find<Image>(go, "Dot");
         if (dot != null) dot.color = MoodColor(m.mood);
+
         string th = BreezText.Mood(m.mood), en = Capitalize(m.mood);
-        SetText(go, "Name", string.Equals(th, en, StringComparison.OrdinalIgnoreCase) ? th : $"{th} <size=70%><color=#8A948B>{en}</color></size>");
-        SetText(go, "Time", m.time + " น.");
-        SetText(go, "Note", string.IsNullOrEmpty(m.note) ? "" : m.note);
+        string name = string.Equals(th, en, StringComparison.OrdinalIgnoreCase) ? th : $"{th}  <color=#8A948B><size=75%>{en}</size></color>";
+        Label(go.transform, "MoodName", "อารมณ์: " + name, 28, textNormal, 100, 15, 760, 40, left: true, bold: true);
+        string sub = $"บันทึกเวลา {m.time} น." + (string.IsNullOrEmpty(m.note) ? "" : $"  ·  \"{m.note}\"");
+        Label(go.transform, "MoodInfo", sub, 20, textMuted, 100, -19, 900, 30, left: true);
     }
 
     void AddSessionRow(SummarySession s)
@@ -408,25 +412,111 @@ public class DailyHistoryPanel : MonoBehaviour
         var go = Instantiate(sessionTemplate, sessionContent);
         go.SetActive(true);
         rows.Add(go);
-        SetText(go, "Mode", $"{ModeIcon(s.mode)} {s.mode}");
-        SetText(go, "Time", s.time + " น.");
+        HideTemplateTexts(go);
+
+        Label(go.transform, "ModeName", $"{ModeIcon(s.mode)} {s.mode}", 28, textNormal, 24, 30, 760, 40, left: true, bold: true);
+        Label(go.transform, "PlayInfo", $"เล่นเวลา {s.time} น.  ·  ใช้เวลา {BreezText.Clock(s.duration)} นาที", 20, textNormal, 24, -2, 900, 30, left: true);
         string result = BreezText.SessionResultFull(s);
-        string line = $"ระยะเวลา {BreezText.Clock(s.duration)} นาที";
-        SetText(go, "Detail", string.IsNullOrEmpty(result) ? line : line + "\n" + result);
+        if (!string.IsNullOrEmpty(result)) Label(go.transform, "PlayResult", result, 20, textMuted, 24, -32, 900, 30, left: true);
+
         bool scored = s.score > 0;
-        SetText(go, "Score", scored ? s.score.ToString() : "—");
-        SetText(go, "ScoreLabel", scored ? "คะแนน" : "");
+        Label(go.transform, "ScoreValue", scored ? s.score.ToString() : "-", 40, scored ? textNormal : textMuted, -28, 10, 160, 50, left: false, bold: true, anchorRight: true);
+        Label(go.transform, "ScoreCaption", scored ? "คะแนน" : "ไม่มีคะแนน", 18, textMuted, -28, -28, 160, 26, left: false, anchorRight: true);
+    }
+
+    // -----------------------------------------------------------------
+    // ข้อความในแถว/ช่องวัน สร้างใหม่จากต้นแบบที่แสดงผลได้แน่นอน (ข้อความสถานะของหน้านี้)
+    // ไม่ใช้ข้อความในเทมเพลตเดิม (บางตัวไม่แสดงผลในบางเครื่อง)
+    // -----------------------------------------------------------------
+    TMP_Text proto;
+    TMP_Text Proto => proto != null ? proto : (proto = statusText != null ? statusText : sessionEmpty != null ? sessionEmpty : moodEmpty);
+
+    static void HideTemplateTexts(GameObject row)
+    {
+        foreach (var t in row.GetComponentsInChildren<TMP_Text>(true))
+            if (t.transform.parent == row.transform) t.gameObject.SetActive(false);
+    }
+
+    TMP_Text Label(Transform parent, string name, string text, float size, Color color, float x, float y, float w, float h,
+                   bool left, bool bold = false, bool anchorRight = false)
+    {
+        var proto = Proto;
+        if (proto == null) return null;
+        var go = Instantiate(proto.gameObject, parent, false);
+        go.name = name;
+        go.SetActive(true);
+        foreach (Transform ch in go.transform) Destroy(ch.gameObject);   // ต้นแบบอาจมี sub-mesh ลูก
+        var t = go.GetComponent<TMP_Text>();
+        var rt = t.rectTransform;
+        float ax = anchorRight ? 1f : left ? 0f : 0.5f;
+        rt.anchorMin = rt.anchorMax = new Vector2(ax, 0.5f);
+        rt.pivot = new Vector2(anchorRight ? 1f : left ? 0f : 0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(w, h);
+        rt.anchoredPosition = new Vector2(x, y);
+        rt.localScale = Vector3.one;
+        t.richText = true;
+        t.enableAutoSizing = false;
+        t.fontSize = size;
+        t.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+        t.color = color;
+        t.alignment = anchorRight ? TextAlignmentOptions.Right : left ? TextAlignmentOptions.Left : TextAlignmentOptions.Center;
+        t.enableWordWrapping = false;
+        t.overflowMode = TextOverflowModes.Ellipsis;
+        t.raycastTarget = false;
+        t.text = text;
+        return t;
+    }
+
+    /// <summary>ช่องวัน + หัวข้อ: ใช้ข้อความที่สร้างใหม่แทนของเดิม</summary>
+    readonly Dictionary<TMP_Text, TMP_Text> swapped = new Dictionary<TMP_Text, TMP_Text>();
+
+    TMP_Text Swap(TMP_Text original, bool bold)
+    {
+        if (original == null) return null;
+        if (swapped.TryGetValue(original, out var done) && done != null) return done;
+        var rt = original.rectTransform;
+        var t = Label(rt.parent, original.name + "Label", original.text, original.fontSize, original.color, 0, 0, rt.sizeDelta.x, rt.sizeDelta.y, false, bold);
+        if (t == null) return original;
+        var nrt = t.rectTransform;
+        nrt.anchorMin = rt.anchorMin; nrt.anchorMax = rt.anchorMax; nrt.pivot = rt.pivot;
+        nrt.anchoredPosition = rt.anchoredPosition; nrt.sizeDelta = rt.sizeDelta;
+        t.alignment = original.alignment;
+        t.overflowMode = TextOverflowModes.Ellipsis;
+        nrt.SetSiblingIndex(rt.GetSiblingIndex() + 1);
+        original.gameObject.SetActive(false);
+        swapped[original] = t;
+        return t;
+    }
+
+    void SwapStaticTexts()
+    {
+        if (chips != null)
+            foreach (var c in chips)
+            {
+                c.weekday = Swap(c.weekday, false);
+                c.day = Swap(c.day, true);
+            }
+        titleText = Swap(titleText, true);
+        dayTitleText = Swap(dayTitleText, true);
+        moodEmpty = Swap(moodEmpty, false);
+        sessionEmpty = Swap(sessionEmpty, false);
+        if (closeButton != null)
+        {
+            var lbl = closeButton.GetComponentInChildren<TMP_Text>(true);
+            var t = Swap(lbl, true);
+            if (t != null) { t.text = "X"; t.fontSize = 30; }
+        }
     }
 
     static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1).ToLowerInvariant();
 
-    /// <summary>สัญลักษณ์ที่ฟอนต์ไทยของเกมมี (ใช้แค่ตัวพื้นฐาน)</summary>
+    /// <summary>จุดสีของโหมด (ใช้ตัว • ที่ฟอนต์ของเกมมี)</summary>
     static string ModeIcon(string mode)
     {
         switch (mode)
         {
             case GameDataRecorder.CalmFlow: return "<color=#A9C77E><size=140%>•</size></color>";
-            case GameDataRecorder.PowerRelease: return "<color=#F2BDC9><size=140%>•</size></color>";
+            case GameDataRecorder.PowerRelease: return "<color=#F2A7B8><size=140%>•</size></color>";
             case GameDataRecorder.BreatheFocus: return "<color=#EDC965><size=140%>•</size></color>";
             case GameDataRecorder.Soundscape: return "<color=#8DB8D9><size=140%>•</size></color>";
             case GameDataRecorder.QuickSession: return "<color=#E79AB0><size=140%>•</size></color>";
