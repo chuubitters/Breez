@@ -130,24 +130,28 @@ public class BFGameManager : MonoBehaviour
         // 3
         if (countdownText != null)
             countdownText.text = "3";
+        BreezAudio.Play("count_tick");
 
         yield return new WaitForSecondsRealtime(1f);
 
         // 2
         if (countdownText != null)
             countdownText.text = "2";
+        BreezAudio.Play("count_tick");
 
         yield return new WaitForSecondsRealtime(1f);
 
         // 1
         if (countdownText != null)
             countdownText.text = "1";
+        BreezAudio.Play("count_tick");
 
         yield return new WaitForSecondsRealtime(1f);
 
         // GO!
         if (countdownText != null)
             countdownText.text = "เริ่ม!";
+        BreezAudio.Play("count_go");
 
         yield return new WaitForSecondsRealtime(0.5f);
 
@@ -173,6 +177,7 @@ public class BFGameManager : MonoBehaviour
 
         obstaclesPassed++;
         currentScore += scorePerObstacle;
+        BreezAudio.Play("focus_point", 0.8f);
 
         UpdateUI();
     }
@@ -214,6 +219,8 @@ public class BFGameManager : MonoBehaviour
             return;
 
         isGameOver = true;
+        BreezAudio.Play("focus_hit");
+        BreezAudio.PlayDelayed("result_end", 0.6f);
         gameStarted = false;
 
         int minutes = Mathf.FloorToInt(gameTime / 60f);

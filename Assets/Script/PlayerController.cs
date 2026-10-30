@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
 
     private bool isFlying = false;
+    private float nextWhoosh;
     private bool wasFlying = false;
     private bool isGameOver = false;
 
@@ -83,6 +84,11 @@ public class PlayerController : MonoBehaviour
         // =========================
         if (isFlying && !wasFlying)
         {
+            if (Time.unscaledTime >= nextWhoosh)
+            {
+                nextWhoosh = Time.unscaledTime + 0.3f;
+                if (Time.timeScale > 0f) BreezAudio.Play("focus_whoosh", 0.8f);
+            }
             if (anim != null)
             {
                 anim.Play("PlayerAnim", -1, 0f);

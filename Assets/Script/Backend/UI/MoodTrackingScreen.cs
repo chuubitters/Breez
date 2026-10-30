@@ -130,6 +130,7 @@ public class MoodTrackingScreen : MonoBehaviour
     {
         if (saving) return;
         saving = true;
+        BreezAudio.Play("mood_select");
         HighlightMood(mood);
         SetStatus("กำลังบันทึก...");
 

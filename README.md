@@ -88,7 +88,7 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 ### Breath Play: เลเยอร์ + วิธีการเล่น
 เมนู **Breez → Fix Layers + How To Play (Breath Play)** (Power Release / Breathe & Focus / Calm Flow)
 - ย้ายหน้าวิธีการเล่น / ผลลัพธ์ / พัก / นับถอยหลัง ไปไว้ใน `BreezTopCanvas` (Overlay, Sort Order 100) อยู่บนสุดเสมอ
-- เพิ่มหน้าวิธีการเล่นให้ Power Release และ Calm Flow (กด "เริ่ม" แล้วค่อยเริ่มเกม)
+- หน้าวิธีการเล่นหน้าตาเดียวกันทั้ง 3 เกม: การ์ดขาว + ภาพประกอบ + คำอธิบาย 2 บรรทัด + ปุ่ม "เริ่ม" + Back
 
 ### Rainy Forest: ฝน
 ถ้า RainEffect หายไปจาก scene เกมจะสร้างฝนให้เองตอนเริ่ม (`SPGameManager.autoCreateRain`)
@@ -99,6 +99,17 @@ TextMeshPro จัดวรรณยุกต์/สระบนเองไม�
 - นับถอยหลัง 3 · 2 · 1 · เริ่ม! เป็นวงกลมกลางจอ วงแหวนลดลงทีละวินาที
 - ป้ายนำการหายใจ: วงกลมขยาย/หด + หายใจเข้า/ออก + วินาทีที่เหลือ + แถบความคืบหน้า
 - บันทึกฉาก, จำนวนรอบหายใจ 5-5 ที่ครบ และเวลาที่เป่า ขึ้นหลังบ้าน
+- กด "จบการฝึก" => หน้าผลลัพธ์: เวลาที่ใช้ในโหมดนี้ / รอบหายใจ / เวลาที่เป่า + Replay / Home (ไปหน้าเลือกโหมด)
+- Windy Mountain: จัดหัวข้อ / ปุ่มกลับ / สถานะอุปกรณ์ / ปุ่มจบ ตามตำแหน่งของ Rainy Forest (ถ้าย้ายใน Rainy Forest แล้วกดเมนูนี้ซ้ำ Windy จะย้ายตาม)
+
+### เสียง (BGM + เสียงคลิก + เสียงประกอบเกม)
+ไม่ต้องกดเมนู ใช้ได้ทันทีหลัง pull
+- ไฟล์เสียงทั้งหมดอยู่ที่ `Assets/Sound/Breez` (สร้างจาก `tools/audio/make_sounds.py` ใช้ได้ฟรี ไม่ติดลิขสิทธิ์)
+- จับคู่เสียงที่ `Assets/Resources/BreezSoundBank.asset`: ลากไฟล์เสียงใหม่ใส่ช่อง `clip` ของ id ที่ต้องการเปลี่ยน / ปรับ `volume` ได้ / ตั้งเพลงแต่ละ scene ใน `Scene Music` (เว้นว่าง = ไม่เล่นเพลง)
+- เพลงพื้นหลังเล่นต่อเนื่องข้าม scene (`BreezAudio`) เปลี่ยนเพลงแบบ crossfade
+- ทุกปุ่มมีเสียงคลิกอัตโนมัติ (ปุ่มกลับ/ปิดใช้เสียง `ui_back`) ไม่อยากให้ปุ่มไหนมีเสียง ใส่ component `BreezNoClickSound`
+- Soundscape: ถ้า scene ใส่เสียง BGM/SFX เองไว้ จะใช้ของเดิม ถ้าช่องว่างจะใช้เสียงของ Breez (ลม / ฝน)
+- ระดับเสียงเก็บใน PlayerPrefs: `BreezAudio.MusicVolume`, `BreezAudio.SfxVolume`, `BreezAudio.Muted`
 
 ### Weekly Summary (สรุปรายสัปดาห์)
 เมนู **Breez → Create Mood Tracking Scene** สร้างหน้าใหม่ตามดีไซน์ (พื้นหลังดอกไม้ `Assets/element/Mood/weekly_bg.png`)
