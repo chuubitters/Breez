@@ -229,9 +229,17 @@ public class DailyHistoryPanel : MonoBehaviour
     /// <summary>ข้อความในช่องรายการ (ตอนโหลด / ว่าง / ผิดพลาด)</summary>
     void ShowEmpty(string message)
     {
+        foreach (var l in new[] { moodEmptyLabel, sessionEmptyLabel })
+        {
+            if (l == null) continue;
+            bool show = (l == moodEmptyLabel && CurrentView != View.Plays) || (l == sessionEmptyLabel && CurrentView != View.Moods);
+            l.gameObject.SetActive(show);
+            SetLabel(l, message, textMuted);
+            l.transform.SetAsLastSibling();
+        }
         foreach (var t in new[] { moodEmpty, sessionEmpty })
         {
-            if (t == null) continue;
+            if (t == null || swapped.ContainsKey(t)) continue;
             bool show = (t == moodEmpty && CurrentView != View.Plays) || (t == sessionEmpty && CurrentView != View.Moods);
             t.gameObject.SetActive(show);
             t.text = message;
@@ -260,8 +268,11 @@ public class DailyHistoryPanel : MonoBehaviour
                 var info = FindDay(d);
                 bool sel = d == selected, future = d > Today;
                 if (c.background != null) c.background.color = future ? chipFuture : sel ? chipSelected : chipNormal;
-                if (c.weekday != null) { c.weekday.text = d == Today ? "วันนี้" : BreezText.WeekdayShortOf(d); c.weekday.color = textMuted; }
+                string wk = d == Today ? "วันนี้" : BreezText.WeekdayShortOf(d);
+                if (c.weekday != null) { c.weekday.text = wk; c.weekday.color = textMuted; }
                 if (c.day != null) { c.day.text = d.Day.ToString(); c.day.color = future ? textMuted : textNormal; }
+                if (wkLabels != null && i < wkLabels.Length) SetLabel(wkLabels[i], wk, textMuted);
+                if (dayLabels != null && i < dayLabels.Length) SetLabel(dayLabels[i], d.Day.ToString(), future ? textMuted : textNormal);
                 bool hasMood = info != null && !string.IsNullOrEmpty(info.mood);
                 if (c.moodDot != null) { c.moodDot.enabled = hasMood && CurrentView != View.Plays; if (hasMood) c.moodDot.color = MoodColor(info.mood); }
                 if (c.count != null)
@@ -284,6 +295,11 @@ public class DailyHistoryPanel : MonoBehaviour
             dayTitleText.richText = true;
             dayTitleText.overflowMode = TMPro.TextOverflowModes.Ellipsis;
         }
+        if (dayTitleLabel != null)
+        {
+            string sum = DaySummary(selected);
+            SetLabel(dayTitleLabel, BreezText.LongDate(selected) + (string.IsNullOrEmpty(sum) ? "" : $"   <size=72%><color=#7A8A7E>{sum}</color></size>"));
+        }
 
         foreach (var r in rows) if (r != null) Destroy(r);
         rows.Clear();
@@ -302,20 +318,33 @@ public class DailyHistoryPanel : MonoBehaviour
         bool loaded = data != null;
         if (!loaded) return;   // ระหว่างโหลด ข้อความมาจาก ShowEmpty
         string dayWord = selected == Today ? "วันนี้" : "วันนั้น";
-        if (moodEmpty != null)
+        if (moodEmpty != null && moodEmptyLabel == null)
         {
             moodEmpty.gameObject.SetActive(moods == 0 && CurrentView != View.Plays);
             moodEmpty.text = $"ไม่ได้บันทึกอารมณ์ใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง";
             moodEmpty.color = textMuted;
             moodEmpty.transform.SetAsLastSibling();
         }
-        if (sessionEmpty != null)
+        if (sessionEmpty != null && sessionEmptyLabel == null)
         {
             sessionEmpty.gameObject.SetActive(sessions == 0 && CurrentView != View.Moods);
             sessionEmpty.text = $"ไม่มีการเล่นใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง";
             sessionEmpty.color = textMuted;
             sessionEmpty.transform.SetAsLastSibling();
         }
+        if (moodEmptyLabel != null)
+        {
+            moodEmptyLabel.gameObject.SetActive(moods == 0 && CurrentView != View.Plays);
+            SetLabel(moodEmptyLabel, $"ไม่ได้บันทึกอารมณ์ใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง", textMuted);
+            moodEmptyLabel.transform.SetAsLastSibling();
+        }
+        if (sessionEmptyLabel != null)
+        {
+            sessionEmptyLabel.gameObject.SetActive(sessions == 0 && CurrentView != View.Moods);
+            SetLabel(sessionEmptyLabel, $"ไม่มีการเล่นใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง", textMuted);
+            sessionEmptyLabel.transform.SetAsLastSibling();
+        }
+        DumpTexts();
         if (moodContent != null) LayoutRebuilder.ForceRebuildLayoutImmediate(moodContent);
         if (sessionContent != null) LayoutRebuilder.ForceRebuildLayoutImmediate(sessionContent);
     }
@@ -344,7 +373,9 @@ public class DailyHistoryPanel : MonoBehaviour
     {
         CacheLayout();
         bool showMood = CurrentView != View.Plays, showPlay = CurrentView != View.Moods;
-        if (titleText != null) titleText.text = CurrentView == View.Moods ? titleMoods : CurrentView == View.Plays ? titlePlays : titleBoth;
+        string title = CurrentView == View.Moods ? titleMoods : CurrentView == View.Plays ? titlePlays : titleBoth;
+        if (titleText != null) titleText.text = title;
+        SetLabel(titleLabel, title);
         if (moodList != null) moodList.gameObject.SetActive(showMood);
         if (playList != null) playList.gameObject.SetActive(showPlay);
         if (moodHead != null) moodHead.gameObject.SetActive(CurrentView == View.Both);
@@ -425,11 +456,23 @@ public class DailyHistoryPanel : MonoBehaviour
     }
 
     // -----------------------------------------------------------------
-    // ข้อความในแถว/ช่องวัน สร้างใหม่จากต้นแบบที่แสดงผลได้แน่นอน (ข้อความสถานะของหน้านี้)
-    // ไม่ใช้ข้อความในเทมเพลตเดิม (บางตัวไม่แสดงผลในบางเครื่อง)
+    // ข้อความในหน้าประวัติ: ใช้ UI Text แบบธรรมดา (ฟอนต์ TTF ตัวเดียวกับเกม + ThaiShaper)
+    // เพราะ TextMeshPro บางตัวในหน้านี้ไม่แสดงผลในบางเครื่อง
     // -----------------------------------------------------------------
-    TMP_Text proto;
-    TMP_Text Proto => proto != null ? proto : (proto = statusText != null ? statusText : sessionEmpty != null ? sessionEmpty : moodEmpty);
+    [Header("ข้อความแบบธรรมดา (ไม่ใส่ก็ได้ จะใช้ฟอนต์ของ TMP)")]
+    public Font legacyFont;
+    public Font legacyBoldFont;
+    [Tooltip("พิมพ์ข้อมูลข้อความลง Console ตอนเปิดหน้า (ช่วยหาปัญหา)")]
+    public bool logTextDebug = true;
+
+    Font RegularFont => legacyFont != null ? legacyFont : (legacyFont = FontFrom(statusText) ?? FontFrom(moodEmpty) ?? FontFrom(sessionEmpty));
+    Font BoldFont => legacyBoldFont != null ? legacyBoldFont : (legacyBoldFont = FontFrom(titleText) ?? RegularFont);
+
+    static Font FontFrom(TMP_Text t)
+    {
+        if (t == null || t.font == null) return null;
+        try { return t.font.sourceFontFile; } catch { return null; }
+    }
 
     static void HideTemplateTexts(GameObject row)
     {
@@ -437,75 +480,107 @@ public class DailyHistoryPanel : MonoBehaviour
             if (t.transform.parent == row.transform) t.gameObject.SetActive(false);
     }
 
-    TMP_Text Label(Transform parent, string name, string text, float size, Color color, float x, float y, float w, float h,
-                   bool left, bool bold = false, bool anchorRight = false)
+    /// <summary>% ใน &lt;size=..%&gt; ใช้กับ UI Text ไม่ได้ => แปลงเป็นพิกเซล</summary>
+    static string LegacyRich(string s, int baseSize)
     {
-        var proto = Proto;
-        if (proto == null) return null;
-        var go = Instantiate(proto.gameObject, parent, false);
-        go.name = name;
-        go.SetActive(true);
-        foreach (Transform ch in go.transform) Destroy(ch.gameObject);   // ต้นแบบอาจมี sub-mesh ลูก
-        var t = go.GetComponent<TMP_Text>();
-        var rt = t.rectTransform;
+        if (string.IsNullOrEmpty(s)) return s;
+        return System.Text.RegularExpressions.Regex.Replace(s, @"<size=(\d+)%>", m =>
+            "<size=" + Mathf.RoundToInt(baseSize * int.Parse(m.Groups[1].Value) / 100f) + ">");
+    }
+
+    Text Label(Transform parent, string name, string text, float size, Color color, float x, float y, float w, float h,
+               bool left, bool bold = false, bool anchorRight = false)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var rt = (RectTransform)go.transform;
         float ax = anchorRight ? 1f : left ? 0f : 0.5f;
         rt.anchorMin = rt.anchorMax = new Vector2(ax, 0.5f);
-        rt.pivot = new Vector2(anchorRight ? 1f : left ? 0f : 0.5f, 0.5f);
+        rt.pivot = new Vector2(ax, 0.5f);
         rt.sizeDelta = new Vector2(w, h);
         rt.anchoredPosition = new Vector2(x, y);
-        rt.localScale = Vector3.one;
-        t.richText = true;
-        t.enableAutoSizing = false;
-        t.fontSize = size;
-        t.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+        var t = go.AddComponent<Text>();
+        t.font = bold ? BoldFont : RegularFont;
+        if (t.font == null) t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.fontSize = Mathf.RoundToInt(size);
+        t.fontStyle = FontStyle.Normal;
         t.color = color;
-        t.alignment = anchorRight ? TextAlignmentOptions.Right : left ? TextAlignmentOptions.Left : TextAlignmentOptions.Center;
-        t.enableWordWrapping = false;
-        t.overflowMode = TextOverflowModes.Ellipsis;
+        t.alignment = anchorRight ? TextAnchor.MiddleRight : left ? TextAnchor.MiddleLeft : TextAnchor.MiddleCenter;
+        t.horizontalOverflow = HorizontalWrapMode.Overflow;
+        t.verticalOverflow = VerticalWrapMode.Overflow;
+        t.supportRichText = true;
         t.raycastTarget = false;
-        t.text = text;
+        SetLabel(t, text);
         return t;
     }
 
-    /// <summary>ช่องวัน + หัวข้อ: ใช้ข้อความที่สร้างใหม่แทนของเดิม</summary>
-    readonly Dictionary<TMP_Text, TMP_Text> swapped = new Dictionary<TMP_Text, TMP_Text>();
+    static void SetLabel(Text t, string text, Color? color = null)
+    {
+        if (t == null) return;
+        t.text = ThaiShaper.Fix(LegacyRich(text ?? "", t.fontSize));
+        if (color.HasValue) t.color = color.Value;
+    }
 
-    TMP_Text Swap(TMP_Text original, bool bold)
+    /// <summary>แทนที่ TMP ด้วย UI Text ตำแหน่งเดิม</summary>
+    readonly Dictionary<TMP_Text, Text> swapped = new Dictionary<TMP_Text, Text>();
+
+    Text Swap(TMP_Text original, bool bold)
     {
         if (original == null) return null;
         if (swapped.TryGetValue(original, out var done) && done != null) return done;
         var rt = original.rectTransform;
-        var t = Label(rt.parent, original.name + "Label", original.text, original.fontSize, original.color, 0, 0, rt.sizeDelta.x, rt.sizeDelta.y, false, bold);
-        if (t == null) return original;
+        var t = Label(rt.parent, original.name + "Text", original.text, original.fontSize, original.color, 0, 0, rt.sizeDelta.x, rt.sizeDelta.y, false, bold);
         var nrt = t.rectTransform;
         nrt.anchorMin = rt.anchorMin; nrt.anchorMax = rt.anchorMax; nrt.pivot = rt.pivot;
         nrt.anchoredPosition = rt.anchoredPosition; nrt.sizeDelta = rt.sizeDelta;
-        t.alignment = original.alignment;
-        t.overflowMode = TextOverflowModes.Ellipsis;
+        var h = original.horizontalAlignment;
+        t.alignment = h == HorizontalAlignmentOptions.Left ? TextAnchor.MiddleLeft : h == HorizontalAlignmentOptions.Right ? TextAnchor.MiddleRight : TextAnchor.MiddleCenter;
         nrt.SetSiblingIndex(rt.GetSiblingIndex() + 1);
         original.gameObject.SetActive(false);
         swapped[original] = t;
         return t;
     }
 
+    Text[] wkLabels, dayLabels;
+    Text titleLabel, dayTitleLabel, moodEmptyLabel, sessionEmptyLabel;
+
     void SwapStaticTexts()
     {
         if (chips != null)
-            foreach (var c in chips)
+        {
+            wkLabels = new Text[chips.Length];
+            dayLabels = new Text[chips.Length];
+            for (int i = 0; i < chips.Length; i++)
             {
-                c.weekday = Swap(c.weekday, false);
-                c.day = Swap(c.day, true);
+                wkLabels[i] = Swap(chips[i].weekday, false);
+                dayLabels[i] = Swap(chips[i].day, true);
             }
-        titleText = Swap(titleText, true);
-        dayTitleText = Swap(dayTitleText, true);
-        moodEmpty = Swap(moodEmpty, false);
-        sessionEmpty = Swap(sessionEmpty, false);
+        }
+        titleLabel = Swap(titleText, true);
+        dayTitleLabel = Swap(dayTitleText, true);
+        moodEmptyLabel = Swap(moodEmpty, false);
+        sessionEmptyLabel = Swap(sessionEmpty, false);
         if (closeButton != null)
         {
             var lbl = closeButton.GetComponentInChildren<TMP_Text>(true);
             var t = Swap(lbl, true);
-            if (t != null) { t.text = "X"; t.fontSize = 30; }
+            if (t != null) { t.fontSize = 30; SetLabel(t, "X"); }
         }
+    }
+
+    void DumpTexts()
+    {
+        if (!logTextDebug || panel == null) return;
+        var sb = new System.Text.StringBuilder("[Breez][History] texts:\n");
+        foreach (var t in panel.GetComponentsInChildren<TMP_Text>(true))
+        {
+            t.ForceMeshUpdate();
+            sb.AppendLine($"TMP {t.name} active={t.isActiveAndEnabled} font={(t.font != null ? t.font.name : "null")} size={t.fontSize} color={t.color} alpha={t.canvasRenderer.GetInheritedAlpha():0.##} chars={t.textInfo.characterCount} text=\"{t.text}\"");
+        }
+        foreach (var t in panel.GetComponentsInChildren<Text>(true))
+            sb.AppendLine($"UI {t.name} active={t.isActiveAndEnabled} font={(t.font != null ? t.font.name : "null")} size={t.fontSize} color={t.color} text=\"{t.text}\"");
+        Debug.Log(sb.ToString());
+        logTextDebug = false;
     }
 
     static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1).ToLowerInvariant();
