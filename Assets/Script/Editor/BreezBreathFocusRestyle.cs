@@ -160,22 +160,15 @@ public static class BreezBreathFocusRestyle
         var go = UI("BackButton", panel);
         var rt = (RectTransform)go;
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
-        rt.pivot = new Vector2(0f, 1f);
-        rt.sizeDelta = new Vector2(190, 70);
-        rt.anchoredPosition = new Vector2(84, -64);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(249, 79);
+        rt.anchoredPosition = new Vector2(160, -75);
         var hit = go.gameObject.AddComponent<Image>();
-        hit.color = new Color(1, 1, 1, 0f);
+        hit.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/element/back-bt.png");
+        hit.color = hit.sprite != null ? Color.white : new Color(1, 1, 1, 0f);
+        hit.preserveAspect = true;
         var b = go.gameObject.AddComponent<Button>();
         b.targetGraphic = hit;
-        var a = Img(go, "Arrow", arrow, Ink);
-        var art = a.rectTransform;
-        art.anchorMin = art.anchorMax = new Vector2(0f, 0.5f); art.pivot = new Vector2(0f, 0.5f);
-        art.sizeDelta = new Vector2(34, 30); art.anchoredPosition = new Vector2(10, 0);
-        var t = Text(go, "Label", "Back", regular, 38, Ink, 0, 0, 130, 60);
-        var trt = t.rectTransform;
-        trt.anchorMin = trt.anchorMax = new Vector2(0f, 0.5f); trt.pivot = new Vector2(0f, 0.5f);
-        trt.anchoredPosition = new Vector2(56, 2);
-        t.alignment = TextAlignmentOptions.Left;
         LoadScene(b, "BreathPlay");
     }
 

@@ -210,19 +210,16 @@ public static class BreezBreathPlayLayers
         start.targetGraphic = b;
         Text(b.transform, "Label", "เริ่ม", regular, 36, Color.white, 0, 0, 238, 96);
 
-        // Back มุมซ้ายบน
+        // ปุ่มกลับ (back-bt) มุมซ้ายบน ตำแหน่งเดียวกับทุกหน้า
         var back = UI("BackButton", panel.transform);
         var brt = (RectTransform)back;
-        brt.anchorMin = brt.anchorMax = new Vector2(0f, 1f); brt.pivot = new Vector2(0f, 1f);
-        brt.sizeDelta = new Vector2(190, 70); brt.anchoredPosition = new Vector2(84, -64);
-        var hit = back.gameObject.AddComponent<Image>(); hit.color = new Color(1, 1, 1, 0f);
+        brt.anchorMin = brt.anchorMax = new Vector2(0f, 1f); brt.pivot = new Vector2(0.5f, 0.5f);
+        brt.sizeDelta = new Vector2(249, 79); brt.anchoredPosition = new Vector2(160, -75);
+        var hit = back.gameObject.AddComponent<Image>();
+        hit.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/element/back-bt.png");
+        hit.color = hit.sprite != null ? Color.white : new Color(1, 1, 1, 0f);
+        hit.preserveAspect = true;
         var bb = back.gameObject.AddComponent<Button>(); bb.targetGraphic = hit;
-        var a = Img(back, "Arrow", arrow, Ink);
-        var art2 = a.rectTransform; art2.anchorMin = art2.anchorMax = new Vector2(0f, 0.5f); art2.pivot = new Vector2(0f, 0.5f);
-        art2.sizeDelta = new Vector2(34, 30); art2.anchoredPosition = new Vector2(10, 0);
-        var t = Text(back, "Label", "Back", regular, 38, Ink, 0, 0, 130, 60);
-        var trt = t.rectTransform; trt.anchorMin = trt.anchorMax = new Vector2(0f, 0.5f); trt.pivot = new Vector2(0f, 0.5f);
-        trt.anchoredPosition = new Vector2(56, 2); t.alignment = TextAlignmentOptions.Left;
         var loader = back.gameObject.AddComponent<SceneLoader>();
         UnityEventTools.AddStringPersistentListener(bb.onClick, loader.LoadSceneByName, "BreathPlay");
 

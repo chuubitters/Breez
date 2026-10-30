@@ -123,8 +123,12 @@ export function sessionDetail(s) {
       if (s.exhale_ms > 0) parts.push(`เป่า ${sec1(s.exhale_ms)} วิ`)
       return parts.length ? parts.join(' · ') : 'ฝึกหายใจ 5-5 พร้อมเสียง'
     }
-    case 'Quick Session':
-      return 'ฝึกหายใจ 4-7-8 บนตัวเครื่อง'
+    case 'Quick Session': {
+      const parts = ['ฝึกหายใจ 4-7-8 บนตัวเครื่อง']
+      if (s.rounds != null) parts.push(`${s.rounds} รอบ`)
+      if (s.blow_pct != null) parts.push(`เป่าได้ ${s.blow_pct}%`)
+      return parts.join(' · ')
+    }
     default:
       return '—'
   }

@@ -5,6 +5,7 @@ import { initials, number } from '../lib/format'
 import OverviewPage from '../pages/OverviewPage.vue'
 import PlayersPage from '../pages/PlayersPage.vue'
 import ModesPage from '../pages/ModesPage.vue'
+import RelaxPage from '../pages/RelaxPage.vue'
 import SessionsPage from '../pages/SessionsPage.vue'
 import MoodsPage from '../pages/MoodsPage.vue'
 import DevicesPage from '../pages/DevicesPage.vue'
@@ -19,6 +20,7 @@ const isOwner = computed(() => props.me.role === 'owner')
 const allNav = [
   { id: 'overview', label: 'ภาพรวม', icon: '◫', title: 'ภาพรวมระบบ', page: OverviewPage },
   { id: 'modes', label: 'โหมดการฝึก', icon: '✿', title: 'โหมดการฝึก', page: ModesPage },
+  { id: 'relax', label: 'Soundscape / Quick', icon: '♪', title: 'Soundscape & Quick Session', page: RelaxPage },
   { id: 'players', label: 'ผู้เล่น', icon: '♙', title: 'ผู้เล่น', page: PlayersPage },
   { id: 'sessions', label: 'ประวัติการเล่น', icon: '▷', title: 'ประวัติการเล่น', page: SessionsPage },
   { id: 'moods', label: 'บันทึกอารมณ์', icon: '♡', title: 'บันทึกอารมณ์', page: MoodsPage, owner: true },
