@@ -4,6 +4,7 @@ using UnityEngine;
 // รูปแบบข้อความที่รองรับ:
 //   "57"       ค่าแรงเป่า 0-100 (เหมือนเดิม)
 //   "BAT:85"   ระดับแบตเตอรี่ % (ไม่บังคับ ใช้แสดงในหลังบ้าน)
+//   "QS:DONE,4,76,85"  ฝึก Quick Session 4-7-8 บนตัวเครื่องครบ (รอบ, วินาที, % เป่า) => บันทึกลงประวัติ
 // เมื่อบอร์ดเชื่อมต่อ จะส่ง "NAME:..." และ "ICON:..." กลับไปให้บอร์ดแสดงบนจอ
 public class BreathReceiver : MonoBehaviour
 {
@@ -33,6 +34,12 @@ public class BreathReceiver : MonoBehaviour
             return;
         }
 
+        if (message.StartsWith("QS:"))
+        {
+            HandleQuickSession(message.Substring(3));
+            return;
+        }
+
         if (int.TryParse(message, out int value))
         {
             breathLevel = Mathf.Clamp(value, 0, 100);
@@ -40,6 +47,24 @@ public class BreathReceiver : MonoBehaviour
             if (logMessages)
                 Debug.Log("Breath Level: " + breathLevel);
         }
+    }
+
+    /// <summary>Quick Session ที่ฝึกบนตัวเครื่อง (จอกลม) ระหว่างเสียบสายกับเกม => บันทึกลงประวัติการเล่น</summary>
+    public static event System.Action<int, int, int> QuickSessionCompleted;   // rounds, seconds, blowPct
+    static float lastQuickSave = -999f;
+
+    void HandleQuickSession(string payload)
+    {
+        if (!payload.StartsWith("DONE")) return;              // START / STOP: ไม่ต้องทำอะไร
+        var parts = payload.Split(',');
+        if (parts.Length < 4) return;
+        if (!int.TryParse(parts[1], out int rounds) || !int.TryParse(parts[2], out int seconds) || !int.TryParse(parts[3], out int blowPct)) return;
+        // มี BreathReceiver หลายตัวในบาง scene => บันทึกครั้งเดียว
+        if (Time.unscaledTime - lastQuickSave < 5f) return;
+        lastQuickSave = Time.unscaledTime;
+        Debug.Log($"[Breez] Quick Session done on gadget: {rounds} rounds, {seconds}s, blow {blowPct}%");
+        GameDataRecorder.RecordQuickSession(seconds, rounds, blowPct);
+        QuickSessionCompleted?.Invoke(rounds, seconds, blowPct);
     }
 
     // Ardity แจ้งเมื่อเสียบ/ถอดบอร์ด
