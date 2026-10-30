@@ -212,6 +212,8 @@ void readCommands() {
 | RST (RES) | **GPIO1** |
 | BLK (BL) | 3V3 (หรือไม่ต่อ) |
 
+ผังการเสียบบน breadboard ครึ่งแผ่น (30 แถว): [`tools/display/breadboard_wiring.png`](tools/display/breadboard_wiring.png)
+
 ปุ่มเริ่ม/หยุด Quick Session: ใช้ปุ่ม **BOOT** บนบอร์ดได้เลย หรือต่อปุ่มกดเพิ่ม ขาหนึ่ง → **GPIO0** อีกขา → GND
 
 ### Quick Session (ฝึกหายใจ 4-7-8 บนตัวเครื่อง ไม่ต้องเปิดแอป)
