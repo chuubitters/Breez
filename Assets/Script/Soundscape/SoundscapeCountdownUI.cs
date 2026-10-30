@@ -19,6 +19,8 @@ public class SoundscapeCountdownUI : MonoBehaviour
     public string goText = "เริ่ม!";
     public float numberSize = 150f;
     public float goSize = 110f;
+    [Tooltip("พื้นหลังตอนนับถอยหลัง (ขาวทึบเกือบเต็ม ให้ตัวเลขเห็นชัด)")]
+    public Color backdrop = new Color(1f, 1f, 1f, 0.92f);
 
     float popT = 1f, ringFrom = 1f, ringTo = 1f, ringT = 1f, ringDur = 1f;
     float fadeTarget, fade;
@@ -26,6 +28,9 @@ public class SoundscapeCountdownUI : MonoBehaviour
     void Awake()
     {
         if (group == null) group = GetComponent<CanvasGroup>();
+        var blocker = transform.Find("Blocker");
+        var img = blocker != null ? blocker.GetComponent<Image>() : null;
+        if (img != null) { img.color = backdrop; img.raycastTarget = true; }
         fade = fadeTarget = 0f;
         Apply();
     }

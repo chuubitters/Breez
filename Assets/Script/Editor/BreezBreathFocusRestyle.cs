@@ -177,6 +177,7 @@ public static class BreezBreathFocusRestyle
         trt.anchoredPosition = new Vector2(56, 2);
         t.alignment = TextAlignmentOptions.Left;
         LoadScene(b, "BreathPlay");
+        BreezPolishUI.Style(b);   // รูป back-bt ตำแหน่งเดียวกับปุ่มกลับของฉาก
     }
 
     static Button Button(Transform parent, string name, Color color, float x, float y, float w, float h, string label, float size)

@@ -60,4 +60,17 @@ public static class BreezText
         if (mode == GameDataRecorder.QuickSession) return "ฝึกหายใจแบบ 4-7-8";
         return "";
     }
+
+    /// <summary>ผลแบบละเอียด (มีรอบ 4-7-8 / เวลาที่เป่า) ใช้ในหน้าประวัติ</summary>
+    public static string SessionResultFull(SummarySession s)
+    {
+        if (s.mode == GameDataRecorder.QuickSession && (s.rounds >= 0 || s.blow_pct >= 0))
+        {
+            string r = s.rounds >= 0 ? $"หายใจ 4-7-8 ครบ {s.rounds}/4 รอบ" : "ฝึกหายใจแบบ 4-7-8";
+            return s.blow_pct >= 0 ? r + $" · เป่าได้ {s.blow_pct}%" : r;
+        }
+        string text = SessionResult(s);
+        if (s.mode == GameDataRecorder.Soundscape && s.exhale_ms > 0) text += $" · เป่า {s.exhale_ms / 1000f:0.#} วิ";
+        return text;
+    }
 }

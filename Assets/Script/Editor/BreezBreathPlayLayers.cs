@@ -225,6 +225,7 @@ public static class BreezBreathPlayLayers
         trt.anchoredPosition = new Vector2(56, 2); t.alignment = TextAlignmentOptions.Left;
         var loader = back.gameObject.AddComponent<SceneLoader>();
         UnityEventTools.AddStringPersistentListener(bb.onClick, loader.LoadSceneByName, "BreathPlay");
+        BreezPolishUI.Style(bb);   // รูป back-bt ตำแหน่งเดียวกับปุ่มกลับของฉาก
 
         panel.transform.SetAsLastSibling();
         return panel.gameObject;

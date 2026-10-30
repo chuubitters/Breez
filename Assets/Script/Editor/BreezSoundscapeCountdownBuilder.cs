@@ -136,7 +136,7 @@ public static class BreezSoundscapeCountdownBuilder
 
         var root = UI("CountdownOverlay", C); Stretch(root);
         var group = root.gameObject.AddComponent<CanvasGroup>();
-        var hit = Img(root, "Blocker", null, new Color(1f, 1f, 1f, 0.12f)); Stretch(hit.rectTransform);
+        var hit = Img(root, "Blocker", null, new Color(1f, 1f, 1f, 0.92f)); Stretch(hit.rectTransform);
 
         var center = UI("Center", root); Place(center, 0, 0, RingSize, RingSize);
         var r = Ring(center);
