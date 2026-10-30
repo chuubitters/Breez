@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26ee5d7a1b2743689b61d3f64f1383c6, type: 3}
+  m_Name: BreezSoundBank
+  m_EditorClassIdentifier: 
+  defaultMusic: bgm_menu
+  sceneMusic:
+  - scene: CalmFlow
+    music: bgm_calm_flow
+  - scene: PowerRelease
+    music: bgm_power_release
+  - scene: BreathFocus
+    music: bgm_breathe_focus
+  - scene: Rainy Forest
+    music: 
+  - scene: Windy Mountain
+    music: 
+  sounds:
+  - id: amb_rain
+    clip: {fileID: 8300000, guid: ca5fd360cdca4d48bb5b53062d6daefe, type: 3}
+    volume: 0.8
+  - id: amb_wind
+    clip: {fileID: 8300000, guid: 5fe09446c7d84a7fbcea02665fae1570, type: 3}
+    volume: 0.8
+  - id: balloon_inflate
+    clip: {fileID: 8300000, guid: b30146ea4a1e4178b9b3e0b63b4d601e, type: 3}
+    volume: 0.45
+  - id: balloon_pop
+    clip: {fileID: 8300000, guid: dfba662b20aa4e7b912a5821c86fec5c, type: 3}
+    volume: 1
+  - id: bgm_breathe_focus
+    clip: {fileID: 8300000, guid: 9527156804784f7d84441dfe8a5d9ad6, type: 3}
+    volume: 0.5
+  - id: bgm_calm_flow
+    clip: {fileID: 8300000, guid: ba4da58243d5450da1d7e1fb99d72836, type: 3}
+    volume: 0.6
+  - id: bgm_menu
+    clip: {fileID: 8300000, guid: 2a9c9907ab394419a8d31f34c5f8d14b, type: 3}
+    volume: 0.55
+  - id: bgm_power_release
+    clip: {fileID: 8300000, guid: 4db211902fae4f88b65cce7018901fdc, type: 3}
+    volume: 0.5
+  - id: bgm_windy_mountain
+    clip: {fileID: 8300000, guid: dee9d22828fe400e85fd95246826f8e7, type: 3}
+    volume: 0.7
+  - id: breath_in
+    clip: {fileID: 8300000, guid: c94354048fb54b22ba4d2c663c69b610, type: 3}
+    volume: 1
+  - id: breath_out
+    clip: {fileID: 8300000, guid: 15f79398ce8d468f9bc2dba94f801edd, type: 3}
+    volume: 1
+  - id: count_go
+    clip: {fileID: 8300000, guid: 00343711fda74f5b914b3e0eae205f9d, type: 3}
+    volume: 1
+  - id: count_tick
+    clip: {fileID: 8300000, guid: c535ae9ff7fe41f38b98f2647b7b846b, type: 3}
+    volume: 0.8
+  - id: flower_bloom
+    clip: {fileID: 8300000, guid: 2bb1676a3c2c443d9e393746066013f5, type: 3}
+    volume: 1
+  - id: flower_plant
+    clip: {fileID: 8300000, guid: 051f90e0db314a43b872065dc7bca6f2, type: 3}
+    volume: 1
+  - id: focus_hit
+    clip: {fileID: 8300000, guid: 43c0635c36f5412ba29a04ec2932524b, type: 3}
+    volume: 1
+  - id: focus_point
+    clip: {fileID: 8300000, guid: a6938a0c2bf14139b0b22aee080a011c, type: 3}
+    volume: 1
+  - id: focus_whoosh
+    clip: {fileID: 8300000, guid: e793613b08c54adaad80b031a0d0ddc1, type: 3}
+    volume: 0.5
+  - id: mood_select
+    clip: {fileID: 8300000, guid: 93b11d10fe264b5ebb7f687f2ae6b264, type: 3}
+    volume: 1
+  - id: result_calm
+    clip: {fileID: 8300000, guid: 4333a15baf504a239f0a1cb96d8884a2, type: 3}
+    volume: 1
+  - id: result_end
+    clip: {fileID: 8300000, guid: 0cc9e2ebf7704099ab552c61da19040c, type: 3}
+    volume: 1
+  - id: result_win
+    clip: {fileID: 8300000, guid: beda93857be14179ada1200e8812682a, type: 3}
+    volume: 1
+  - id: ui_back
+    clip: {fileID: 8300000, guid: 044c60a2553e4836957c4f54b1dd0c7b, type: 3}
+    volume: 0.55
+  - id: ui_click
+    clip: {fileID: 8300000, guid: e918a53a745040d480713d7dfef97f3d, type: 3}
+    volume: 0.55

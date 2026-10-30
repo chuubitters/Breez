@@ -31,6 +31,11 @@ public class SPGameManager : MonoBehaviour
     public SoundscapeCountdownUI countdownUI;
     public BreathGuideUI breathGuide;
 
+    [Header("จบการฝึก + หน้าผลลัพธ์")]
+    [Tooltip("ปุ่ม \"จบการฝึก\" (ผูกให้อัตโนมัติ)")]
+    public Button endButton;
+    public SoundscapeResultUI resultUI;
+
     [Header("Breathing Audio")]
     public AudioSource audioSource;
     public AudioClip inhaleSound;
@@ -68,9 +73,19 @@ public class SPGameManager : MonoBehaviour
             breathingBar.value = 0f;
         }
 
+        SetupAudio();
+
         // เล่น BGM
         if (bgm != null)
             bgm.Play();
+
+        if (endButton != null)
+        {
+            endButton.onClick.RemoveListener(EndSession);
+            endButton.onClick.AddListener(EndSession);
+        }
+        if (resultUI != null)
+            resultUI.gameObject.SetActive(false);
 
         // ฝนหายไปจาก scene (เช่น ถูกลบ) => สร้างใหม่ให้อัตโนมัติ
         if (rainParticles == null && autoCreateRain && gameObject.scene.name.ToLower().Contains("rain"))
@@ -101,6 +116,15 @@ public class SPGameManager : MonoBehaviour
 
     private void Update()
     {
+        // เสียงลม/ฝนตอนเป่า ดังตามแรงเป่า
+        if (sfx != null && sfx.isPlaying)
+        {
+            float level = breathReceiver != null ? Mathf.InverseLerp(breathThreshold, 100f, breathReceiver.breathLevel) : 0f;
+            if (Input.GetKey(KeyCode.UpArrow)) level = Mathf.Max(level, 0.7f);
+            float target = sfxBaseVolume * Mathf.Lerp(0.55f, 1f, level) * BreezAudio.SfxScale;
+            sfx.volume = Mathf.MoveTowards(sfx.volume, target, Time.deltaTime * 2f);
+        }
+
         // ยังไม่เริ่มเกม ไม่รับ Input
         if (!gameStarted)
             return;
@@ -174,6 +198,7 @@ public class SPGameManager : MonoBehaviour
 
         while (count > 0)
         {
+            BreezAudio.Play("count_tick");
             if (countdownUI != null)
                 countdownUI.Tick(count, count / (float)total, (count - 1) / (float)total, 1f);
             else if (countdownText != null)
@@ -185,6 +210,7 @@ public class SPGameManager : MonoBehaviour
         }
 
         // แสดง เริ่ม!
+        BreezAudio.Play("count_go");
         if (countdownUI != null)
             countdownUI.Go();
         else if (countdownText != null)
@@ -255,7 +281,7 @@ public class SPGameManager : MonoBehaviour
             // =========================
             // INHALE
             // =========================
-            PlaySound(inhaleSound);
+            PlaySound(inhaleSound, "breath_in");
 
             yield return StartCoroutine(
                 BreathingPhase(
@@ -269,7 +295,7 @@ public class SPGameManager : MonoBehaviour
             // =========================
             // EXHALE
             // =========================
-            PlaySound(exhaleSound);
+            PlaySound(exhaleSound, "breath_out");
 
             yield return StartCoroutine(
                 BreathingPhase(
@@ -362,6 +388,61 @@ public class SPGameManager : MonoBehaviour
         GameDataRecorder.RecordSoundscape(seconds, gameObject.scene.name, breathCycles, exhaleSeconds);
     }
 
+    // ==================================
+    // กด "จบการฝึก" => หยุด บันทึก แล้วแสดงผลลัพธ์ (เวลาที่ใช้ในโหมดนี้)
+    // ==================================
+    public void EndSession()
+    {
+        if (sessionEnded) return;
+        sessionEnded = true;
+
+        float seconds = gameStarted ? Time.realtimeSinceStartup - sessionStartTime : 0f;
+        SaveSession();
+
+        StopAllCoroutines();
+        isBreathing = false;
+        if (wasInputActive) StopInputEffect();
+        wasInputActive = false;
+        gameStarted = false;
+        if (countdownUI != null) countdownUI.Hide();
+        if (countdownText != null) countdownText.gameObject.SetActive(false);
+        if (startPanel != null) startPanel.SetActive(false);
+        if (breathGuide != null) breathGuide.gameObject.SetActive(false);
+        if (endButton != null) endButton.interactable = false;
+
+        BreezAudio.Play("result_calm");
+
+        if (resultUI != null)
+            resultUI.Show(seconds, breathCycles, exhaleSeconds, sessionSaved);
+        else
+            Debug.Log("Soundscape ended: " + seconds.ToString("0") + "s");
+    }
+
+    // ==================================
+    // เสียง: ถ้าใน scene ยังไม่ได้ใส่เสียง ใช้เสียงของ Breez (Resources/BreezSoundBank)
+    // ==================================
+    private float sfxBaseVolume = 1f;
+    private bool sessionEnded = false;
+
+    private void SetupAudio()
+    {
+        bool windy = gameObject.scene.name.ToLower().Contains("wind");
+        if (bgm != null)
+        {
+            if (bgm.clip == null) bgm.clip = BreezAudio.Clip(windy ? "bgm_windy_mountain" : "amb_rain");
+            bgm.loop = true;
+            bgm.playOnAwake = false;
+            bgm.volume *= BreezAudio.MusicScale;
+        }
+        if (sfx != null)
+        {
+            if (sfx.clip == null) sfx.clip = BreezAudio.Clip(windy ? "amb_wind" : "amb_rain");
+            sfx.loop = true;
+            sfx.playOnAwake = false;
+            sfxBaseVolume = sfx.volume;
+        }
+    }
+
     private void OnDestroy()
     {
         SaveSession();
@@ -375,11 +456,16 @@ public class SPGameManager : MonoBehaviour
     // ==================================
     // เล่นเสียง
     // ==================================
-    private void PlaySound(AudioClip clip)
+    private void PlaySound(AudioClip clip, string fallbackId)
     {
         if (audioSource != null && clip != null)
         {
-            audioSource.PlayOneShot(clip);
+            audioSource.PlayOneShot(clip, BreezAudio.SfxScale);
+        }
+        else
+        {
+            // ไม่ได้ใส่เสียงหายใจเข้า/ออกไว้ => ใช้เสียงนำหายใจของ Breez
+            BreezAudio.Play(fallbackId, 0.8f);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.IO;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,8 @@ using UnityEngine.UI;
 // ใช้กับ Rainy Forest + Windy Mountain (กดซ้ำได้)
 //   • นับถอยหลัง 3 · 2 · 1 · เริ่ม! : วงกลมขาวกลางจอ วงแหวนลดลงทีละวินาที ตัวเลขเด้ง
 //   • ป้ายนำการหายใจ: วงกลมขยาย/หด + "หายใจเข้า / หายใจออก" + วินาทีที่เหลือ + แถบความคืบหน้า
+//   • ปุ่ม "จบการฝึก" => หน้าผลลัพธ์ (เวลาที่ใช้ในโหมดนี้ / รอบหายใจ / เวลาที่เป่า) + Replay / Home
+//   • Windy Mountain: จัดตำแหน่งหัวข้อ / ปุ่มกลับ / สถานะอุปกรณ์ / ปุ่มจบ ให้เหมือน Rainy Forest
 //   ข้อความ/Slider แบบเดิมจะถูกซ่อน (ไม่ลบ)
 // =====================================================================
 public static class BreezSoundscapeCountdownBuilder
@@ -22,8 +25,21 @@ public static class BreezSoundscapeCountdownBuilder
     static readonly Color Track = new Color32(0xEE, 0xEF, 0xE8, 255);
     static readonly Color Sage = new Color32(0xA9, 0xC7, 0x7E, 255);
 
+    static readonly Color Black = new Color32(34, 34, 34, 255);
+    static readonly Color HeaderPink = new Color32(252, 227, 232, 255);
+    static readonly Color Pink = new Color32(242, 189, 201, 255);
+    static readonly Color Green = new Color32(212, 229, 157, 255);
+
     static TMP_FontAsset regular, bold;
-    static Sprite pill, circle, ring, gradientRing;
+    static Sprite pill, circle, ring, gradientRing, card, arrow;
+
+    /// <summary>ตำแหน่ง UI ของ Rainy Forest (ต้นแบบ) — ใช้จัด Windy Mountain ให้เหมือนกัน</summary>
+    class Layout
+    {
+        public Vector2 titlePos, titleSize, backPos, backSize, gadgetPos, gadgetSize, endPos, endSize;
+        public float titleFontSize; public Color titleColor; public TMP_FontAsset titleFont; public FontStyles titleStyle;
+        public bool hasTitle, hasBack, hasGadget, hasEnd;
+    }
 
     [MenuItem("Breez/Restyle Soundscape Countdown")]
     public static void Restyle()
@@ -37,9 +53,12 @@ public static class BreezSoundscapeCountdownBuilder
         ring = BreezStatusElementsBuilder.MakeSprite("ui_ring_track", BreezSpriteArt.Ring(512, 0.09f), 512, 0);
         gradientRing = BreezStatusElementsBuilder.MakeSprite("ui_ring_gradient", BreezSpriteArt.GradientRing(512, 0.09f,
             BreezSpriteArt.Rgba.Hex(0x7FB8EE), BreezSpriteArt.Rgba.Hex(0x7CD8B2)), 512, 0);
+        card = BreezStatusElementsBuilder.MakeSprite("ui_card", BreezSpriteArt.RoundedRect(128, 40), 128, 40);
+        arrow = BreezStatusElementsBuilder.MakeSprite("ui_arrow_left", BreezSpriteArt.ArrowLeft(128), 128, 0);
 
         string previous = EditorSceneManager.GetActiveScene().path;
         var log = new System.Text.StringBuilder();
+        Layout model = null;
         foreach (var path in Scenes)
         {
             if (!File.Exists(path)) continue;
@@ -54,6 +73,19 @@ public static class BreezSoundscapeCountdownBuilder
             var C = canvas.transform;
 
             Undo.RecordObject(sp, "Restyle countdown");
+
+            // ---------- จัด layout: Rainy Forest = ต้นแบบ, Windy Mountain = ตามต้นแบบ ----------
+            var title = FindTitle(C, sp);
+            var back = FindButton(C, "back");
+            var end = FindButton(C, "end");
+            var gadget = C.Find("GadgetStatus") as RectTransform;
+            if (model == null) model = Capture(title, back, gadget, end);
+            else ApplyLayout(model, title, back, gadget, end);
+            if (back != null) WireBack(back);
+
+            // ---------- จบการฝึก + หน้าผลลัพธ์ ----------
+            if (end != null) sp.endButton = end;
+            sp.resultUI = BuildResult();
             // ของเดิม: ซ่อนไว้
             if (sp.countdownText != null) sp.countdownText.gameObject.SetActive(false);
             if (sp.breathingText != null) sp.breathingText.gameObject.SetActive(false);
@@ -74,7 +106,8 @@ public static class BreezSoundscapeCountdownBuilder
             log.AppendLine("✓ " + Path.GetFileNameWithoutExtension(path));
         }
         if (!string.IsNullOrEmpty(previous) && File.Exists(previous)) EditorSceneManager.OpenScene(previous, OpenSceneMode.Single);
-        EditorUtility.DisplayDialog("Breez", "ปรับหน้านับถอยหลัง Soundscape แล้ว\n\n" + log + "\nกด Play แล้วกดเริ่มเพื่อดู", "OK");
+        EditorUtility.DisplayDialog("Breez", "ปรับหน้า Soundscape แล้ว\n\n" + log +
+            "\n• นับถอยหลัง + ป้ายนำการหายใจ\n• กด \"จบการฝึก\" => หน้าผลลัพธ์ (เวลาที่ใช้)\n• Windy Mountain จัดตำแหน่งตาม Rainy Forest\n\nกด Play เพื่อทดสอบ", "OK");
     }
 
     // ---------------------------------------------------------------
@@ -147,6 +180,158 @@ public static class BreezSoundscapeCountdownBuilder
         ui.tintProgress = false;
         group.alpha = 0f;
         return ui;
+    }
+
+    // ---------------------------------------------------------------
+    // Layout
+    static TMP_Text FindTitle(Transform C, SPGameManager sp)
+    {
+        foreach (Transform ch in C)
+        {
+            if (!ch.gameObject.activeSelf) continue;
+            var t = ch.GetComponent<TMP_Text>();
+            if (t == null || t == sp.countdownText || t == sp.breathingText) continue;
+            return t;
+        }
+        return null;
+    }
+
+    /// <summary>ปุ่มลูกของ Canvas ที่ชื่อ/รูป มีคำว่า key (back / end)</summary>
+    static Button FindButton(Transform C, string key)
+    {
+        foreach (Transform ch in C)
+        {
+            var b = ch.GetComponent<Button>();
+            if (b == null || !ch.gameObject.activeSelf) continue;
+            var img = ch.GetComponent<Image>();
+            string n = ch.name.ToLower() + " " + (img != null && img.sprite != null ? img.sprite.name.ToLower() : "");
+            if (n.Contains(key)) return b;
+        }
+        return null;
+    }
+
+    static Layout Capture(TMP_Text title, Button back, RectTransform gadget, Button end)
+    {
+        var l = new Layout();
+        if (title != null)
+        {
+            l.hasTitle = true; var rt = title.rectTransform; l.titlePos = rt.anchoredPosition; l.titleSize = rt.sizeDelta;
+            l.titleFontSize = title.fontSize; l.titleColor = title.color; l.titleFont = title.font; l.titleStyle = title.fontStyle;
+        }
+        if (back != null) { l.hasBack = true; var rt = (RectTransform)back.transform; l.backPos = rt.anchoredPosition; l.backSize = rt.sizeDelta; }
+        if (gadget != null) { l.hasGadget = true; l.gadgetPos = gadget.anchoredPosition; l.gadgetSize = gadget.sizeDelta; }
+        if (end != null) { l.hasEnd = true; var rt = (RectTransform)end.transform; l.endPos = rt.anchoredPosition; l.endSize = rt.sizeDelta; }
+        return l;
+    }
+
+    static void ApplyLayout(Layout l, TMP_Text title, Button back, RectTransform gadget, Button end)
+    {
+        if (title != null && l.hasTitle)
+        {
+            var rt = title.rectTransform; Undo.RecordObject(rt, "Layout"); Undo.RecordObject(title, "Layout");
+            rt.anchoredPosition = l.titlePos; rt.sizeDelta = l.titleSize;
+            title.fontSize = l.titleFontSize; title.color = l.titleColor; title.fontStyle = l.titleStyle;
+            if (l.titleFont != null) title.font = l.titleFont;
+        }
+        if (back != null && l.hasBack) Move((RectTransform)back.transform, l.backPos, l.backSize);
+        if (gadget != null && l.hasGadget) Move(gadget, l.gadgetPos, l.gadgetSize);
+        if (end != null && l.hasEnd) Move((RectTransform)end.transform, l.endPos, l.endSize);
+    }
+
+    static void Move(RectTransform rt, Vector2 pos, Vector2 size)
+    {
+        Undo.RecordObject(rt, "Layout");
+        rt.anchoredPosition = pos; rt.sizeDelta = size;
+    }
+
+    /// <summary>ปุ่มกลับที่ยังไม่ได้ผูก => กลับไปหน้าเลือก Soundscape</summary>
+    static void WireBack(Button b)
+    {
+        if (b.onClick.GetPersistentEventCount() > 0) return;
+        string target = null;
+        foreach (var s in EditorBuildSettings.scenes)
+        {
+            if (!s.enabled) continue;
+            string n = Path.GetFileNameWithoutExtension(s.path);
+            string k = new string(System.Array.FindAll(n.ToCharArray(), ch => char.IsLetter(ch))).ToLower();
+            if (k == "soundscape") { target = n; break; }
+        }
+        if (target == null) target = "Mode";
+        var loader = b.GetComponent<SceneLoader>();
+        if (loader == null) loader = Undo.AddComponent<SceneLoader>(b.gameObject);
+        UnityEventTools.AddStringPersistentListener(b.onClick, loader.LoadSceneByName, target);
+    }
+
+    // ---------------------------------------------------------------
+    // หน้าผลลัพธ์ (การ์ดขาวแบบเดียวกับ Breathe & Focus) อยู่ใน BreezTopCanvas => บนสุดเสมอ
+    static SoundscapeResultUI BuildResult()
+    {
+        var top = BreezBreathPlayLayers.TopCanvas();
+        var old = top.Find("SoundscapeResult");
+        if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
+
+        var root = UI("SoundscapeResult", top); Stretch(root);
+        var group = root.gameObject.AddComponent<CanvasGroup>();
+        var dim = Img(root, "Dim", null, new Color(1f, 0.97f, 0.97f, 0.45f)); Stretch(dim.rectTransform); dim.raycastTarget = true;
+
+        var c = Img(root, "Card", card, Color.white); c.type = Image.Type.Sliced;
+        Place(c.rectTransform, 0, 20, 1338, 853);
+        Shadow(c.gameObject, 0.08f);
+        var R = c.transform;
+        var head = Img(R, "Header", pill, HeaderPink); head.type = Image.Type.Sliced;
+        Place(head.rectTransform, 0, 312, 266, 92);
+        Text(head.transform, "Text", "ผลลัพธ์", bold, 38, Black, 0, 0, 266, 92);
+
+        Text(R, "TimeLabel", "เวลาที่ใช้ในโหมดนี้", regular, 34, Black, 0, 205, 600, 50);
+        var time = Text(R, "Time", "00:00<size=40%>  นาที</size>", regular, 130, Black, 0, 100, 900, 150);
+        time.richText = true;
+
+        Text(R, "CyclesLabel", "หายใจเข้า-ออกครบ", regular, 32, Black, -250, -24, 440, 46);
+        var cycles = Text(R, "Cycles", "0<size=40%>  รอบ</size>", regular, 84, Black, -250, -100, 440, 100);
+        cycles.richText = true;
+        Text(R, "ExhaleLabel", "เวลาที่เป่ารวม", regular, 32, Black, 250, -24, 440, 46);
+        var exhale = Text(R, "Exhale", "0<size=40%>  วินาที</size>", regular, 84, Black, 250, -100, 440, 100);
+        exhale.richText = true;
+        var note = Text(R, "Note", "", regular, 26, Grey, 0, -175, 900, 40);
+
+        var replay = PillButton(R, "ReplayButton", Pink, -134, -274, "Replay");
+        var rl = replay.gameObject.AddComponent<SceneLoader>();
+        UnityEventTools.AddVoidPersistentListener(replay.onClick, rl.ReloadCurrent);
+        var home = PillButton(R, "HomeButton", Green, 134, -274, "Home");
+        var hl = home.gameObject.AddComponent<SceneLoader>();
+        UnityEventTools.AddStringPersistentListener(home.onClick, hl.LoadSceneByName, "Mode");   // หน้าหลัก = หน้าเลือกโหมด
+
+        var ui = root.gameObject.AddComponent<SoundscapeResultUI>();
+        ui.group = group;
+        ui.card = c.rectTransform;
+        ui.timeText = time;
+        ui.cyclesText = cycles;
+        ui.exhaleText = exhale;
+        ui.noteText = note;
+        root.SetAsLastSibling();
+        root.gameObject.SetActive(false);
+        BreezThaiFontInstaller.Apply(root.gameObject);
+        return ui;
+    }
+
+    static Button PillButton(Transform parent, string name, Color color, float x, float y, string label)
+    {
+        var img = Img(parent, name, pill, color);
+        img.type = Image.Type.Sliced;
+        img.raycastTarget = true;
+        Place(img.rectTransform, x, y, 238, 96);
+        Shadow(img.gameObject, 0.10f);
+        var b = img.gameObject.AddComponent<Button>();
+        b.targetGraphic = img;
+        Text(img.transform, "Label", label, regular, 36, Color.white, 0, 0, 238, 96);
+        return b;
+    }
+
+    static void Shadow(GameObject go, float alpha)
+    {
+        var s = go.AddComponent<Shadow>();
+        s.effectColor = new Color(0, 0, 0, alpha);
+        s.effectDistance = new Vector2(0, -6);
     }
 
     // ---------------------------------------------------------------

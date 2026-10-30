@@ -81,6 +81,7 @@ public class PWGameManager : MonoBehaviour
     {
         if (started) return;
         started = true;
+        if (howToPanel != null) BreezAudio.Play("count_go", 0.7f);
         if (howToPanel != null) howToPanel.SetActive(false);
         SpawnBalloon();
         UpdateUI();
@@ -249,6 +250,7 @@ public class PWGameManager : MonoBehaviour
 
         if (resultText != null)
             resultText.text = isWin ? winText : loseText;
+        BreezAudio.Play(isWin ? "result_win" : "result_end");
 
         if (finalScoreText != null)
             finalScoreText.text = currentScore.ToString();

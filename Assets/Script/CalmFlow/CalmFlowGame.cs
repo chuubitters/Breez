@@ -135,6 +135,7 @@ public class CalmFlowGame : MonoBehaviour
 
     public void StartSession()
     {
+        BreezAudio.Play("count_go", 0.7f);
         sessionSeconds = durationsMinutes[selectedIndex] * 60f;
         TimeLeft = sessionSeconds;
         played = 0f;
@@ -192,7 +193,7 @@ public class CalmFlowGame : MonoBehaviour
 
         if (blow)
         {
-            if (!growing) { growing = true; exhaleSpan = 0f; exhaleAbove = 0f; }
+            if (!growing) { growing = true; exhaleSpan = 0f; exhaleAbove = 0f; bloomSoundPlayed = false; }
             exhaleSpan += belowFor + dt;   // ช่วงตกสั้นๆ ระหว่างเป่า นับรวมเป็นการเป่าต่อเนื่อง
             exhaleAbove += dt;
             TotalExhale += dt;
@@ -208,6 +209,7 @@ public class CalmFlowGame : MonoBehaviour
         {
             flower.breathing = growing && belowFor <= 0f;
             if (growing) flower.progress = Mathf.Clamp01(exhaleSpan / Mathf.Max(0.1f, secondsToFullBloom));
+            if (growing && !bloomSoundPlayed && flower.progress >= 1f) { bloomSoundPlayed = true; BreezAudio.Play("flower_bloom"); }
         }
 
         if (TimeLeft <= 0f) { EndSession(); return; }
@@ -220,6 +222,7 @@ public class CalmFlowGame : MonoBehaviour
         if (exhaleSpan >= minExhaleSeconds)
         {
             FlowersGrown++;
+            BreezAudio.Play("flower_plant");
             sumBloom += size;
             LargestFlower01 = Mathf.Max(LargestFlower01, size);
             LongestExhale = Mathf.Max(LongestExhale, exhaleSpan);
@@ -255,8 +258,11 @@ public class CalmFlowGame : MonoBehaviour
         planted.Add(copy);
     }
 
+    bool bloomSoundPlayed;
+
     void EndSession()
     {
+        BreezAudio.Play("result_calm");
         if (growing) FinishFlower();
         Current = State.Done;
         if (flower != null) flower.breathing = false;

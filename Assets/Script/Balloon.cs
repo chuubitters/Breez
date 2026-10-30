@@ -52,6 +52,13 @@ public class Balloon : MonoBehaviour
 
         currentProgress += inflateSpeed * Time.deltaTime;
 
+        // เสียงลูกโป่งพอง (เว้นช่วงไม่ให้ถี่เกิน เสียงสูงขึ้นตามขนาด)
+        if (Time.time >= nextInflateSound)
+        {
+            nextInflateSound = Time.time + 0.2f;
+            BreezAudio.Play("balloon_inflate", 0.8f, 0.85f + currentProgress * 0.7f);
+        }
+
         currentProgress = Mathf.Clamp01(currentProgress);
 
         // ขยายลูกโป่ง
@@ -84,8 +91,11 @@ public class Balloon : MonoBehaviour
         }
     }
 
+    static float nextInflateSound;
+
     void Pop()
     {
+        BreezAudio.Play("balloon_pop");
         PWGameManager.instance.OnBalloonPopped(pointValue);
     }
 }

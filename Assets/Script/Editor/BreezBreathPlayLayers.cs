@@ -11,7 +11,7 @@ using UnityEngine.UI;
 // ใช้กับ 3 เกมใน Breath Play: Power Release / Breathe & Focus / Calm Flow (กดซ้ำได้)
 //   • ย้ายหน้าที่ต้องอยู่บนสุด (วิธีการเล่น / ผลลัพธ์ / พัก / นับถอยหลัง) ไปไว้ใน "BreezTopCanvas"
 //     (Screen Space Overlay, Sort Order 100) => อยู่บนลูกโป่ง ก้อนเมฆ ตัวละคร และ UI อื่นเสมอ
-//   • เพิ่มหน้า "วิธีการเล่น" ให้ Power Release และ Calm Flow (Breathe & Focus มีจาก Restyle แล้ว)
+//   • หน้า "วิธีการเล่น" แบบเดียวกันทั้ง 3 เกม (การ์ดขาว + ภาพ + คำอธิบาย 2 บรรทัด + ปุ่มเริ่ม + Back)
 //   • Calm Flow: ลบ UI ของ Power Release ที่ติดมาจากตอนคัดลอก scene
 // =====================================================================
 public static class BreezBreathPlayLayers
@@ -80,11 +80,38 @@ public static class BreezBreathPlayLayers
         if (gm == null) return "✗ Breathe & Focus: ไม่พบ BFGameManager";
         Undo.RecordObject(gm, "Layers");
         var top = TopCanvas();
-        if (gm.startPanel == null || gm.startPanel.name != "HowToPlayPanel")
-            return "✗ Breathe & Focus: กด Breez > Restyle Breathe & Focus ก่อน แล้วค่อยกดเมนูนี้อีกครั้ง";
+
+        // หน้าวิธีการเล่นแบบเดิม (จาก Restyle) อยู่ที่ canvas อื่น => ลบ แล้วสร้างใหม่แบบเดียวกับอีกสองเกม
+        if (gm.startPanel != null && gm.startPanel.transform.parent != top && gm.startPanel.name == "HowToPlayPanel")
+            Undo.DestroyObjectImmediate(gm.startPanel);
+        else if (gm.startPanel != null && gm.startPanel.name != "HowToPlayPanel")
+            gm.startPanel.SetActive(false);   // start panel เก่าก่อน restyle: ซ่อนไว้
+
+        Sprite playerSprite = null;
+        var player = Object.FindObjectOfType<PlayerController>();
+        if (player != null) { var sr = player.GetComponentInChildren<SpriteRenderer>(); if (sr != null) playerSprite = sr.sprite; }
+        var cloud = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/element/B&F/clound.png");
+
+        var how = HowTo(top, "เป่าตัวเครื่องเพื่อให้ตัวละครลอยขึ้น\nและข้ามสิ่งกีดขวางให้ได้มากที่สุด", out var start, art =>
+        {
+            var cloudTint = new Color32(0xE3, 0xED, 0xF1, 255);
+            if (cloud != null)
+            {
+                Shadow(Art(art, "CloudUpper", cloud, 110, 120, 190, 122).gameObject, 0.12f);
+                Shadow(Art(art, "CloudLower", cloud, -150, 45, 190, 122).gameObject, 0.12f);
+                foreach (Transform t in art) t.GetComponent<Image>().color = cloudTint;
+            }
+            if (playerSprite != null)
+                Art(art, "Player", playerSprite, -20, 110, 110, 88).color = new Color32(0x55, 0x55, 0x55, 255);
+        });
+        gm.startPanel = how;
+        gm.startButton = start;
+        how.SetActive(true);   // BFGameManager เปิด/ปิดเองตอนเริ่ม
+
         MoveToTop(gm.gameOverPanel, top);
-        MoveToTop(gm.startPanel, top);
         if (gm.countdownText != null) MoveToTop(gm.countdownText.gameObject, top);
+        how.transform.SetAsLastSibling();
+        if (gm.countdownText != null) gm.countdownText.transform.SetAsLastSibling();
         return Save(gm, "Breathe & Focus");
     }
 
