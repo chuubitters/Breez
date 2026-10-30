@@ -19,6 +19,10 @@ public class SoundscapeCountdownUI : MonoBehaviour
     public string goText = "เริ่ม!";
     public float numberSize = 150f;
     public float goSize = 110f;
+    [Tooltip("พื้นหลังสีขาวตอนนับถอยหลัง (ตัวลูกชื่อ Blocker)")]
+    public Color backdropColor = new Color(1f, 1f, 1f, 0.94f);
+    [Tooltip("สีวงแหวนพื้น (ตัวลูกชื่อ RingTrack) ให้เห็นชัดบนพื้นขาว")]
+    public Color trackColor = new Color32(0xE4, 0xEC, 0xDD, 255);
 
     float popT = 1f, ringFrom = 1f, ringTo = 1f, ringT = 1f, ringDur = 1f;
     float fadeTarget, fade;
@@ -26,6 +30,12 @@ public class SoundscapeCountdownUI : MonoBehaviour
     void Awake()
     {
         if (group == null) group = GetComponent<CanvasGroup>();
+        // พื้นหลังขาว + วงแหวนพื้นสีเขียวอ่อน (ใช้ได้ทันทีโดยไม่ต้องกดเมนูใหม่)
+        var blocker = transform.Find("Blocker");
+        if (blocker != null) { var img = blocker.GetComponent<Image>(); if (img != null) { img.color = backdropColor; img.raycastTarget = true; } }
+        foreach (var img in GetComponentsInChildren<Image>(true))
+            if (img.name == "RingTrack") img.color = trackColor;
+        transform.SetAsLastSibling();
         fade = fadeTarget = 0f;
         Apply();
     }
@@ -33,6 +43,7 @@ public class SoundscapeCountdownUI : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+        transform.SetAsLastSibling();
         fadeTarget = 1f;
         if (caption != null) caption.text = captionText;
     }

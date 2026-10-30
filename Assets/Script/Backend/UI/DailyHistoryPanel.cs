@@ -102,9 +102,14 @@ public class DailyHistoryPanel : MonoBehaviour
 
     public void Open(DateTime day) => Open(day, View.Both);
 
+    bool autoPick;
+
     public void Open(DateTime day, View view)
     {
-        if (panel != null) panel.SetActive(true);
+        // หน้าประวัติต้องอยู่บนสุดเสมอ
+        transform.SetAsLastSibling();
+        if (panel != null) { panel.SetActive(true); panel.transform.SetAsLastSibling(); }
+        autoPick = true;   // โหลดเสร็จแล้วเลือกวันล่าสุดที่มีข้อมูลให้เอง
         CurrentView = view;
         ApplyView();
         selected = day.Date > Today ? Today : day.Date;
@@ -142,20 +147,65 @@ public class DailyHistoryPanel : MonoBehaviour
 
         data = null;
         Render();
-        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("กรุณาเข้าสู่ระบบ"); return; }
+        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("กรุณาเข้าสู่ระบบ"); ListMessage("กรุณาเข้าสู่ระบบก่อน จึงจะดูประวัติได้"); return; }
         SetStatus("กำลังโหลด...");
+        ListMessage("กำลังโหลดข้อมูล...");
         int id = ++requestId;
         string body = Json.Obj("p_from", Json.Str(BreezText.Iso(from)), "p_to", Json.Str(BreezText.Iso(windowEnd)));
         BreezBackend.Instance.Rpc("my_history", body, (ok, text) =>
         {
             if (this == null || id != requestId) return;
-            if (!ok) { SetStatus(text); return; }
+            if (!ok)
+            {
+                Debug.LogWarning("[Breez] my_history failed: " + text);
+                SetStatus("โหลดไม่สำเร็จ");
+                ListMessage("โหลดข้อมูลไม่สำเร็จ\n" + text);
+                return;
+            }
             try { data = JsonUtility.FromJson<HistoryData>(text); }
-            catch (Exception e) { Debug.LogWarning("[Breez] History parse error: " + e.Message); SetStatus("อ่านข้อมูลไม่ได้"); return; }
+            catch (Exception e) { Debug.LogWarning("[Breez] History parse error: " + e.Message); SetStatus("อ่านข้อมูลไม่ได้"); ListMessage("อ่านข้อมูลไม่ได้"); return; }
+            if (data == null) data = new HistoryData();
             cache[key] = data;
+            Debug.Log($"[Breez] my_history {BreezText.Iso(from)}..{BreezText.Iso(windowEnd)}: {(data.moods?.Length ?? 0)} moods, {(data.sessions?.Length ?? 0)} sessions");
             SetStatus("");
+            if (autoPick) { autoPick = false; PickLatestDay(); }
             Render();
         });
+    }
+
+    /// <summary>เลือกวันล่าสุดในสัปดาห์ที่มีข้อมูลของมุมมองนี้ (ไม่มีเลย = คงวันเดิม)</summary>
+    void PickLatestDay()
+    {
+        if (data == null) return;
+        for (int i = 0; i < 7; i++)
+        {
+            var d = windowEnd.AddDays(-i);
+            string iso = BreezText.Iso(d);
+            bool hasMood = false, hasPlay = false;
+            if (data.moods != null) foreach (var m in data.moods) if (m.date == iso) { hasMood = true; break; }
+            if (data.sessions != null) foreach (var x in data.sessions) if (x.date == iso) { hasPlay = true; break; }
+            bool match = CurrentView == View.Moods ? hasMood : CurrentView == View.Plays ? hasPlay : hasMood || hasPlay;
+            if (match) { selected = d; return; }
+        }
+    }
+
+    /// <summary>ข้อความกลางรายการ (กำลังโหลด / ผิดพลาด) ให้เห็นเสมอ</summary>
+    void ListMessage(string msg)
+    {
+        if (moodEmpty != null)
+        {
+            bool show = CurrentView != View.Plays;
+            moodEmpty.gameObject.SetActive(show);
+            moodEmpty.text = msg;
+            moodEmpty.transform.SetAsLastSibling();
+        }
+        if (sessionEmpty != null)
+        {
+            bool show = CurrentView != View.Moods;
+            sessionEmpty.gameObject.SetActive(show);
+            sessionEmpty.text = msg;
+            sessionEmpty.transform.SetAsLastSibling();
+        }
     }
 
     void SelectIndex(int i)
@@ -206,9 +256,19 @@ public class DailyHistoryPanel : MonoBehaviour
                 foreach (var s in data.sessions)
                     if (s.date == iso) { AddSessionRow(s); sessions++; }
         }
-        bool loaded = data != null;
-        if (moodEmpty != null) { moodEmpty.gameObject.SetActive(loaded && moods == 0 && CurrentView != View.Plays); moodEmpty.text = "ไม่ได้บันทึกอารมณ์ในวันนี้"; }
-        if (sessionEmpty != null) { sessionEmpty.gameObject.SetActive(loaded && sessions == 0 && CurrentView != View.Moods); sessionEmpty.text = "ไม่มีการเล่นในวันนี้"; }
+        if (data == null) return;   // ยังโหลดไม่เสร็จ: คงข้อความ "กำลังโหลด" ไว้
+        if (moodEmpty != null)
+        {
+            moodEmpty.gameObject.SetActive(moods == 0 && CurrentView != View.Plays);
+            moodEmpty.text = WeekHas(true) ? "ไม่ได้บันทึกอารมณ์ในวันนี้\nลองกดวันอื่นด้านบน" : "ยังไม่มีการบันทึกอารมณ์ในสัปดาห์นี้\nเลือกอารมณ์ในหน้า Mood Tracking ได้เลย";
+            moodEmpty.transform.SetAsLastSibling();
+        }
+        if (sessionEmpty != null)
+        {
+            sessionEmpty.gameObject.SetActive(sessions == 0 && CurrentView != View.Moods);
+            sessionEmpty.text = WeekHas(false) ? "ไม่มีการเล่นในวันนี้\nลองกดวันอื่นด้านบน" : "ยังไม่มีการเล่นในสัปดาห์นี้";
+            sessionEmpty.transform.SetAsLastSibling();
+        }
     }
 
     // ---------------------------------------------------------------
@@ -268,6 +328,12 @@ public class DailyHistoryPanel : MonoBehaviour
         return t != null ? t.GetComponent<TMP_Text>() : null;
     }
 
+
+    bool WeekHas(bool moods)
+    {
+        if (data == null) return false;
+        return moods ? data.moods != null && data.moods.Length > 0 : data.sessions != null && data.sessions.Length > 0;
+    }
 
     HistoryDay FindDay(DateTime d)
     {

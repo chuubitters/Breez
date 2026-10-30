@@ -79,13 +79,19 @@ public class SPGameManager : MonoBehaviour
         if (bgm != null)
             bgm.Play();
 
+        // ปุ่ม "จบการฝึก": ถ้ายังไม่ได้ผูก ให้หาจากรูป end-bt / ชื่อ End
+        if (endButton == null) endButton = FindEndButton();
         if (endButton != null)
         {
             endButton.onClick.RemoveListener(EndSession);
             endButton.onClick.AddListener(EndSession);
+            endButton.transform.SetAsLastSibling();   // ไม่ให้ UI อื่นบังปุ่ม
         }
+        else Debug.LogWarning("[Breez] Soundscape: ไม่พบปุ่ม จบการฝึก (ลาก Button ใส่ช่อง End Button ของ SPGameManager)");
+        if (resultUI == null) resultUI = FindObjectOfType<SoundscapeResultUI>(true);
         if (resultUI != null)
             resultUI.gameObject.SetActive(false);
+        else Debug.LogWarning("[Breez] Soundscape: ยังไม่มีหน้าผลลัพธ์ กดเมนู Breez > Restyle Soundscape Countdown");
 
         // ฝนหายไปจาก scene (เช่น ถูกลบ) => สร้างใหม่ให้อัตโนมัติ
         if (rainParticles == null && autoCreateRain && gameObject.scene.name.ToLower().Contains("rain"))
@@ -412,10 +418,13 @@ public class SPGameManager : MonoBehaviour
 
         BreezAudio.Play("result_calm");
 
+        Debug.Log($"[Breez] Soundscape ended: {seconds:0}s, {breathCycles} cycles, saved={sessionSaved}");
+        if (resultUI == null) resultUI = FindObjectOfType<SoundscapeResultUI>(true);
         if (resultUI != null)
+        {
+            if (resultUI.transform.parent != null) resultUI.transform.parent.gameObject.SetActive(true);
             resultUI.Show(seconds, breathCycles, exhaleSeconds, sessionSaved);
-        else
-            Debug.Log("Soundscape ended: " + seconds.ToString("0") + "s");
+        }
     }
 
     // ==================================
@@ -423,6 +432,21 @@ public class SPGameManager : MonoBehaviour
     // ==================================
     private float sfxBaseVolume = 1f;
     private bool sessionEnded = false;
+
+    private Button FindEndButton()
+    {
+        foreach (var b in FindObjectsOfType<Button>(true))
+        {
+            if (b.gameObject.scene != gameObject.scene) continue;
+            var img = b.GetComponent<Image>();
+            string n = (b.name + " " + (img != null && img.sprite != null ? img.sprite.name : "")).ToLowerInvariant();
+            if (n.Contains("endbt") || n.Contains("end-bt") || n.Contains("end_bt") || b.name.ToLowerInvariant().StartsWith("end"))
+                return b;
+            var label = b.GetComponentInChildren<TMP_Text>(true);
+            if (label != null && label.text.Contains("จบการฝึก")) return b;
+        }
+        return null;
+    }
 
     private void SetupAudio()
     {
