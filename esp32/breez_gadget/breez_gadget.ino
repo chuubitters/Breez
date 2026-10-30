@@ -59,6 +59,9 @@ const int TFT_CS   = 7;
 const int TFT_DC   = 10;
 const int TFT_RST  = 1;
 const int TFT_ROTATION = 0;     // หมุนจอ 0-3
+// ความเร็วส่งภาพไปจอ: สายจัมเปอร์ยาวบน breadboard ใช้ 20MHz
+// ถ้าจอยังขึ้นสีมั่ว/เป็นจุดๆ ลดเป็น 10000000 / ถ้าบัดกรีสายสั้นแล้วลองเพิ่มเป็น 40000000 ให้ภาพลื่นขึ้น
+const long TFT_SPI_HZ  = 20000000;
 
 // ---------------- ตั้งค่า ----------------
 const long BAUD          = 115200;
@@ -77,7 +80,7 @@ const int BLOW_MIN = 12;         // แรงเป่าขั้นต่ำ�
 const uint32_t DONE_SCREEN_MS = 30000;   // หน้าจบค้างไว้กี่ ms แล้วกลับหน้าแรก
 
 // ---------------- จอ ----------------
-Arduino_DataBus *bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED);
+Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, GFX_NOT_DEFINED);
 Arduino_GFX *gfx = new Arduino_GC9A01(bus, TFT_RST, TFT_ROTATION, true /* IPS */);
 uint16_t *frame = nullptr;
 bool displayOk = false;
@@ -354,7 +357,7 @@ void setup()
 
   frame = (uint16_t *)malloc(240 * 240 * sizeof(uint16_t));
   if (frame != nullptr) ui::begin(frame);
-  if (frame != nullptr && gfx->begin(40000000))
+  if (frame != nullptr && gfx->begin(TFT_SPI_HZ))
   {
     displayOk = true;
     gfx->fillScreen(0xFFFF);
