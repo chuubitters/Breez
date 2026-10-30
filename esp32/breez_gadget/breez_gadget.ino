@@ -12,12 +12,18 @@
       BAT:85             แบตเตอรี่ %         (ถ้าเปิดใช้ BAT_PIN)
       QS:START           เริ่ม Quick Session
       QS:STOP            หยุดกลางคัน
-      QS:DONE,4,76,85    จบครบ: รอบ, วินาที, % เวลาที่เป่าได้ตอนหายใจออก
+      QS:LOG,7,4,76,85,1793500000
+                         ผลที่ยังไม่ได้ส่ง: id, รอบ, วินาที, % เป่า, เวลาจบ (unix, 0 = ไม่ทราบ)
+                         เก็บในเครื่องได้ 20 รายการ ส่งซ้ำจนกว่าเกมตอบ QS:ACK
+  Quick Session ที่ฝึกตอนไม่ได้เสียบเกม จะถูกเก็บไว้ แล้วส่งเข้าเกม/หลังบ้านเองตอนเสียบสาย
       # ...              ข้อความดีบัก        (Unity ไม่สนใจ)
   รับจาก Unity:
       NAME:<ชื่อ>  ICON:<...>   (จำไว้ใน flash)
       CAL                       คาลิเบรตใหม่
       QS                        เริ่ม Quick Session จากเกม
+      TIME:<unix>               เวลาปัจจุบัน (เกมส่งตอนเชื่อมต่อ) => ส่งผลที่ค้างอยู่
+      SYNC                      ส่งผลที่ค้างอยู่อีกครั้ง
+      QS:ACK,<id>               เกมบันทึกแล้ว => ลบออกจากเครื่อง
 
   ---------------- การต่อสาย ----------------
   KY-037           -> ESP32-C3 Super Mini
@@ -162,6 +168,84 @@ void enter(State s)
   stateAt = millis();
 }
 
+// ---------------- ผล Quick Session ที่ยังไม่ได้ส่ง (เก็บใน flash) ----------------
+const int QS_MAX = 20;
+struct QsLog { uint32_t id; uint8_t rounds; uint16_t secs; int8_t blow; uint32_t epoch; uint32_t boot; uint32_t ms; };
+QsLog qsLogs[QS_MAX];
+int qsCount = 0;
+uint32_t qsNextId = 1, bootId = 0;
+uint32_t epochAtSync = 0, millisAtSync = 0;
+
+uint32_t nowEpoch() { return epochAtSync ? epochAtSync + (millis() - millisAtSync) / 1000 : 0; }
+
+void saveLogs()
+{
+  prefs.putBytes("qs_logs", qsLogs, sizeof(QsLog) * qsCount);
+  prefs.putInt("qs_n", qsCount);
+  prefs.putUInt("qs_next", qsNextId);
+}
+
+void loadLogs()
+{
+  qsCount = constrain(prefs.getInt("qs_n", 0), 0, QS_MAX);
+  if (qsCount > 0 && prefs.getBytesLength("qs_logs") == sizeof(QsLog) * qsCount)
+    prefs.getBytes("qs_logs", qsLogs, sizeof(QsLog) * qsCount);
+  else qsCount = 0;
+  qsNextId = prefs.getUInt("qs_next", 1);
+  bootId = prefs.getUInt("boot", 0) + 1;
+  prefs.putUInt("boot", bootId);
+}
+
+void sendLogs()
+{
+  for (int i = 0; i < qsCount; i++)
+  {
+    const QsLog &q = qsLogs[i];
+    Serial.printf("QS:LOG,%lu,%d,%d,%d,%lu\n", (unsigned long)q.id, q.rounds, q.secs, q.blow, (unsigned long)q.epoch);
+  }
+}
+
+void addLog(int rounds, uint32_t secs, int blow)
+{
+  if (qsCount >= QS_MAX)   // เต็ม => ทิ้งอันเก่าสุด
+  {
+    for (int i = 1; i < QS_MAX; i++) qsLogs[i - 1] = qsLogs[i];
+    qsCount = QS_MAX - 1;
+  }
+  QsLog q = { qsNextId++, (uint8_t)rounds, (uint16_t)min<uint32_t>(secs, 65535), (int8_t)blow, nowEpoch(), bootId, millis() };
+  qsLogs[qsCount++] = q;
+  saveLogs();
+  sendLogs();
+}
+
+void ackLog(uint32_t id)
+{
+  for (int i = 0; i < qsCount; i++)
+    if (qsLogs[i].id == id)
+    {
+      for (int j = i + 1; j < qsCount; j++) qsLogs[j - 1] = qsLogs[j];
+      qsCount--;
+      saveLogs();
+      Serial.printf("# acked %lu, %d left\n", (unsigned long)id, qsCount);
+      return;
+    }
+}
+
+/// ได้เวลาจริงจากเกม => เติมเวลาให้ผลที่ฝึกในรอบเปิดเครื่องนี้
+void setTime(uint32_t unix)
+{
+  epochAtSync = unix;
+  millisAtSync = millis();
+  bool changed = false;
+  for (int i = 0; i < qsCount; i++)
+    if (qsLogs[i].epoch == 0 && qsLogs[i].boot == bootId)
+    {
+      qsLogs[i].epoch = unix - (millis() - qsLogs[i].ms) / 1000;
+      changed = true;
+    }
+  if (changed) saveLogs();
+}
+
 // ---------------- Quick Session ----------------
 void startSession()
 {
@@ -184,8 +268,8 @@ void finishSession()
   lastBlowPct = exhaleMs > 0 ? (int)(blowMs * 100 / exhaleMs) : 0;
   sessionsDone++;
   prefs.putInt("qs_count", sessionsDone);
-  Serial.printf("QS:DONE,%d,%lu,%d\n", ROUNDS, (unsigned long)secs, lastBlowPct);
   enter(ST_DONE);
+  addLog(ROUNDS, secs, lastBlowPct);   // เก็บไว้ + ส่งทันที (ถ้าเสียบเกมอยู่ เกมจะตอบ ACK)
 }
 
 void onShortPress()
@@ -302,6 +386,23 @@ void handleLine(String line)
     calibrate();
     enter(ST_IDLE);
   }
+  else if (line.startsWith("TIME:"))
+  {
+    setTime((uint32_t)strtoul(line.c_str() + 5, nullptr, 10));
+    sendLogs();
+  }
+  else if (line == "SYNC")
+  {
+    sendLogs();
+  }
+  else if (line.startsWith("QS:ACK,"))
+  {
+    ackLog((uint32_t)strtoul(line.c_str() + 7, nullptr, 10));
+  }
+  else if (line.startsWith("COLOR:"))
+  {
+    prefs.putString("color", line.substring(6));
+  }
   else if (line == "QS" || line == "QS:START")
   {
     if (state == ST_IDLE || state == ST_DONE || state == ST_STOPPED) startSession();
@@ -345,6 +446,7 @@ void setup()
   gadgetName = prefs.getString("name", gadgetName);
   gadgetIcon = prefs.getString("icon", gadgetIcon);
   sessionsDone = prefs.getInt("qs_count", 0);
+  loadLogs();
 
   ui::begin(band, BAND_H);
   displayOk = gfx->begin(TFT_SPI_HZ);
@@ -387,6 +489,13 @@ void loop()
   {
     lastSend = now;
     Serial.println((int)(level + 0.5f));
+  }
+  // ยังมีผลค้างส่ง => ส่งซ้ำทุก 20 วินาที (เกมที่เปิดอยู่จะบันทึกแล้วตอบ ACK)
+  static unsigned long lastLogSend = 0;
+  if (qsCount > 0 && now - lastLogSend >= 20000)
+  {
+    lastLogSend = now;
+    sendLogs();
   }
   if (BAT_PIN >= 0 && now - lastBat >= 30000)
   {

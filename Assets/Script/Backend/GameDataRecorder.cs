@@ -48,16 +48,17 @@ public static class GameDataRecorder
             "exhale_ms", Json.Num(Mathf.RoundToInt(Mathf.Max(0f, exhaleSeconds) * 1000f))), done);
 
     /// <summary>Quick Session 4-7-8 (ฝึกบนตัวเครื่อง) — rounds = รอบที่ครบ, blowPct = % เวลาที่เป่าได้ตอนหายใจออก</summary>
-    public static void RecordQuickSession(float durationSeconds, int rounds = 0, int blowPct = -1, Action<bool> done = null) =>
+    public static void RecordQuickSession(float durationSeconds, int rounds = 0, int blowPct = -1, Action<bool> done = null, DateTime? endedAtUtc = null) =>
         RecordSession(QuickSession, Mathf.Max(0, blowPct), durationSeconds, Json.Obj(
             "pattern", Json.Str("4-7-8"),
             "rounds", Json.Num(Mathf.Max(0, rounds)),
             "blow_pct", Json.Num(Mathf.Clamp(blowPct, 0, 100)),
-            "source", Json.Str("gadget")), done);
+            "source", Json.Str("gadget")), done, endedAtUtc);
 
     // ---------- ทั่วไป ----------
 
-    public static void RecordSession(string mode, int score, float durationSeconds, string detailsJson = "{}", Action<bool> done = null)
+    /// <param name="endedAtUtc">เวลาที่เล่นจบจริง (เช่น Quick Session ที่ฝึกบนเครื่องตอนไม่ได้เสียบเกม) ไม่ใส่ = ตอนนี้</param>
+    public static void RecordSession(string mode, int score, float durationSeconds, string detailsJson = "{}", Action<bool> done = null, DateTime? endedAtUtc = null)
     {
         var backend = BreezBackend.Instance;
         if (!backend.IsLoggedIn)
@@ -68,7 +69,7 @@ public static class GameDataRecorder
         }
 
         int seconds = Mathf.Max(0, Mathf.RoundToInt(durationSeconds));
-        string startedAt = DateTime.UtcNow.AddSeconds(-seconds)
+        string startedAt = (endedAtUtc ?? DateTime.UtcNow).AddSeconds(-seconds)
             .ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
         string deviceId = DeviceService.Current?.device_id;
 
@@ -84,7 +85,9 @@ public static class GameDataRecorder
         {
             Debug.Log(ok ? $"[Breez] Saved {mode}: score {score}, {seconds}s" : $"[Breez] {mode}: {msg}");
             Saved?.Invoke(ok, ok ? "บันทึกผลแล้ว" : msg);
-            done?.Invoke(ok);
+            // เก็บไว้ส่งทีหลัง (ออฟไลน์) ก็นับว่าบันทึกแล้ว — ไม่ต้องให้ผู้เรียกส่งซ้ำ
+            bool queued = !ok && msg != null && msg.StartsWith("บันทึกแบบออฟไลน์");
+            done?.Invoke(ok || queued);
         }, queueOnFailure: true);
     }
 
