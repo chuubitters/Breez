@@ -66,7 +66,7 @@ function recentDetail(r) {
     <div>
       <div class="eyebrow"><span class="eyebrow-dot"></span> RELAX MODES</div>
       <h1>โหมด<span class="highlight">ผ่อนคลาย</span></h1>
-      <p class="page-description">Soundscape ในเกม และ Quick Session บนตัวเครื่อง · ไม่รวมบัญชีผู้ดูแล</p>
+      <p class="page-description">Soundscape ในเกม และ Quick Session บนตัวเครื่อง · รวมทุกบัญชี</p>
     </div>
     <div class="period-select">
       <span>ช่วงเวลา</span>

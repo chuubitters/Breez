@@ -34,6 +34,8 @@ public class GadgetStatusUI : MonoBehaviour
 
     [Header("Options")]
     public bool showBattery = false;
+    [Tooltip("ไอคอนใช้สีที่ผู้เล่นตั้งในหน้า Gadget Setting")]
+    public bool useDeviceColor = true;
     [Tooltip("ถ้า scene นี้ไม่มี SerialController ให้สร้างเพื่อเช็คการเชื่อมต่อ")]
     public bool startSerialIfMissing = true;
     [Tooltip("กดที่ป้ายแล้วเปิด scene นี้ (เว้นว่าง = ไม่ทำอะไร)")]
@@ -51,12 +53,19 @@ public class GadgetStatusUI : MonoBehaviour
 
         var btn = GetComponent<Button>();
         if (btn != null && !string.IsNullOrEmpty(openSceneOnClick))
-            btn.onClick.AddListener(() => SceneManager.LoadScene(openSceneOnClick));
+            btn.onClick.AddListener(() =>
+            {
+                ReturnScene = SceneManager.GetActiveScene().name;   // ตั้งค่าเสร็จแล้วกลับมาหน้านี้
+                SceneManager.LoadScene(openSceneOnClick);
+            });
 
         DeviceService.Updated += OnDeviceUpdated;
         if (DeviceService.Current == null && BreezBackend.Instance.IsLoggedIn) DeviceService.Sync();
         InvokeRepeating(nameof(Refresh), 0f, 1f);
     }
+
+    /// <summary>หน้าที่กดป้ายสถานะเข้ามา (หน้า Gadget Setting ใช้กลับไป)</summary>
+    public static string ReturnScene;
 
     void OnDestroy() => DeviceService.Updated -= OnDeviceUpdated;
 
@@ -73,10 +82,12 @@ public class GadgetStatusUI : MonoBehaviour
 
         if (iconImage != null)
         {
-            string id = d != null && !string.IsNullOrEmpty(d.device_icon) ? d.device_icon : "cat";
+            string id = d != null ? d.IconId : DeviceInfo.DefaultIcon;
             var s = SpriteFor(id);
             if (s != null) iconImage.sprite = s;
-            iconImage.color = connected ? iconConnected : iconDisconnected;
+            // สีที่ตั้งไว้ในหน้า Gadget Setting (ไม่ได้เชื่อมต่อ = จางลง)
+            Color c = d != null && useDeviceColor ? d.IconColor : iconConnected;
+            iconImage.color = connected ? c : Color.Lerp(c, iconDisconnected, 0.65f);
         }
 
         if (batteryText != null)

@@ -10,6 +10,31 @@ public class DeviceInfo
     public int battery_level;
     public string connection_status;
     public string updated_at;
+
+    // device_icon เก็บแบบ "cat" หรือ "cat|#A9C77E" (ไอคอน|สี) — ไม่ต้องเพิ่มคอลัมน์ในฐานข้อมูล
+    public const string DefaultIcon = "cat";
+    public const string DefaultColor = "#555555";
+
+    public string IconId => SplitIcon(device_icon).id;
+    public string IconHex => SplitIcon(device_icon).hex;
+    public Color IconColor => ParseColor(IconHex);
+
+    public static (string id, string hex) SplitIcon(string raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return (DefaultIcon, DefaultColor);
+        int bar = raw.IndexOf('|');
+        string id = bar < 0 ? raw : raw.Substring(0, bar);
+        string hex = bar < 0 ? DefaultColor : raw.Substring(bar + 1);
+        if (string.IsNullOrEmpty(id)) id = DefaultIcon;
+        if (string.IsNullOrEmpty(hex) || !ColorUtility.TryParseHtmlString(hex, out _)) hex = DefaultColor;
+        return (id, hex);
+    }
+
+    public static string ComposeIcon(string id, string hex) =>
+        (string.IsNullOrEmpty(id) ? DefaultIcon : id) + "|" + (string.IsNullOrEmpty(hex) ? DefaultColor : hex.ToUpperInvariant());
+
+    public static Color ParseColor(string hex) =>
+        ColorUtility.TryParseHtmlString(hex, out var c) ? c : new Color32(85, 85, 85, 255);
 }
 
 // =====================================================================
@@ -52,7 +77,8 @@ public static class DeviceService
     {
         if (Current == null) return;
         SendToGadget("NAME:" + (Current.device_name ?? "").Replace("\n", " "));
-        SendToGadget("ICON:" + Current.device_icon);
+        SendToGadget("ICON:" + Current.IconId);
+        SendToGadget("COLOR:" + Current.IconHex.TrimStart('#'));
     }
 
     /// <summary>ออนไลน์ตามข้อมูลบนเซิร์ฟเวอร์ (อัปเดตภายใน 2 นาที)</summary>

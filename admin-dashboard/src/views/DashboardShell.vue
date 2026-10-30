@@ -56,6 +56,18 @@ onMounted(async () => {
   try { summary.value = await rpc('dashboard_overview', { p_days: 7 }) } catch { /* แสดงหน้าได้ปกติ */ }
 })
 onBeforeUnmount(() => window.removeEventListener('hashchange', onHash))
+
+// รวมบัญชีผู้ดูแลในสถิติ (owner เปิด/ปิดได้) — ถ้าฐานข้อมูลยังไม่มีฟังก์ชันนี้ จะซ่อนปุ่ม
+const includeStaff = ref(null)
+const pageKey = ref(0)
+rpc('dashboard_settings_get').then(r => { includeStaff.value = !!r?.include_staff }).catch(() => { includeStaff.value = null })
+async function toggleStaff() {
+  if (!isOwner.value || includeStaff.value === null) return
+  try {
+    includeStaff.value = !!(await rpc('dashboard_set_include_staff', { p_include: !includeStaff.value }))
+    pageKey.value++
+  } catch (e) { alert(e.message) }
+}
 watch(search, () => { if (search.value) playerFilter.value = null })
 
 const notifications = computed(() => {
@@ -115,13 +127,17 @@ const notifications = computed(() => {
             <p v-for="n in notifications" :key="n">{{ n }}</p>
             <p v-if="!notifications.length">ยังไม่มีการแจ้งเตือน</p>
           </div>
+          <button v-if="includeStaff !== null" class="staff-toggle" :class="{ on: includeStaff }" :disabled="!isOwner"
+            :title="isOwner ? 'กดเพื่อสลับ' : 'เฉพาะ owner'" @click="toggleStaff">
+            <i></i>{{ includeStaff ? 'รวมบัญชีผู้ดูแล' : 'ไม่รวมบัญชีผู้ดูแล' }}
+          </button>
           <span class="role-badge" :class="me.role">{{ isOwner ? 'OWNER' : 'ADMIN' }}</span>
           <button class="top-avatar" @click="showMenu = !showMenu" :title="me.email">{{ initials(me.name) }}</button>
         </div>
       </header>
 
       <div class="page-content">
-        <component :is="current.page" :key="current.id" :me="me" :search="search" :player-filter="playerFilter"
+        <component :is="current.page" :key="current.id + ':' + pageKey" :me="me" :search="search" :player-filter="playerFilter"
           @navigate="(id, opts) => go(id, opts)" @clear-player="playerFilter = null" />
         <footer class="page-footer"><span><img src="/breez-logo.png" alt="breez" /> admin dashboard</span><span>เชื่อมต่อ Supabase · ข้อมูลจริง</span></footer>
       </div>

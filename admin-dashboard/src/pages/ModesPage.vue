@@ -59,7 +59,7 @@ const sceneMax = computed(() => Math.max(1, ...(sound.value.scenes ?? []).map(s 
     <div>
       <div class="eyebrow"><span class="eyebrow-dot"></span> TRAINING MODES</div>
       <h1>โหมด<span class="highlight">การฝึก</span></h1>
-      <p class="page-description">ข้อมูลที่เก็บจากแต่ละโหมด · ไม่รวมบัญชีผู้ดูแล</p>
+      <p class="page-description">ข้อมูลที่เก็บจากแต่ละโหมด · รวม/ไม่รวมบัญชีผู้ดูแล เลือกได้ที่ปุ่มด้านบน</p>
     </div>
     <div class="period-select">
       <span>ช่วงเวลา</span>
