@@ -193,7 +193,7 @@ public class MoodTrackingScreen : MonoBehaviour
     public static string Detail(SummarySession s)
     {
         string line1 = $"ระยะเวลาที่ใช้ {BreezText.Clock(s.duration)} นาที";
-        string line2 = BreezText.SessionResult(s);
+        string line2 = BreezText.SessionResultFull(s);
         return string.IsNullOrEmpty(line2) ? line1 : line1 + "\n" + line2;
     }
 

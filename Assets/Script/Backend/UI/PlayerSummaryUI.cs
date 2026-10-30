@@ -26,6 +26,9 @@ public class SummarySession
     public int obstacles_avoided = -1;
     public string scene;           // Soundscape: ชื่อฉาก
     public int breath_cycles = -1; // Soundscape: รอบหายใจที่ครบ
+    public int exhale_ms = -1;     // Soundscape: เวลาที่เป่ารวม
+    public int rounds = -1;        // Quick Session: รอบ 4-7-8 ที่ครบ
+    public int blow_pct = -1;      // Quick Session: % เวลาที่เป่าได้ตอนหายใจออก
 }
 
 [Serializable] public class SummaryModeCounts { public int calm; public int power; public int focus; public int soundscape; public int quick; }

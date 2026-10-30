@@ -79,6 +79,16 @@ public class SPGameManager : MonoBehaviour
         if (bgm != null)
             bgm.Play();
 
+        // ยังไม่ได้ผูกในฉาก => หาเอง
+        if (resultUI == null) resultUI = FindObjectOfType<SoundscapeResultUI>(true);
+        if (endButton == null)
+            foreach (var b in FindObjectsOfType<Button>(true))
+            {
+                var im = b.GetComponent<Image>();
+                string n = b.name.ToLower() + " " + (im != null && im.sprite != null ? im.sprite.name.ToLower() : "");
+                if (n.Contains("end")) { endButton = b; break; }
+            }
+
         if (endButton != null)
         {
             endButton.onClick.RemoveListener(EndSession);

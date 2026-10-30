@@ -5,6 +5,7 @@ import { initials, number } from '../lib/format'
 import OverviewPage from '../pages/OverviewPage.vue'
 import PlayersPage from '../pages/PlayersPage.vue'
 import ModesPage from '../pages/ModesPage.vue'
+import RelaxPage from '../pages/RelaxPage.vue'
 import SessionsPage from '../pages/SessionsPage.vue'
 import MoodsPage from '../pages/MoodsPage.vue'
 import DevicesPage from '../pages/DevicesPage.vue'
@@ -19,6 +20,7 @@ const isOwner = computed(() => props.me.role === 'owner')
 const allNav = [
   { id: 'overview', label: 'ภาพรวม', icon: '◫', title: 'ภาพรวมระบบ', page: OverviewPage },
   { id: 'modes', label: 'โหมดการฝึก', icon: '✿', title: 'โหมดการฝึก', page: ModesPage },
+  { id: 'relax', label: 'Soundscape & Quick', icon: '♪', title: 'โหมดผ่อนคลาย', page: RelaxPage },
   { id: 'players', label: 'ผู้เล่น', icon: '♙', title: 'ผู้เล่น', page: PlayersPage },
   { id: 'sessions', label: 'ประวัติการเล่น', icon: '▷', title: 'ประวัติการเล่น', page: SessionsPage },
   { id: 'moods', label: 'บันทึกอารมณ์', icon: '♡', title: 'บันทึกอารมณ์', page: MoodsPage, owner: true },
@@ -104,7 +106,7 @@ const notifications = computed(() => {
       <header class="topbar">
         <div class="breadcrumb"><span>breez Admin</span><span class="crumb-slash">/</span><strong>{{ current.title }}</strong></div>
         <div class="top-actions">
-          <div v-if="!['overview', 'staff', 'players', 'modes'].includes(current.id)" class="search-box">
+          <div v-if="!['overview', 'staff', 'players', 'modes', 'relax'].includes(current.id)" class="search-box">
             <span>⌕</span><input v-model="search" placeholder="ค้นหาชื่อผู้เล่น หรือรหัส..." aria-label="ค้นหา" />
           </div>
           <button class="icon-button notification-button" @click="showNotifications = !showNotifications" aria-label="การแจ้งเตือน">♧<i v-if="notifications.length"></i></button>

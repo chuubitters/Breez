@@ -63,6 +63,7 @@ public class DailyHistoryPanel : MonoBehaviour
     readonly Dictionary<string, HistoryData> cache = new Dictionary<string, HistoryData>();
     readonly List<GameObject> rows = new List<GameObject>();
     int requestId;
+    bool autoPick;
 
     void Awake()
     {
@@ -111,6 +112,7 @@ public class DailyHistoryPanel : MonoBehaviour
         windowEnd = selected.AddDays(6) > Today ? Today : selected.AddDays(6);
         if (windowEnd < selected) windowEnd = selected;
         cache.Clear();   // เปิดใหม่ = ดึงข้อมูลล่าสุด
+        autoPick = true; // โหลดเสร็จ => ถ้าวันนี้ว่าง เลือกวันล่าสุดที่มีข้อมูลให้
         Load();
     }
 
@@ -142,20 +144,71 @@ public class DailyHistoryPanel : MonoBehaviour
 
         data = null;
         Render();
-        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("กรุณาเข้าสู่ระบบ"); return; }
+        if (!BreezBackend.Instance.IsLoggedIn) { SetStatus("กรุณาเข้าสู่ระบบก่อน จึงจะดูประวัติได้"); ShowEmpty("กรุณาเข้าสู่ระบบก่อน"); return; }
         SetStatus("กำลังโหลด...");
+        ShowEmpty("กำลังโหลด...");
         int id = ++requestId;
         string body = Json.Obj("p_from", Json.Str(BreezText.Iso(from)), "p_to", Json.Str(BreezText.Iso(windowEnd)));
         BreezBackend.Instance.Rpc("my_history", body, (ok, text) =>
         {
             if (this == null || id != requestId) return;
-            if (!ok) { SetStatus(text); return; }
+            if (!ok)
+            {
+                Debug.LogWarning("[Breez] my_history failed: " + text);
+                SetStatus("โหลดไม่สำเร็จ");
+                ShowEmpty("โหลดข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง");
+                return;
+            }
             try { data = JsonUtility.FromJson<HistoryData>(text); }
-            catch (Exception e) { Debug.LogWarning("[Breez] History parse error: " + e.Message); SetStatus("อ่านข้อมูลไม่ได้"); return; }
+            catch (Exception e) { Debug.LogWarning("[Breez] History parse error: " + e.Message); SetStatus("อ่านข้อมูลไม่ได้"); ShowEmpty("อ่านข้อมูลไม่ได้"); return; }
+            if (data == null) data = new HistoryData();
             cache[key] = data;
-            SetStatus("");
+            if (autoPick) { autoPick = false; PickLatestDayWithData(); }
+            SetStatus(WeekSummary());
             Render();
         });
+    }
+
+    /// <summary>วันที่เลือกไม่มีข้อมูล => เลือกวันล่าสุดในสัปดาห์ที่มีข้อมูล (ตามมุมมองที่เปิด)</summary>
+    void PickLatestDayWithData()
+    {
+        if (HasData(selected)) return;
+        for (int i = 0; i < 7; i++)
+        {
+            var d = windowEnd.AddDays(-i);
+            if (HasData(d)) { selected = d; return; }
+        }
+    }
+
+    bool HasData(DateTime d)
+    {
+        if (data == null) return false;
+        string iso = BreezText.Iso(d);
+        if (CurrentView != View.Plays && data.moods != null) foreach (var m in data.moods) if (m.date == iso) return true;
+        if (CurrentView != View.Moods && data.sessions != null) foreach (var s in data.sessions) if (s.date == iso) return true;
+        return false;
+    }
+
+    string WeekSummary()
+    {
+        int moods = data?.moods?.Length ?? 0, plays = data?.sessions?.Length ?? 0;
+        if (CurrentView == View.Moods) return moods > 0 ? $"สัปดาห์นี้บันทึกอารมณ์ {moods} ครั้ง" : "สัปดาห์นี้ยังไม่ได้บันทึกอารมณ์";
+        if (CurrentView == View.Plays) return plays > 0 ? $"สัปดาห์นี้เล่น {plays} ครั้ง" : "สัปดาห์นี้ยังไม่มีการเล่น";
+        return $"สัปดาห์นี้: อารมณ์ {moods} · เล่น {plays} ครั้ง";
+    }
+
+    /// <summary>ข้อความในช่องรายการ (ตอนโหลด / ว่าง / ผิดพลาด)</summary>
+    void ShowEmpty(string message)
+    {
+        foreach (var t in new[] { moodEmpty, sessionEmpty })
+        {
+            if (t == null) continue;
+            bool show = (t == moodEmpty && CurrentView != View.Plays) || (t == sessionEmpty && CurrentView != View.Moods);
+            t.gameObject.SetActive(show);
+            t.text = message;
+            t.color = textMuted;
+            t.transform.SetAsLastSibling();
+        }
     }
 
     void SelectIndex(int i)
@@ -207,8 +260,24 @@ public class DailyHistoryPanel : MonoBehaviour
                     if (s.date == iso) { AddSessionRow(s); sessions++; }
         }
         bool loaded = data != null;
-        if (moodEmpty != null) { moodEmpty.gameObject.SetActive(loaded && moods == 0 && CurrentView != View.Plays); moodEmpty.text = "ไม่ได้บันทึกอารมณ์ในวันนี้"; }
-        if (sessionEmpty != null) { sessionEmpty.gameObject.SetActive(loaded && sessions == 0 && CurrentView != View.Moods); sessionEmpty.text = "ไม่มีการเล่นในวันนี้"; }
+        if (!loaded) return;   // ระหว่างโหลด ข้อความมาจาก ShowEmpty
+        string dayWord = selected == Today ? "วันนี้" : "วันนั้น";
+        if (moodEmpty != null)
+        {
+            moodEmpty.gameObject.SetActive(moods == 0 && CurrentView != View.Plays);
+            moodEmpty.text = $"ไม่ได้บันทึกอารมณ์ใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง";
+            moodEmpty.color = textMuted;
+            moodEmpty.transform.SetAsLastSibling();
+        }
+        if (sessionEmpty != null)
+        {
+            sessionEmpty.gameObject.SetActive(sessions == 0 && CurrentView != View.Moods);
+            sessionEmpty.text = $"ไม่มีการเล่นใน{dayWord}\nกดวันอื่นด้านบนเพื่อดูย้อนหลัง";
+            sessionEmpty.color = textMuted;
+            sessionEmpty.transform.SetAsLastSibling();
+        }
+        if (moodContent != null) LayoutRebuilder.ForceRebuildLayoutImmediate(moodContent);
+        if (sessionContent != null) LayoutRebuilder.ForceRebuildLayoutImmediate(sessionContent);
     }
 
     // ---------------------------------------------------------------
@@ -300,7 +369,7 @@ public class DailyHistoryPanel : MonoBehaviour
         rows.Add(go);
         SetText(go, "Mode", s.mode);
         SetText(go, "Time", s.time + " น.");
-        string result = BreezText.SessionResult(s);
+        string result = BreezText.SessionResultFull(s);
         string line = $"ระยะเวลา {BreezText.Clock(s.duration)} นาที";
         SetText(go, "Detail", string.IsNullOrEmpty(result) ? line : line + "\n" + result);
         bool scored = s.score > 0;
