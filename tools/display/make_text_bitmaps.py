@@ -20,6 +20,7 @@ LABELS = [
     ("QS_TITLE",   "Quick Session",            True,  20),
     ("QS_478",     "ฝึกหายใจ 4-7-8",            False, 18),
     ("PRESS",      "กดปุ่มเพื่อเริ่ม",             False, 17),
+    ("QS_LINE",    "Quick Session  4-7-8",     True,  15),
     ("READY",      "เตรียมตัว",                 True,  24),
     ("READY_SUB",  "นั่งสบายๆ ผ่อนคลาย",          False, 15),
     ("IN",         "หายใจเข้า",                 True,  24),
@@ -38,6 +39,11 @@ LABELS = [
     ("CAL",        "กำลังปรับเสียง",              True,  22),
     ("CAL_SUB",    "อยู่เงียบๆ สักครู่นะ",           False, 16),
     ("STOPPED",    "หยุดฝึกแล้ว",                True,  24),
+]
+# รูปภาพ (ใช้ช่อง alpha): id, ไฟล์, ความกว้าง(px)
+IMAGES = [
+    ("LOGO",    "tools/display/breez_logo.png", 150),
+    ("LOGO_SM", "tools/display/breez_logo.png", 92),
 ]
 # ชุดตัวเลข: id, ตัวหนา?, ขนาด, ตัวอักษร
 DIGITS = [
@@ -109,6 +115,14 @@ def main():
         h.append(carr(f"TXT_{lid}_DATA", data))
         names.append((lid, w, hh, dx, dy))
         total += len(data)
+    for iid, path, width in IMAGES:
+        im = Image.open(os.path.join(ROOT, path)).convert("RGBA")
+        a = im.getchannel("A")
+        hgt = round(a.height * width / a.width)
+        a = a.resize((width, hgt), Image.LANCZOS)
+        h.append(carr(f"TXT_{iid}_DATA", pack(a)))
+        names.append((iid, width, hgt, -(width // 2), -(hgt // 2)))
+        total += (width + 1) // 2 * hgt
     for lid, w, hh, dx, dy in names:
         h.append(f"static const UiBitmap TXT_{lid} = {{ {w}, {hh}, {dx}, {dy}, 0, TXT_{lid}_DATA }};")
     h.append("")

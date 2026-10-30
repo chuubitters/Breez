@@ -271,12 +271,12 @@ void drawCurrent(uint32_t now)
   {
   case ST_CAL:     ui::drawCalibrating(now); break;
   case ST_IDLE:    ui::drawIdle(now, lv, sessionsDone); break;
-  case ST_READY:   ui::drawReady(max(1, READY_S - (int)t), min(1.f, t / READY_S)); break;
-  case ST_INHALE:  ui::drawPhase(ui::PH_INHALE, min(1.f, t / INHALE_S), max(1, INHALE_S - (int)t), round_, ROUNDS, lv, false); break;
-  case ST_HOLD:    ui::drawPhase(ui::PH_HOLD, min(1.f, t / HOLD_S), max(1, HOLD_S - (int)t), round_, ROUNDS, lv, false); break;
-  case ST_EXHALE:  ui::drawPhase(ui::PH_EXHALE, min(1.f, t / EXHALE_S), max(1, EXHALE_S - (int)t), round_, ROUNDS, lv, lv >= BLOW_MIN); break;
+  case ST_READY:   ui::drawReady(now, max(1, READY_S - (int)t), min(1.f, t / READY_S)); break;
+  case ST_INHALE:  ui::drawPhase(now, ui::PH_INHALE, min(1.f, t / INHALE_S), max(1, INHALE_S - (int)t), round_, ROUNDS, lv, false); break;
+  case ST_HOLD:    ui::drawPhase(now, ui::PH_HOLD, min(1.f, t / HOLD_S), max(1, HOLD_S - (int)t), round_, ROUNDS, lv, false); break;
+  case ST_EXHALE:  ui::drawPhase(now, ui::PH_EXHALE, min(1.f, t / EXHALE_S), max(1, EXHALE_S - (int)t), round_, ROUNDS, lv, lv >= BLOW_MIN); break;
   case ST_DONE:    ui::drawDone(now - stateAt, lastBlowPct, sessionsDone); break;
-  case ST_STOPPED: ui::drawStopped(); break;
+  case ST_STOPPED: ui::drawStopped(now); break;
   }
 }
 
