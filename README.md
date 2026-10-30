@@ -189,7 +189,7 @@ void readCommands() {
 // ถ้าอยากให้จำค่าไว้หลังปิดเครื่อง ใช้ Preferences.h บันทึก gadgetName / gadgetIcon
 ```
 
-## 3. Breath Gadget: ESP32-C3 Super Mini + KY-037
+## 3. Breath Gadget: ESP32-C3 Super Mini + KY-037 + จอกลม GC9A01
 
 โค้ดบอร์ด: [`esp32/breez_gadget/breez_gadget.ino`](esp32/breez_gadget/breez_gadget.ino)
 
@@ -201,12 +201,35 @@ void readCommands() {
 | A0 (AO) | **GPIO3** |
 | D0 | ไม่ต้องต่อ |
 
+| จอ GC9A01 1.28" | ESP32-C3 Super Mini |
+|---|---|
+| VCC | **3V3** |
+| GND | GND |
+| SCL (SCK) | **GPIO4** |
+| SDA (MOSI) | **GPIO6** |
+| DC | **GPIO10** |
+| CS | **GPIO7** |
+| RST (RES) | **GPIO1** |
+| BLK (BL) | 3V3 (หรือไม่ต่อ) |
+
+ปุ่มเริ่ม/หยุด Quick Session: ใช้ปุ่ม **BOOT** บนบอร์ดได้เลย หรือต่อปุ่มกดเพิ่ม ขาหนึ่ง → **GPIO0** อีกขา → GND
+
+### Quick Session (ฝึกหายใจ 4-7-8 บนตัวเครื่อง ไม่ต้องเปิดแอป)
+- กดปุ่ม → นับ 3-2-1 → หายใจเข้า 4 วิ → กลั้น 7 วิ → หายใจออก (เป่าใส่ไมค์) 8 วิ × 4 รอบ
+- ระหว่างหายใจออก วงกลมจะเรืองแสงเมื่อเป่าจริง หน้าจบบอกว่าเป่าได้กี่ %
+- กดปุ่มระหว่างฝึก = หยุด / กดค้าง 2 วินาทีที่หน้าแรก = ปรับเสียงพื้นหลังใหม่
+- จำนวนครั้งที่ฝึกเก็บในเครื่อง (แสดง "ฝึกแล้ว N ครั้ง")
+- ถ้าเสียบสายกับเกมอยู่ตอนฝึกจบ เกมจะบันทึกลงประวัติ (mode `Quick Session`)
+- แก้ข้อความบนจอ: แก้ `tools/display/make_text_bitmaps.py` แล้วรัน (ใช้ฟอนต์เดียวกับเกม) → ได้ `ui_text.h` ใหม่
+- พรีวิวหน้าจอ: [`tools/display/quick_session_preview.png`](tools/display/quick_session_preview.png)
+
 ### Arduino IDE
 1. Settings → Additional boards manager URLs ใส่
    `https://espressif.github.io/arduino-esp32/package_esp32_index.json`
 2. Boards Manager → ติดตั้ง **esp32 by Espressif Systems**
 3. Tools → Board: **ESP32C3 Dev Module** (หรือ Nologo ESP32C3 Super Mini)
 4. Tools → **USB CDC On Boot: Enabled** (สำคัญ)
+   - Library Manager → ติดตั้ง **GFX Library for Arduino** (by Moon On Our Nation)
 5. เลือก Port (Mac: `/dev/cu.usbmodem…`) แล้ว Upload
    - ถ้า upload ไม่ได้: กดปุ่ม BOOT ค้างไว้ แล้วเสียบ USB ใหม่ แล้วกด Upload
 6. เปิด Serial Monitor ที่ 115200 ลองเป่า ควรเห็นตัวเลข 0 → 100 แล้ว **ปิด Serial Monitor ก่อนเปิด Unity** (พอร์ตใช้ได้ทีละโปรแกรม)

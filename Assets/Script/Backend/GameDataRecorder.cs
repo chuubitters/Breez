@@ -47,8 +47,13 @@ public static class GameDataRecorder
             "breath_cycles", Json.Num(Mathf.Max(0, breathCycles)),
             "exhale_ms", Json.Num(Mathf.RoundToInt(Mathf.Max(0f, exhaleSeconds) * 1000f))), done);
 
-    public static void RecordQuickSession(float durationSeconds, Action<bool> done = null) =>
-        RecordSession(QuickSession, 0, durationSeconds, "{}", done);
+    /// <summary>Quick Session 4-7-8 (ฝึกบนตัวเครื่อง) — rounds = รอบที่ครบ, blowPct = % เวลาที่เป่าได้ตอนหายใจออก</summary>
+    public static void RecordQuickSession(float durationSeconds, int rounds = 0, int blowPct = -1, Action<bool> done = null) =>
+        RecordSession(QuickSession, Mathf.Max(0, blowPct), durationSeconds, Json.Obj(
+            "pattern", Json.Str("4-7-8"),
+            "rounds", Json.Num(Mathf.Max(0, rounds)),
+            "blow_pct", Json.Num(Mathf.Clamp(blowPct, 0, 100)),
+            "source", Json.Str("gadget")), done);
 
     // ---------- ทั่วไป ----------
 
