@@ -577,3 +577,13 @@ td strong { color: var(--ink-strong); font-weight: 800 }
 @media (max-width: 1300px) { .mode-cards { grid-template-columns: repeat(3, minmax(0, 1fr)) } .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) } .detail-panel:first-child { grid-row: auto } }
 @media (max-width: 850px) { .mode-cards { grid-template-columns: repeat(2, minmax(0, 1fr)) } .detail-grid { grid-template-columns: 1fr } }
 @media (max-width: 560px) { .mode-cards { grid-template-columns: 1fr } .mini-row { grid-template-columns: 80px 1fr 30px } }
+
+/* สลับ รวม/ไม่รวม บัญชีผู้ดูแล */
+.staff-toggle { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; transition: all .18s ease }
+.staff-toggle:hover:not(:disabled) { transform: translateY(-1px) }
+.staff-toggle:disabled { cursor: default; opacity: .8 }
+.staff-toggle i { width: 26px; height: 14px; border-radius: 999px; background: #e3e6dc; position: relative; transition: background .18s }
+.staff-toggle i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #fff; transition: transform .18s; box-shadow: 0 1px 2px rgba(0,0,0,.15) }
+.staff-toggle.on { color: var(--ink-strong); border-color: #c9de8c }
+.staff-toggle.on i { background: #a9c77e }
+.staff-toggle.on i::after { transform: translateX(12px) }

@@ -10,6 +10,11 @@ const error = ref('')
 const filter = ref('all')
 
 const ICONS = { cat: '🐱', flower: '✿', cloud: '☁', star: '★', heart: '♥', moon: '☾' }
+// device_icon = "cat" หรือ "cat|#A9C77E" (ไอคอน|สีที่ผู้เล่นเลือกในเกม)
+const iconOf = d => {
+  const [id, color] = String(d.device_icon || 'cat').split('|')
+  return { glyph: ICONS[id] ?? '⌁', color: /^#[0-9a-f]{6}$/i.test(color || '') ? color : null }
+}
 
 let timer
 async function load() {
@@ -55,7 +60,7 @@ const shown = computed(() => devices.value.filter(d =>
   <section class="device-grid" :class="{ loading }">
     <article v-for="d in shown" :key="d.device_id" class="device-card">
       <div class="device-card-top">
-        <div class="device-illustration">{{ ICONS[d.device_icon] ?? '⌁' }}</div>
+        <div class="device-illustration" :style="iconOf(d).color ? { color: iconOf(d).color, background: iconOf(d).color + '22' } : null">{{ iconOf(d).glyph }}</div>
         <span class="status-label" :class="d.is_online ? 'active' : 'inactive'"><i></i>{{ d.is_online ? 'ออนไลน์' : 'ออฟไลน์' }}</span>
       </div>
       <h3>{{ d.device_name }}</h3>

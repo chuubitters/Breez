@@ -38,7 +38,7 @@ public class DeviceSettings : MonoBehaviour
         {
             if (device == null) { SetStatus("Load failed"); return; }
             if (deviceNameInput != null) deviceNameInput.text = device.device_name;
-            selectedIcon = string.IsNullOrEmpty(device.device_icon) ? "cat" : device.device_icon;
+            selectedIcon = device.IconId;
             UpdateIconUI(selectedIcon);
             if (batteryText != null)
                 batteryText.text = DeviceService.LastBattery.HasValue ? DeviceService.LastBattery + "%" : "—";
@@ -73,7 +73,7 @@ public class DeviceSettings : MonoBehaviour
         }
 
         SetStatus("Saving...");
-        DeviceService.Sync(name: newName, icon: selectedIcon, done: device =>
+        DeviceService.Sync(name: newName, icon: DeviceInfo.ComposeIcon(selectedIcon, DeviceService.Current != null ? DeviceService.Current.IconHex : DeviceInfo.DefaultColor), done: device =>
         {
             SetStatus(device != null ? "Saved" : "Save failed");
         });

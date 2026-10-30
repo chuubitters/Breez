@@ -169,6 +169,35 @@ public class DailyHistoryPanel : MonoBehaviour
         });
     }
 
+    /// <summary>สรุปของวัน: "อารมณ์ มีความสุข · เล่น Calm Flow ×2, Soundscape"</summary>
+    string DaySummary(DateTime d)
+    {
+        if (data == null) return "";
+        string iso = BreezText.Iso(d);
+        var moodNames = new List<string>();
+        if (CurrentView != View.Plays && data.moods != null)
+            foreach (var m in data.moods)
+                if (m.date == iso) { string n = BreezText.Mood(m.mood); if (!moodNames.Contains(n)) moodNames.Add(n); }
+        var modes = new List<string>();
+        var counts = new Dictionary<string, int>();
+        if (CurrentView != View.Moods && data.sessions != null)
+            foreach (var s in data.sessions)
+                if (s.date == iso)
+                {
+                    if (!counts.ContainsKey(s.mode)) { counts[s.mode] = 0; modes.Add(s.mode); }
+                    counts[s.mode]++;
+                }
+        var parts = new List<string>();
+        if (moodNames.Count > 0) parts.Add("อารมณ์ " + string.Join(", ", moodNames));
+        if (modes.Count > 0)
+        {
+            var list = new List<string>();
+            foreach (var m in modes) list.Add(counts[m] > 1 ? $"{m} ×{counts[m]}" : m);
+            parts.Add("เล่น " + string.Join(", ", list));
+        }
+        return string.Join("  ·  ", parts);
+    }
+
     /// <summary>วันที่เลือกไม่มีข้อมูล => เลือกวันล่าสุดในสัปดาห์ที่มีข้อมูล (ตามมุมมองที่เปิด)</summary>
     void PickLatestDayWithData()
     {
@@ -237,13 +266,24 @@ public class DailyHistoryPanel : MonoBehaviour
                 if (c.moodDot != null) { c.moodDot.enabled = hasMood && CurrentView != View.Plays; if (hasMood) c.moodDot.color = MoodColor(info.mood); }
                 if (c.count != null)
                 {
+                    int plays = info != null ? info.sessions : 0;
                     if (CurrentView == View.Moods) c.count.text = hasMood ? BreezText.Mood(info.mood) : "";
-                    else c.count.text = info != null && info.sessions > 0 ? info.sessions + " ครั้ง" : "";
+                    else if (CurrentView == View.Plays) c.count.text = plays > 0 ? $"เล่น {plays} ครั้ง" : "";
+                    else c.count.text = plays > 0 ? $"{plays} ครั้ง" : hasMood ? BreezText.Mood(info.mood) : "";
+                    c.count.enableAutoSizing = true;
+                    c.count.fontSizeMin = 14;
+                    c.count.fontSizeMax = Mathf.Max(c.count.fontSizeMax, 20);
                 }
                 if (c.button != null) c.button.interactable = !future;
             }
 
-        if (dayTitleText != null) dayTitleText.text = BreezText.LongDate(selected);
+        if (dayTitleText != null)
+        {
+            string sum = DaySummary(selected);
+            dayTitleText.text = BreezText.LongDate(selected) + (string.IsNullOrEmpty(sum) ? "" : $"  <size=72%><color=#7A8A7E>{sum}</color></size>");
+            dayTitleText.richText = true;
+            dayTitleText.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+        }
 
         foreach (var r in rows) if (r != null) Destroy(r);
         rows.Clear();
@@ -356,7 +396,8 @@ public class DailyHistoryPanel : MonoBehaviour
         if (icon != null) { var sp = IconFor(m.mood); icon.sprite = sp; icon.enabled = sp != null; }
         var dot = Find<Image>(go, "Dot");
         if (dot != null) dot.color = MoodColor(m.mood);
-        SetText(go, "Name", BreezText.Mood(m.mood));
+        string th = BreezText.Mood(m.mood), en = Capitalize(m.mood);
+        SetText(go, "Name", string.Equals(th, en, StringComparison.OrdinalIgnoreCase) ? th : $"{th} <size=70%><color=#8A948B>{en}</color></size>");
         SetText(go, "Time", m.time + " น.");
         SetText(go, "Note", string.IsNullOrEmpty(m.note) ? "" : m.note);
     }
@@ -367,7 +408,7 @@ public class DailyHistoryPanel : MonoBehaviour
         var go = Instantiate(sessionTemplate, sessionContent);
         go.SetActive(true);
         rows.Add(go);
-        SetText(go, "Mode", s.mode);
+        SetText(go, "Mode", $"{ModeIcon(s.mode)} {s.mode}");
         SetText(go, "Time", s.time + " น.");
         string result = BreezText.SessionResultFull(s);
         string line = $"ระยะเวลา {BreezText.Clock(s.duration)} นาที";
@@ -375,6 +416,22 @@ public class DailyHistoryPanel : MonoBehaviour
         bool scored = s.score > 0;
         SetText(go, "Score", scored ? s.score.ToString() : "—");
         SetText(go, "ScoreLabel", scored ? "คะแนน" : "");
+    }
+
+    static string Capitalize(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s.Substring(1).ToLowerInvariant();
+
+    /// <summary>สัญลักษณ์ที่ฟอนต์ไทยของเกมมี (ใช้แค่ตัวพื้นฐาน)</summary>
+    static string ModeIcon(string mode)
+    {
+        switch (mode)
+        {
+            case GameDataRecorder.CalmFlow: return "<color=#A9C77E><size=140%>•</size></color>";
+            case GameDataRecorder.PowerRelease: return "<color=#F2BDC9><size=140%>•</size></color>";
+            case GameDataRecorder.BreatheFocus: return "<color=#EDC965><size=140%>•</size></color>";
+            case GameDataRecorder.Soundscape: return "<color=#8DB8D9><size=140%>•</size></color>";
+            case GameDataRecorder.QuickSession: return "<color=#E79AB0><size=140%>•</size></color>";
+            default: return "<color=#BBBBBB><size=140%>•</size></color>";
+        }
     }
 
     Sprite IconFor(string mood)

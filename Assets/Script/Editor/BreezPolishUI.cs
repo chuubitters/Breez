@@ -4,6 +4,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // =====================================================================
@@ -38,6 +39,8 @@ public static class BreezPolishUI
                     if (IsBack(b)) { Style(b); backs++; }
 
             string extra = "";
+            int gadgets = ReplaceGadgetImages(scene);
+            if (gadgets > 0) extra += $" · ป้ายสถานะจริง {gadgets}";
             var sp = Object.FindObjectOfType<SPGameManager>(true);
             if (sp != null) extra += AlignSoundscape(sp);
             if (sp != null && sp.countdownUI != null)
@@ -119,6 +122,35 @@ public static class BreezPolishUI
         if (p == null) return false;
         if (p.GetComponent<Canvas>() != null) return true;
         return p.anchorMin == Vector2.zero && p.anchorMax == Vector2.one && p.offsetMin == Vector2.zero && p.offsetMax == Vector2.zero;
+    }
+
+    // ---------------------------------------------------------------
+    /// <summary>รูป GadgetStatus.png (แค่ภาพ) => ป้ายสถานะจริง (prefab GadgetStatus: ชื่อ ไอคอน สี สถานะ กดแล้วไปตั้งค่า)</summary>
+    public static int ReplaceGadgetImages(Scene scene)
+    {
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Breez/GadgetStatus.prefab");
+        if (prefab == null) return 0;
+        var found = new List<Image>();
+        foreach (var root in scene.GetRootGameObjects())
+            foreach (var img in root.GetComponentsInChildren<Image>(true))
+            {
+                if (img.sprite == null || !img.sprite.name.ToLowerInvariant().StartsWith("gadgetstatus")) continue;
+                if (img.GetComponentInParent<GadgetStatusUI>(true) != null) continue;
+                found.Add(img);
+            }
+        foreach (var img in found)
+        {
+            var rt = img.rectTransform;
+            var inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab, rt.parent);
+            Undo.RegisterCreatedObjectUndo(inst, "Gadget status");
+            var irt = (RectTransform)inst.transform;
+            irt.anchorMin = rt.anchorMin; irt.anchorMax = rt.anchorMax; irt.pivot = rt.pivot;
+            irt.anchoredPosition = rt.anchoredPosition; irt.sizeDelta = rt.sizeDelta; irt.localScale = rt.localScale;
+            irt.SetSiblingIndex(rt.GetSiblingIndex() + 1);
+            Undo.RecordObject(img.gameObject, "Gadget status");
+            img.gameObject.SetActive(false);
+        }
+        return found.Count;
     }
 
     // ---------------------------------------------------------------
