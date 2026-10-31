@@ -146,13 +146,14 @@ export function modeDetail(mode, all) {
     const maxTotal = Math.max(1, ...g.map(r => r.balloons_total))
     base.completionPct = pctOf(done.length, g.length)
     base.metrics = [
-      { label: 'อัตราการเป่าครบทุกลูก', value: `${base.completionPct}%`, hint: `${done.length} จาก ${g.length} ครั้ง` },
-      { label: 'ลูกโป่งที่เป่าแตก (เฉลี่ย)', value: `${avg(g.map(r => r.balloons_popped)).toFixed(1)} / ${avg(g.map(r => r.balloons_total)).toFixed(1)}` },
-      { label: 'เวลาเฉลี่ยที่ใช้จนเป่าครบ', value: done.length ? secText(avg(done.map(r => r.duration))) : '—' },
-      { label: 'คะแนนเฉลี่ย', value: avg(rs.map(r => r.score || 0)).toFixed(1) },
+      { label: 'อัตราการเป่าครบทุกลูก', value: `${base.completionPct}%`, hint: `${done.length} จาก ${g.length} ครั้ง`, how: 'จำนวนครั้งที่ลูกโป่งที่เป่าแตก = ลูกโป่งทั้งหมดในรอบ ÷ จำนวนครั้งที่เล่นทั้งหมด × 100' },
+      { label: 'ลูกโป่งที่เป่าแตก (เฉลี่ย)', how: 'ค่าเฉลี่ยของจำนวนลูกโป่งที่เป่าแตกต่อครั้ง / ค่าเฉลี่ยของจำนวนลูกโป่งทั้งหมดต่อครั้ง', value: `${avg(g.map(r => r.balloons_popped)).toFixed(1)} / ${avg(g.map(r => r.balloons_total)).toFixed(1)}` },
+      { label: 'เวลาเฉลี่ยที่ใช้จนเป่าครบ', how: 'ค่าเฉลี่ยของระยะเวลาเล่น เฉพาะครั้งที่เป่าแตกครบทุกลูก', value: done.length ? secText(avg(done.map(r => r.duration))) : '—' },
+      { label: 'คะแนนเฉลี่ย', value: avg(rs.map(r => r.score || 0)).toFixed(1), how: 'ผลรวมคะแนนทุกครั้ง ÷ จำนวนครั้งที่เล่น' },
     ]
     base.charts = [{
       title: 'จำนวนลูกโป่งที่เป่าแตกต่อครั้ง',
+      how: 'นับจำนวนครั้งที่เล่น แยกตามจำนวนลูกโป่งที่เป่าแตกในครั้งนั้น',
       note: 'หากส่วนใหญ่อยู่ฝั่งจำนวนน้อย แสดงว่าเกมอาจยากเกินไปหรือเวลาไม่เพียงพอ',
       data: histogram(g.map(r => r.balloons_popped), Array.from({ length: maxTotal + 1 }, (_, i) => ({ label: `${i} ลูก`, test: v => v === i }))),
     }]
@@ -163,14 +164,15 @@ export function modeDetail(mode, all) {
     const fl = rs.map(r => r.obstacles_avoided ?? 0)
     const sc = rs.map(r => r.score || 0)
     base.metrics = [
-      { label: 'ดอกไม้ที่เก็บได้ (เฉลี่ย / มัธยฐาน)', value: `${avg(fl).toFixed(1)} / ${median(fl)}` },
-      { label: 'เก็บได้มากที่สุด', value: `${Math.max(...fl)} ดอก` },
-      { label: 'คะแนนเฉลี่ย', value: avg(sc).toFixed(0) },
-      { label: 'คะแนนเฉลี่ยต่อดอก', value: avg(fl) ? (avg(sc) / avg(fl)).toFixed(1) : '—', hint: 'ยิ่งสูง แสดงว่าเก็บโคลเวอร์และดอกสีเหลืองได้มาก' },
+      { label: 'ดอกไม้ที่เก็บได้ (เฉลี่ย / มัธยฐาน)', how: 'ค่าเฉลี่ยและค่ากลาง (มัธยฐาน) ของจำนวนดอกไม้ที่เก็บได้ในแต่ละครั้ง', value: `${avg(fl).toFixed(1)} / ${median(fl)}` },
+      { label: 'เก็บได้มากที่สุด', how: 'จำนวนดอกไม้สูงสุดที่เก็บได้ในครั้งเดียว ในช่วงเวลาที่เลือก', value: `${Math.max(...fl)} ดอก` },
+      { label: 'คะแนนเฉลี่ย', value: avg(sc).toFixed(0), how: 'ผลรวมคะแนนทุกครั้ง ÷ จำนวนครั้งที่เล่น (ชมพู 10 · เหลือง 20 · โคลเวอร์ 50 คะแนน)' },
+      { label: 'คะแนนเฉลี่ยต่อดอก', value: avg(fl) ? (avg(sc) / avg(fl)).toFixed(1) : '—', hint: 'ยิ่งสูง แสดงว่าเก็บโคลเวอร์และดอกสีเหลืองได้มาก', how: 'คะแนนเฉลี่ย ÷ จำนวนดอกไม้ที่เก็บได้เฉลี่ย (ค่าต่ำสุด 10 = เก็บแต่ดอกชมพู)' },
     ]
     base.charts = [
       {
         title: 'จำนวนดอกไม้ที่เก็บได้ต่อครั้ง',
+        how: 'นับจำนวนครั้งที่เล่น แยกตามจำนวนดอกไม้ที่เก็บได้ในครั้งนั้น',
         note: 'หากส่วนใหญ่เก็บได้น้อย ควรพิจารณาลดความเร็วของดอกไม้หรือเพิ่มจำนวนดอก',
         data: histogram(fl, [
           { label: '0–5', test: v => v <= 5 }, { label: '6–10', test: v => v >= 6 && v <= 10 },
@@ -180,6 +182,7 @@ export function modeDetail(mode, all) {
       },
       {
         title: 'คะแนนต่อครั้ง',
+        how: 'นับจำนวนครั้งที่เล่น แยกตามช่วงคะแนนที่ได้ในครั้งนั้น',
         data: histogram(sc, [
           { label: '0–100', test: v => v <= 100 }, { label: '101–200', test: v => v > 100 && v <= 200 },
           { label: '201–400', test: v => v > 200 && v <= 400 }, { label: '401–600', test: v => v > 400 && v <= 600 },
@@ -195,14 +198,15 @@ export function modeDetail(mode, all) {
     const exhale = g.map(r => (r.longest_exhale_ms ?? 0) / 1000)
     base.fullBloomPct = pctOf(full.length, g.length)
     base.metrics = [
-      { label: 'จำนวนดอกไม้ต่อครั้ง (เฉลี่ย)', value: avg(g.map(r => r.flowers_grown)).toFixed(1) },
-      { label: 'มีดอกไม้บานเต็ม 100% อย่างน้อย 1 ดอก', value: `${base.fullBloomPct}%`, hint: `${full.length} จาก ${g.length} ครั้ง` },
-      { label: 'หายใจออกนานที่สุด (เฉลี่ย)', value: `${avg(exhale).toFixed(1)} วินาที` },
-      { label: 'ไม่มีดอกไม้บานเลย', value: `${pctOf(g.filter(r => r.flowers_grown === 0).length, g.length)}%` },
+      { label: 'จำนวนดอกไม้ต่อครั้ง (เฉลี่ย)', how: 'ผลรวมจำนวนดอกไม้ที่ปลูกได้ ÷ จำนวนครั้งที่เล่น', value: avg(g.map(r => r.flowers_grown)).toFixed(1) },
+      { label: 'มีดอกไม้บานเต็ม 100% อย่างน้อย 1 ดอก', value: `${base.fullBloomPct}%`, hint: `${full.length} จาก ${g.length} ครั้ง`, how: 'จำนวนครั้งที่ดอกใหญ่ที่สุดบาน 100% ÷ จำนวนครั้งที่เล่นทั้งหมด × 100' },
+      { label: 'หายใจออกนานที่สุด (เฉลี่ย)', how: 'ในแต่ละครั้งเก็บช่วงหายใจออกที่นานที่สุดไว้ แล้วนำมาหาค่าเฉลี่ย', value: `${avg(exhale).toFixed(1)} วินาที` },
+      { label: 'ไม่มีดอกไม้บานเลย', how: 'จำนวนครั้งที่ไม่มีดอกไม้บานเลย ÷ จำนวนครั้งที่เล่นทั้งหมด × 100', value: `${pctOf(g.filter(r => r.flowers_grown === 0).length, g.length)}%` },
     ]
     base.charts = [
       {
         title: 'หายใจออกนานที่สุดในแต่ละครั้ง',
+        how: 'นับจำนวนครั้งที่เล่น แยกตามช่วงหายใจออกที่นานที่สุดของครั้งนั้น (วินาที)',
         note: 'ใช้ประกอบการกำหนดระยะเวลาหายใจออกที่ทำให้ดอกไม้บานเต็ม',
         data: histogram(exhale, [
           { label: '< 2 วินาที', test: v => v < 2 }, { label: '2–4 วินาที', test: v => v >= 2 && v < 4 },
@@ -212,6 +216,7 @@ export function modeDetail(mode, all) {
       },
       {
         title: 'ระยะเวลาที่ฝึกจริง',
+        how: 'นับจำนวนครั้งที่เล่น แยกตามระยะเวลาตั้งแต่เริ่มจนจบในครั้งนั้น',
         data: histogram(durations, [
           { label: '< 1 นาที', test: v => v < 55 }, { label: '≈ 1 นาที', test: v => v >= 55 && v < 100 },
           { label: '≈ 2 นาที', test: v => v >= 100 && v < 160 }, { label: '≈ 3 นาที+', test: v => v >= 160 },
@@ -230,18 +235,19 @@ export function modeDetail(mode, all) {
     const early = rs.filter(r => (r.duration || 0) < 60)
     base.earlyPct = pctOf(early.length, rs.length)
     base.metrics = [
-      { label: 'ออกก่อนครบ 1 นาที', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
-      { label: 'รอบหายใจต่อครั้ง (เฉลี่ย)', value: avg(rs.map(r => Math.max(0, r.breath_cycles ?? 0))).toFixed(1) },
-      { label: 'เวลาหายใจออกต่อครั้ง (เฉลี่ย)', value: `${(avg(rs.map(r => Math.max(0, r.exhale_ms ?? 0))) / 1000).toFixed(1)} วินาที` },
-      { label: 'เวลาต่อครั้ง (มัธยฐาน)', value: secText(base.medianDuration) },
+      { label: 'ออกก่อนครบ 1 นาที', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง`, how: 'จำนวนครั้งที่ฝึกไม่ถึง 60 วินาที ÷ จำนวนครั้งทั้งหมด × 100' },
+      { label: 'รอบหายใจต่อครั้ง (เฉลี่ย)', how: 'ค่าเฉลี่ยจำนวนรอบหายใจเข้า 5 วินาที–ออก 5 วินาทีที่ทำครบในแต่ละครั้ง', value: avg(rs.map(r => Math.max(0, r.breath_cycles ?? 0))).toFixed(1) },
+      { label: 'เวลาหายใจออกต่อครั้ง (เฉลี่ย)', how: 'ค่าเฉลี่ยของเวลารวมที่ไมโครโฟนตรวจจับการหายใจออกได้ในแต่ละครั้ง', value: `${(avg(rs.map(r => Math.max(0, r.exhale_ms ?? 0))) / 1000).toFixed(1)} วินาที` },
+      { label: 'เวลาต่อครั้ง (มัธยฐาน)', value: secText(base.medianDuration), how: 'เรียงระยะเวลาการฝึกทุกครั้งแล้วเลือกค่าตรงกลาง (ไม่ถูกดึงด้วยครั้งที่นานหรือสั้นผิดปกติ)' },
     ]
     base.charts = [
       {
         title: 'จำนวนครั้งแยกตามฉาก', type: 'donut',
+        how: 'นับจำนวนครั้งที่ฝึกในแต่ละฉาก ÷ จำนวนครั้งทั้งหมดของ Soundscape',
         data: [...scenes.entries()].sort((a, b) => b[1].length - a[1].length)
           .map(([k, v]) => ({ label: k, value: v.length, extra: `เฉลี่ย ${secText(avg(v.map(r => r.duration || 0)))}` })),
       },
-      { title: 'ระยะเวลาที่ฝึกต่อครั้ง', note: 'หากส่วนใหญ่ฝึกในระยะเวลาสั้น ควรตรวจสอบว่าเสียงและภาพช่วยให้ผู้ใช้ฝึกต่อเนื่องได้หรือไม่', data: histogram(durations, secBuckets([60, 180, 300, 600])) },
+      { title: 'ระยะเวลาที่ฝึกต่อครั้ง', how: 'นับจำนวนครั้งที่ฝึก แยกตามระยะเวลาตั้งแต่เริ่มจนจบในครั้งนั้น', note: 'หากส่วนใหญ่ฝึกในระยะเวลาสั้น ควรตรวจสอบว่าเสียงและภาพช่วยให้ผู้ใช้ฝึกต่อเนื่องได้หรือไม่', data: histogram(durations, secBuckets([60, 180, 300, 600])) },
     ]
   }
 
@@ -251,13 +257,14 @@ export function modeDetail(mode, all) {
     const blow = rs.filter(r => r.blow_pct != null).map(r => r.blow_pct)
     base.completionPct = pctOf(done.length, g.length)
     base.metrics = [
-      { label: 'อัตราการฝึกครบ 4 รอบ', value: g.length ? `${base.completionPct}%` : '—', hint: g.length ? `${done.length} จาก ${g.length} ครั้ง` : '' },
-      { label: 'สัดส่วนการหายใจออกที่ตรวจจับได้ (เฉลี่ย)', value: blow.length ? `${Math.round(avg(blow))}%` : '—', hint: 'สัดส่วนเวลาที่ตรวจจับลมหายใจได้ในช่วงหายใจออก 8 วินาที' },
-      { label: 'จำนวนครั้งต่อผู้ใช้', value: (rs.length / Math.max(1, base.players)).toFixed(1) },
-      { label: 'เวลาต่อครั้ง (เฉลี่ย)', value: secText(base.avgDuration) },
+      { label: 'อัตราการฝึกครบ 4 รอบ', how: 'จำนวนครั้งที่ฝึกครบ 4 รอบ ÷ จำนวนครั้งที่ฝึกทั้งหมด × 100', value: g.length ? `${base.completionPct}%` : '—', hint: g.length ? `${done.length} จาก ${g.length} ครั้ง` : '' },
+      { label: 'สัดส่วนการหายใจออกที่ตรวจจับได้ (เฉลี่ย)', value: blow.length ? `${Math.round(avg(blow))}%` : '—', hint: 'สัดส่วนเวลาที่ตรวจจับลมหายใจได้ในช่วงหายใจออก 8 วินาที', how: 'ในแต่ละครั้ง: เวลาที่ตรวจจับลมหายใจได้ ÷ เวลาหายใจออกทั้งหมด (8 วินาทีต่อรอบ) แล้วนำทุกครั้งมาหาค่าเฉลี่ย' },
+      { label: 'จำนวนครั้งต่อผู้ใช้', how: 'จำนวนครั้งที่ฝึก ÷ จำนวนผู้ใช้ที่ฝึกโหมดนี้', value: (rs.length / Math.max(1, base.players)).toFixed(1) },
+      { label: 'เวลาต่อครั้ง (เฉลี่ย)', value: secText(base.avgDuration), how: 'ผลรวมระยะเวลาการฝึก ÷ จำนวนครั้ง' },
     ]
     base.charts = [{
       title: 'สัดส่วนการหายใจออกที่ตรวจจับได้',
+      how: 'นับจำนวนครั้งที่ฝึก แยกตามสัดส่วนเวลาที่ตรวจจับการหายใจออกได้ในครั้งนั้น',
       note: 'หากค่าต่ำ ผู้ใช้อาจยังไม่ทราบว่าต้องหายใจออกใส่ไมโครโฟน หรือไมโครโฟนอาจมีความไวไม่เพียงพอ',
       data: histogram(blow, [
         { label: '0–24%', test: v => v < 25 }, { label: '25–49%', test: v => v >= 25 && v < 50 },

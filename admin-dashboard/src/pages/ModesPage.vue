@@ -40,18 +40,18 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
   </nav>
 
   <section class="kpis" :class="{ loading }">
-    <div class="kpi"><div class="label">จำนวนครั้ง</div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ data.cur.length ? Math.round(d.sessions / data.cur.length * 100) : 0 }}% ของการฝึกทั้งหมด · {{ MODE_INFO[tab] }}</div></div>
-    <div class="kpi"><div class="label">ผู้ใช้ที่ฝึก</div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ totalPlayers ? Math.round(d.players / totalPlayers * 100) : 0 }}% ของผู้ใช้ทั้งหมด</div></div>
-    <div class="kpi"><div class="label">เวลาต่อครั้ง (มัธยฐาน)</div><div class="value">{{ d.sessions ? secText(d.medianDuration) : '—' }}</div><div class="foot">เฉลี่ย {{ d.sessions ? secText(d.avgDuration) : '—' }}</div></div>
+    <div class="kpi"><div class="label">จำนวนครั้ง<i class="info" data-tip="จำนวนครั้งที่เล่นโหมดนี้ในช่วงเวลาที่เลือก · % เทียบกับจำนวนครั้งที่ฝึกทุกโหมดรวมกัน">i</i></div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ data.cur.length ? Math.round(d.sessions / data.cur.length * 100) : 0 }}% ของการฝึกทั้งหมด · {{ MODE_INFO[tab] }}</div></div>
+    <div class="kpi"><div class="label">ผู้ใช้ที่ฝึก<i class="info" data-tip="จำนวนผู้ใช้ไม่ซ้ำกันที่เล่นโหมดนี้ · % เทียบกับผู้ใช้ทั้งหมดที่ฝึกในช่วงเวลานี้">i</i></div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ totalPlayers ? Math.round(d.players / totalPlayers * 100) : 0 }}% ของผู้ใช้ทั้งหมด</div></div>
+    <div class="kpi"><div class="label">เวลาต่อครั้ง (มัธยฐาน)<i class="info" data-tip="เรียงระยะเวลาเล่นทุกครั้งแล้วเลือกค่าตรงกลาง · ค่าเฉลี่ย = ผลรวมระยะเวลา ÷ จำนวนครั้ง">i</i></div><div class="value">{{ d.sessions ? secText(d.medianDuration) : '—' }}</div><div class="foot">เฉลี่ย {{ d.sessions ? secText(d.avgDuration) : '—' }}</div></div>
     <div class="kpi"><div class="label">ประวัติการเล่น</div><div class="value" style="font-size:15px;padding-top:8px"><button class="btn-link" @click="emit('navigate', 'sessions', { mode: tab })">ดูผลการเล่นทั้งหมด →</button></div></div>
   </section>
 
   <template v-if="d.sessions">
     <section class="card" :class="{ loading }">
-      <div class="card-head"><h2>ตัวชี้วัดของเกม</h2><p>ใช้ประเมินว่าระดับความยากของเกมเหมาะสมหรือไม่</p></div>
+      <div class="card-head"><h2>ตัวชี้วัดของเกม</h2><p>ใช้ประเมินว่าระดับความยากของเกมเหมาะสมหรือไม่ · ชี้ที่กล่องเพื่อดูวิธีคำนวณ</p></div>
       <div class="metrics">
-        <div v-for="m in d.metrics" :key="m.label" class="metric">
-          <div class="label">{{ m.label }}</div>
+        <div v-for="m in d.metrics" :key="m.label" class="metric" :data-tip="m.how ? 'วิธีคำนวณ: ' + m.how : null">
+          <div class="label">{{ m.label }}<i v-if="m.how" class="info">i</i></div>
           <div class="value">{{ m.value }}</div>
           <div v-if="m.hint" class="hint">{{ m.hint }}</div>
         </div>
@@ -60,9 +60,9 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
 
     <section class="grid-2" :class="{ loading }">
       <article v-for="c in d.charts" :key="c.title" class="card">
-        <div class="card-head"><h2>{{ c.title }}</h2><p>จำนวนครั้ง</p></div>
-        <Donut v-if="c.type === 'donut'" :parts="c.data.map((x, i) => ({ ...x, color: SCENE_COLORS[i % SCENE_COLORS.length] }))" center-sub="ครั้ง" unit="ครั้ง" />
-        <Columns v-else :data="c.data" :color="MODE_COLOR[tab]" :height="190" unit="ครั้ง" show-all />
+        <div class="card-head"><h2>{{ c.title }}<i v-if="c.how" class="info" :data-tip="'วิธีคำนวณ: ' + c.how">i</i></h2><p>จำนวนครั้ง · ชี้ที่กราฟเพื่อดูรายละเอียด</p></div>
+        <Donut v-if="c.type === 'donut'" :parts="c.data.map((x, i) => ({ ...x, color: SCENE_COLORS[i % SCENE_COLORS.length] }))" center-sub="ครั้ง" unit="ครั้ง" :how="c.how" />
+        <Columns v-else :data="c.data" :color="MODE_COLOR[tab]" :height="190" unit="ครั้ง" show-all :how="c.how" />
         <p v-if="c.note" class="muted small" style="margin-top:12px">{{ c.note }}</p>
       </article>
     </section>
