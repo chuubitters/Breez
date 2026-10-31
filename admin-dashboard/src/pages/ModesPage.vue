@@ -2,8 +2,7 @@
 // แต่ละโหมด: ตัวชี้วัดที่ใช้ปรับความยาก/สมดุลของเกม
 import { computed, ref, watch } from 'vue'
 import { loadSessions, modeDetail, secText, MODES } from '../lib/stats'
-import { MODE_COLOR, MODE_INFO, number } from '../lib/format'
-import Columns from '../components/Columns.vue'
+import { MODE_COLOR, MODE_HEX, MODE_INFO, number, shades } from '../lib/format'
 import Donut from '../components/Donut.vue'
 
 const SCENE_COLORS = ['#6a9fc6', '#8fb35a', '#e3b93f', '#e8899e', '#9a86cf', '#c9cdc4']
@@ -26,6 +25,12 @@ async function load() {
 watch(() => props.days, load, { immediate: true })
 
 const counts = computed(() => Object.fromEntries(MODES.map(m => [m, data.value.cur.filter(r => r.mode === m).length])))
+// ส่วนที่มากที่สุดใช้สีเต็มของโหมด ส่วนอื่นเป็นเฉดอ่อนไล่ตามลำดับช่วง (เห็นชัดว่าช่วงไหนมากที่สุด)
+const shadeParts = data => {
+  const top = data.reduce((a, x, i) => (x.value > (data[a]?.value ?? -1) ? i : a), 0)
+  const cs = shades(MODE_HEX[tab.value], data.length, 0.82, 0.42)
+  return data.map((x, i) => ({ ...x, color: i === top ? MODE_HEX[tab.value] : cs[i] }))
+}
 const totalPlayers = computed(() => new Set(data.value.cur.map(r => r.user_id)).size)
 const d = computed(() => modeDetail(tab.value, data.value.cur))
 </script>
@@ -61,8 +66,8 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
     <section class="grid-2" :class="{ loading }">
       <article v-for="c in d.charts" :key="c.title" class="card">
         <div class="card-head"><h2>{{ c.title }}<i v-if="c.how" class="info" :data-tip="'วิธีคำนวณ: ' + c.how">i</i></h2><p>จำนวนครั้ง · ชี้ที่กราฟเพื่อดูรายละเอียด</p></div>
-        <Donut v-if="c.type === 'donut'" :parts="c.data.map((x, i) => ({ ...x, color: SCENE_COLORS[i % SCENE_COLORS.length] }))" center-sub="ครั้ง" unit="ครั้ง" :how="c.how" />
-        <Columns v-else :data="c.data" :color="MODE_COLOR[tab]" :height="190" unit="ครั้ง" show-all :how="c.how" />
+        <Donut v-if="c.type === 'donut'" :parts="c.data.map((x, i) => ({ ...x, color: SCENE_COLORS[i % SCENE_COLORS.length] }))" unit="ครั้ง" :how="c.how" focus-max />
+        <Donut v-else :parts="shadeParts(c.data)" unit="ครั้ง" :how="c.how" focus-max />
         <p v-if="c.note" class="muted small" style="margin-top:12px">{{ c.note }}</p>
       </article>
     </section>

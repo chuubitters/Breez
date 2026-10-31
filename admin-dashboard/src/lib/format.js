@@ -1,6 +1,23 @@
 export const MODES = ['Power Release', 'Breathe & Focus', 'Calm Flow', 'Soundscape', 'Quick Session']
 
 /** สีประจำโหมด (จุด/แท่งกราฟ) */
+export const MODE_HEX = {
+  'Power Release': '#e8899e',
+  'Breathe & Focus': '#e3b93f',
+  'Calm Flow': '#8fb35a',
+  'Soundscape': '#6fa6c9',
+  'Quick Session': '#a58ad1',
+}
+
+/** ไล่เฉดสีจากอ่อน (ช่วงแรก) ไปเข้ม (ช่วงสุดท้าย) สำหรับกราฟวงกลมที่แบ่งเป็นช่วง */
+export function shades(hex, n, lightest = 0.72, darkest = 0) {
+  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16))
+  return Array.from({ length: n }, (_, i) => {
+    const t = n <= 1 ? darkest : lightest - (lightest - darkest) * (i / (n - 1))   // สัดส่วนผสมสีขาว
+    return '#' + c.map(v => Math.round(v + (255 - v) * t).toString(16).padStart(2, '0')).join('')
+  })
+}
+
 export const MODE_COLOR = {
   'Power Release': 'var(--m-power)',
   'Breathe & Focus': 'var(--m-focus)',
