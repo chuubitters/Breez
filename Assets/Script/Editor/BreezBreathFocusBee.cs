@@ -96,6 +96,7 @@ public static class BreezBreathFocusBee
         player.releaseThreshold = 20;
         player.instantControl = true;
         player.responsiveness = Mathf.Max(player.responsiveness, 80f);
+        player.fallSpeed = Mathf.Max(player.fallSpeed, 6f);
 
         // ---------- ผึ้ง ----------
         var tr = player.transform;
