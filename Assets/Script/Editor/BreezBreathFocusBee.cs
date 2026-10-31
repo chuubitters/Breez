@@ -168,7 +168,9 @@ public static class BreezBreathFocusBee
         sp.petalBitSprite = BreezStatusElementsBuilder.MakeSprite("ui_petal", BreezSpriteArt.Petal(64), 64, 0);
         BreezThaiFontInstaller.EnsureFonts();
         sp.font = BreezThaiFontInstaller.BoldFont != null ? BreezThaiFontInstaller.BoldFont : BreezThaiFontInstaller.EnsureFonts();
-        sp.flowerSize = Mathf.Clamp(worldW * 1.2f, 1.0f, 2.0f);   // ดอกไม้ใหญ่ขึ้น
+        sp.flowerSize = worldW;   // ดอกไม้ขนาดเท่าตัวผึ้ง (ปรับอีกครั้งตอนเริ่มเกมจากขนาดผึ้งจริง)
+        sp.matchBeeSize = true;
+        sp.sizeVsBee = 1f;
         sp.edgeMargin = sp.flowerSize * 0.75f;
         sp.maxStep = Mathf.Max(sp.maxStep, sp.flowerSize * 1.4f);
         sp.sortingOrder = order + 2;

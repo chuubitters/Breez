@@ -53,6 +53,10 @@ public class FlowerSpawner : MonoBehaviour
     public float spawnInterval = 1.15f;
     public float moveSpeed = 3.6f;
     public float flowerSize = 1.3f;          // ขนาด (world unit)
+    [Tooltip("ปรับขนาดดอกไม้ให้เท่ากับตัวผึ้งอัตโนมัติตอนเริ่มเกม")]
+    public bool matchBeeSize = true;
+    [Tooltip("ขนาดดอกไม้เทียบกับความกว้างตัวผึ้ง (1 = เท่าตัวผึ้ง)")]
+    public float sizeVsBee = 1f;
     [Tooltip("ระยะห่างจากขอบบน/ล่างของจอ")]
     public float edgeMargin = 0.9f;
     [Tooltip("ความสูงเปลี่ยนได้มากสุดต่อดอก")]
@@ -67,6 +71,22 @@ public class FlowerSpawner : MonoBehaviour
 
     void Start()
     {
+        if (matchBeeSize)
+        {
+            var bee = FindObjectOfType<BeeVisual>();
+            var body = bee != null && bee.body != null ? bee.body.GetComponent<SpriteRenderer>() : null;
+            if (body != null && body.sprite != null)
+            {
+                float beeW = body.bounds.size.x * 0.8f;          // ตัวผึ้งกินพื้นที่ ~80% ของภาพ
+                if (beeW > 0.1f)
+                {
+                    flowerSize = beeW * sizeVsBee;
+                    edgeMargin = Mathf.Max(edgeMargin, flowerSize * 0.6f);
+                    maxStep = Mathf.Max(maxStep, flowerSize * 1.3f);
+                }
+            }
+        }
+
         var cam = Camera.main;
         float half = cam != null && cam.orthographic ? cam.orthographicSize : 5f;
         float cy = cam != null ? cam.transform.position.y : 0f;
