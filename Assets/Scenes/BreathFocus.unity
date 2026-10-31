@@ -2793,6 +2793,7 @@ MonoBehaviour:
   fallSpeed: 4.5
   responsiveness: 60
   breathThreshold: 50
+  releaseThreshold: -1
   breathReceiver: {fileID: 564789331}
   gameOverUI: {fileID: 0}
   clampToTop: 1
@@ -4092,7 +4093,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floatHeight: 60
-  floatSpeed: 25
+  floatSpeed: 1.5
   rotationAmount: 3
   rotationSpeed: 0.8
   scaleAmount: 0.02
@@ -8123,7 +8124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floatHeight: 60
-  floatSpeed: 25
+  floatSpeed: 1.5
   rotationAmount: 3
   rotationSpeed: 0.8
   scaleAmount: 0.02
@@ -8468,7 +8469,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floatHeight: 60
-  floatSpeed: 25
+  floatSpeed: 1.5
   rotationAmount: 3
   rotationSpeed: 0.8
   scaleAmount: 0.02
