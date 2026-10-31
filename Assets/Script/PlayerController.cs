@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     [Header("Breath Settings")]
     [Range(0, 100)]
     [Tooltip("แรงเป่าที่เริ่มนับว่าเป่า (ยิ่งต่ำยิ่งไว)")]
-    public int breathThreshold = 50;
+    public int breathThreshold = 30;
     [Range(0, 100)]
     [Tooltip("ต่ำกว่าค่านี้ถึงนับว่าหยุดเป่า (กันผึ้งกระตุกตอนแรงเป่าอยู่ใกล้ขีด) -1 = ใช้ breathThreshold")]
     public int releaseThreshold = -1;
@@ -77,12 +77,7 @@ public class PlayerController : MonoBehaviour
         bool breathInput = false;
 
         if (breathReceiver != null)
-        {
-            int release = releaseThreshold >= 0 && releaseThreshold < breathThreshold ? releaseThreshold : breathThreshold;
-            int level = breathReceiver.breathLevel;
-            breathInput = breathing ? level >= release : level >= breathThreshold;
-            breathing = breathInput;
-        }
+            breathInput = DetectBreath(breathReceiver.breathLevel);
 
         // =========================
         // รวม Input ทั้งสองแบบ
@@ -106,6 +101,33 @@ public class PlayerController : MonoBehaviour
         }
 
         wasFlying = isFlying;
+    }
+
+    // ---------------------------------------------------------------
+    // ตรวจจับการเป่า: เป่าปุ๊บ = ลอย, หยุดเป่าปุ๊บ = ตก
+    //   • เริ่มเป่า: แรงเป่าเกิน breathThreshold และสูงกว่าเสียงรบกวนรอบตัว
+    //   • หยุดเป่า: แรงเป่าลดลงต่ำกว่าครึ่งหนึ่งของแรงที่เพิ่งเป่า หรือต่ำกว่า releaseThreshold
+    //     (ไม่ต้องรอให้ค่ากลับไปเป็น 0 เพราะไมค์มักมีเสียงค้าง ทำให้ผึ้งไม่ตก)
+    // ---------------------------------------------------------------
+    float noiseFloor, peak;
+
+    bool DetectBreath(int level)
+    {
+        float dt = Time.unscaledDeltaTime;
+        if (!breathing)
+        {
+            // เสียงรบกวนพื้นหลัง: ลงเร็ว ขึ้นช้า
+            noiseFloor = level < noiseFloor ? Mathf.Lerp(noiseFloor, level, 10f * dt) : Mathf.MoveTowards(noiseFloor, level, 4f * dt);
+            float start = Mathf.Max(breathThreshold, noiseFloor + 15f);
+            if (level >= start) { breathing = true; peak = level; }
+        }
+        else
+        {
+            peak = Mathf.Max(level, peak - 25f * dt);       // แรงเป่าล่าสุด (ค่อยๆ ลดเมื่อเป่าเบาลง)
+            float release = Mathf.Max(releaseThreshold >= 0 ? releaseThreshold : breathThreshold * 0.6f, noiseFloor + 8f, peak * 0.5f);
+            if (level < release) breathing = false;
+        }
+        return breathing;
     }
 
     void FixedUpdate()

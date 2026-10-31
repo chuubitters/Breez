@@ -91,9 +91,9 @@ public static class BreezBreathFocusBee
         foreach (var pc in Object.FindObjectsOfType<PlayerCollision>(true)) { Undo.RecordObject(pc, "Bee"); pc.enabled = false; }
         player.clampToTop = true;
         player.clampToBottom = true;
-        // ตอบสนองไวขึ้น: เริ่มลอยที่แรงเป่า 25 หยุดที่ 15, เปลี่ยนทิศทันที
-        player.breathThreshold = 25;
-        player.releaseThreshold = 15;
+        // เป่าปุ๊บลอย หยุดเป่าปุ๊บตก (หยุดเมื่อแรงเป่าลดลงครึ่งหนึ่งหรือต่ำกว่า 20)
+        player.breathThreshold = 30;
+        player.releaseThreshold = 20;
         player.instantControl = true;
         player.responsiveness = Mathf.Max(player.responsiveness, 80f);
 
