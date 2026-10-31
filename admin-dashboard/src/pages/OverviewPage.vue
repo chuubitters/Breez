@@ -1,7 +1,7 @@
 <script setup>
-// ภาพรวม: ตัวเลขหลัก + ข้อสังเกต + กราฟวงกลม/แท่งหลายมุม + ตารางโหมด
+// ภาพรวม: ตัวเลขหลัก + กราฟวงกลม/แท่งหลายมุม + ตารางโหมด
 import { computed, ref, watch } from 'vue'
-import { loadSessions, summarize, changePct, dailyByMode, modeTable, findings, secText, moodSummary, loadMoods,
+import { loadSessions, summarize, changePct, dailyByMode, modeTable, secText, moodSummary, loadMoods,
   byHour, byWeekday, durationBuckets, frequencyBuckets, dailyPlayers, MOOD_KEYS } from '../lib/stats'
 import { rpc } from '../lib/supabase'
 import { MODE_COLOR, MODE_INFO, MOODS, number } from '../lib/format'
@@ -74,7 +74,6 @@ const hours = computed(() => byHour(cur.value))
 const weekdays = computed(() => byWeekday(cur.value))
 const playersDaily = computed(() => dailyPlayers(cur.value, props.days))
 const peakHour = computed(() => hours.value.reduce((a, h) => (h.value > a.value ? h : a), hours.value[0]))
-const notes = computed(() => findings(data.value.cur, data.value.prev))
 const daily = computed(() => dailyByMode(data.value.cur, props.days))
 const modes = computed(() => modeTable(data.value.cur))
 const periodText = computed(() => (props.days ? `${props.days} วันล่าสุด` : 'ทั้งหมด'))
@@ -92,18 +91,6 @@ const periodText = computed(() => (props.days ? `${props.days} วันล่�
         <span v-if="k.d !== null" :class="k.d >= 0 ? 'up' : 'down'">{{ k.d >= 0 ? '+' : '' }}{{ k.d }}% เทียบกับช่วงก่อนหน้า · </span>{{ k.foot }}
       </div>
     </div>
-  </section>
-
-  <section class="card" :class="{ loading }">
-    <div class="card-head"><h2>ประเด็นที่ควรตรวจสอบ</h2><p>สรุปอัตโนมัติจากข้อมูลการฝึก ({{ periodText }})</p></div>
-    <ul class="findings">
-      <li v-for="(f, i) in notes" :key="i" class="finding" :class="f.level">
-        <span class="tag">{{ f.level === 'warn' ? 'ควรตรวจสอบ' : f.level === 'ok' ? 'ปกติ' : 'ข้อมูล' }}</span>
-        <span><b v-if="f.mode"><i class="dot" :style="{ background: MODE_COLOR[f.mode] }"></i>{{ f.mode }}: </b>{{ f.text }}
-          <button v-if="f.mode" class="btn-link small" @click="emit('navigate', 'modes', { mode: f.mode })">ดูรายละเอียด</button>
-        </span>
-      </li>
-    </ul>
   </section>
 
 

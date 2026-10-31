@@ -24,7 +24,7 @@ const ICON = {
 }
 const allNav = [
   { group: 'ข้อมูลการฝึก' },
-  { id: 'overview', label: 'ภาพรวม', desc: 'สรุปข้อมูลสำคัญและประเด็นที่ควรตรวจสอบในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
+  { id: 'overview', label: 'ภาพรวม', desc: 'สรุปข้อมูลสำคัญในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
   { id: 'modes', label: 'ข้อมูลแต่ละโหมด', desc: 'ตัวชี้วัดของแต่ละเกม สำหรับใช้ปรับระดับความยากให้เหมาะสม', page: ModesPage, period: true },
   { id: 'sessions', label: 'ประวัติการเล่น', desc: 'ผลการเล่นทั้งหมด พร้อมค้นหา กรองข้อมูล และส่งออกไฟล์ CSV', page: SessionsPage, period: true },
   { id: 'moods', label: 'ข้อมูลอารมณ์', desc: 'จำนวนผู้ใช้แยกตามอารมณ์และภาพรวมความเครียด', page: MoodsPage, period: true, owner: true },
