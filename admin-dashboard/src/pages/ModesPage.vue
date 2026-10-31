@@ -3,7 +3,10 @@
 import { computed, ref, watch } from 'vue'
 import { loadSessions, modeDetail, secText, MODES } from '../lib/stats'
 import { MODE_COLOR, MODE_INFO, number } from '../lib/format'
-import BarList from '../components/BarList.vue'
+import Columns from '../components/Columns.vue'
+import Donut from '../components/Donut.vue'
+
+const SCENE_COLORS = ['#6a9fc6', '#8fb35a', '#e3b93f', '#e8899e', '#9a86cf', '#c9cdc4']
 
 const props = defineProps({ days: Number, modeFilter: String })
 const emit = defineEmits(['navigate'])
@@ -58,7 +61,8 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
     <section class="grid-2" :class="{ loading }">
       <article v-for="c in d.charts" :key="c.title" class="card">
         <div class="card-head"><h2>{{ c.title }}</h2><p>จำนวนครั้ง</p></div>
-        <BarList :data="c.data.map(x => ({ ...x, color: MODE_COLOR[tab] }))" />
+        <Donut v-if="c.type === 'donut'" :parts="c.data.map((x, i) => ({ ...x, color: SCENE_COLORS[i % SCENE_COLORS.length] }))" center-sub="ครั้ง" unit="ครั้ง" />
+        <Columns v-else :data="c.data" :color="MODE_COLOR[tab]" :height="190" unit="ครั้ง" show-all />
         <p v-if="c.note" class="muted small" style="margin-top:12px">{{ c.note }}</p>
       </article>
     </section>
