@@ -30,7 +30,7 @@ watch(() => props.days, loadAll, { immediate: true })
 
 const m = computed(() => moodSummary(cur.value))
 const p = computed(() => (props.days ? moodSummary(prev.value) : null))
-const periodText = computed(() => (props.days ? `${props.days} วันที่ผ่านมา` : 'ที่ผ่านมา'))
+const periodText = computed(() => (props.days ? ` ${props.days} วันที่ผ่านมา` : 'ที่ผ่านมา'))
 const maxPeople = computed(() => Math.max(1, ...m.value.byMood.map(x => x.people)))
 
 function exportCsv() {
@@ -41,10 +41,10 @@ function exportCsv() {
 <template>
   <section class="grid-2" :class="{ loading }">
     <article class="card">
-      <div class="card-head"><h2>จำนวนคนในแต่ละอารมณ์</h2><p>{{ number(m.people) }} คน · {{ number(m.records) }} บันทึก</p></div>
+      <div class="card-head"><h2>จำนวนผู้ใช้แยกตามอารมณ์</h2><p>{{ number(m.people) }} คน · {{ number(m.records) }} รายการบันทึก</p></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>อารมณ์</th><th class="r">คน</th><th class="r">สัดส่วน</th><th class="r">บันทึก</th></tr></thead>
+          <thead><tr><th>อารมณ์</th><th class="r">จำนวนผู้ใช้</th><th class="r">สัดส่วน</th><th class="r">จำนวนบันทึก</th></tr></thead>
           <tbody>
             <tr v-for="x in m.byMood" :key="x.key">
               <td><i class="dot" :style="{ background: MOODS[x.key].color }"></i>{{ MOODS[x.key].th }}</td>
@@ -55,17 +55,17 @@ function exportCsv() {
           </tbody>
         </table>
       </div>
-      <p class="muted small" style="margin-top:10px">นับคนจากอารมณ์ล่าสุดที่แต่ละคนบันทึกในช่วงนี้ (1 คนนับ 1 ครั้ง) จึงรวมกันได้ 100%</p>
+      <p class="muted small" style="margin-top:10px">นับจากอารมณ์ล่าสุดที่ผู้ใช้แต่ละคนบันทึกในช่วงเวลานี้ (ผู้ใช้ 1 คนนับเพียง 1 ครั้ง) ผลรวมจึงเท่ากับ 100%</p>
     </article>
 
     <article class="card">
-      <div class="card-head"><h2>อารมณ์โดยรวม</h2><p>ใช้ทำโพสต์ชวนคนมาฝึกหายใจหรือส่งกำลังใจ</p></div>
+      <div class="card-head"><h2>อารมณ์โดยรวม</h2><p>สำหรับใช้ประชาสัมพันธ์และเชิญชวนให้ฝึกหายใจ</p></div>
       <MoodPulse :m="m" :prev="p" :period-text="periodText" />
     </article>
   </section>
 
   <section class="card">
-    <div class="card-head"><h2>บันทึกอารมณ์ล่าสุด</h2></div>
+    <div class="card-head"><h2>รายการบันทึกอารมณ์</h2></div>
     <div class="toolbar" style="margin-bottom:12px">
       <input v-model="search" class="input search" placeholder="ค้นหาชื่อผู้ใช้" />
       <span class="spacer"></span>
@@ -74,7 +74,7 @@ function exportCsv() {
     <p v-if="list.error.value" class="banner err">{{ list.error.value }}</p>
     <div class="table-wrap" :class="{ loading: list.loading.value }">
       <table>
-        <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>อารมณ์</th><th>โน้ต</th></tr></thead>
+        <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>อารมณ์</th><th>บันทึกเพิ่มเติม</th></tr></thead>
         <tbody>
           <tr v-for="r in list.rows.value" :key="r.mood_id">
             <td class="muted" style="white-space:nowrap">{{ when(r.recorded_at) }}</td>
@@ -82,7 +82,7 @@ function exportCsv() {
             <td><i class="dot" :style="{ background: MOODS[r.mood]?.color }"></i>{{ MOODS[r.mood]?.th ?? r.mood }}</td>
             <td class="muted">{{ r.note || '—' }}</td>
           </tr>
-          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="4" class="empty">ไม่มีบันทึกอารมณ์ในช่วงนี้</td></tr>
+          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="4" class="empty">ไม่พบบันทึกอารมณ์ในช่วงเวลานี้</td></tr>
         </tbody>
       </table>
     </div>

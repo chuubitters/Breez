@@ -40,14 +40,14 @@ const iconColor = d => { const c = String(d.device_icon || '').split('|')[1]; re
       <div class="seg">
         <button :class="{ on: filter === 'all' }" @click="filter = 'all'">ทั้งหมด {{ counts.all }}</button>
         <button :class="{ on: filter === 'online' }" @click="filter = 'online'">ออนไลน์ {{ counts.online }}</button>
-        <button :class="{ on: filter === 'low' }" @click="filter = 'low'">แบตต่ำ {{ counts.low }}</button>
-        <button :class="{ on: filter === 'stale' }" @click="filter = 'stale'">เงียบเกิน 14 วัน {{ counts.stale }}</button>
+        <button :class="{ on: filter === 'low' }" @click="filter = 'low'">แบตเตอรี่ต่ำ {{ counts.low }}</button>
+        <button :class="{ on: filter === 'stale' }" @click="filter = 'stale'">ไม่ได้ใช้งานเกิน 14 วัน {{ counts.stale }}</button>
       </div>
-      <input v-model="search" class="input search" placeholder="ค้นหาชื่อเครื่องหรือเจ้าของ" />
+      <input v-model="search" class="input search" placeholder="ค้นหาชื่ออุปกรณ์หรือชื่อเจ้าของ" />
     </div>
     <div class="table-wrap" :class="{ loading }">
       <table>
-        <thead><tr><th>เครื่อง</th><th>เจ้าของ</th><th>สถานะ</th><th class="r">แบตเตอรี่</th><th class="r">ครั้งที่เล่น</th><th>อัปเดตล่าสุด</th></tr></thead>
+        <thead><tr><th>อุปกรณ์</th><th>เจ้าของ</th><th>สถานะ</th><th class="r">แบตเตอรี่</th><th class="r">จำนวนครั้งที่ใช้</th><th>อัปเดตล่าสุด</th></tr></thead>
         <tbody>
           <tr v-for="d in shown" :key="d.device_id">
             <td><i class="dot" :style="{ background: iconColor(d) }"></i>{{ d.device_name || 'Breath Gadget' }}</td>
@@ -57,7 +57,7 @@ const iconColor = d => { const c = String(d.device_icon || '').split('|')[1]; re
             <td class="r num">{{ number(d.sessions) }}</td>
             <td class="muted">{{ when(d.updated_at) }}</td>
           </tr>
-          <tr v-if="!loading && !shown.length"><td colspan="6" class="empty">ไม่มีอุปกรณ์ในกลุ่มนี้</td></tr>
+          <tr v-if="!loading && !shown.length"><td colspan="6" class="empty">ไม่พบอุปกรณ์ในกลุ่มนี้</td></tr>
         </tbody>
       </table>
     </div>

@@ -9,7 +9,7 @@ const copied = ref(-1)
 
 const parts = computed(() => [
   { label: 'รู้สึกดี', pct: props.m.goodPct, value: `${props.m.good} คน`, color: '#8fb35a' },
-  { label: 'เฉยๆ / เบื่อ', pct: props.m.neutralPct, value: `${props.m.neutral} คน`, color: '#c9cdc4' },
+  { label: 'เฉย ๆ / เบื่อ', pct: props.m.neutralPct, value: `${props.m.neutral} คน`, color: '#c9cdc4' },
   { label: 'เครียด / โกรธ', pct: props.m.tensePct, value: `${props.m.tense} คน`, color: '#b5645c' },
 ])
 const diff = computed(() => (props.prev?.people ? props.m.tensePct - props.prev.tensePct : null))
@@ -21,20 +21,20 @@ async function copy(text, i) {
 </script>
 
 <template>
-  <div v-if="!m.people" class="empty">ยังไม่มีการบันทึกอารมณ์ในช่วงนี้</div>
+  <div v-if="!m.people" class="empty">ยังไม่มีการบันทึกอารมณ์ในช่วงเวลานี้</div>
   <div v-else class="pulse">
     <div class="pulse-head">
       <div>
         <div class="pulse-value">{{ m.tensePct }}<small>%</small></div>
-        <div class="muted small">ของผู้ใช้ {{ m.people }} คนรู้สึกเครียดหรือโกรธ</div>
+        <div class="muted small">ของผู้ใช้ทั้งหมด {{ m.people }} คน รู้สึกเครียดหรือโกรธ</div>
       </div>
       <span v-if="diff !== null" class="pulse-diff" :class="diff > 0 ? 'down' : 'up'">
-        {{ diff > 0 ? 'เครียดขึ้น' : diff < 0 ? 'เครียดลดลง' : 'เท่าเดิม' }} {{ Math.abs(diff) }} จุดจากช่วงก่อน
+        {{ diff > 0 ? 'เพิ่มขึ้น' : diff < 0 ? 'ลดลง' : 'คงที่' }} {{ Math.abs(diff) }} จุดเปอร์เซ็นต์ เทียบกับช่วงก่อนหน้า
       </span>
     </div>
     <ShareBar :parts="parts" />
     <div v-if="!compact" class="pulse-msgs">
-      <p class="small" style="font-weight:600">ข้อความพร้อมใช้สำหรับโพสต์ชวนคนมาฝึก / ส่งกำลังใจ</p>
+      <p class="small" style="font-weight:600">ข้อความตัวอย่างสำหรับประชาสัมพันธ์และส่งกำลังใจ</p>
       <div v-for="(t, i) in messages" :key="i" class="pulse-msg">
         <span>{{ t }}</span>
         <button class="btn btn-sm" @click="copy(t, i)">{{ copied === i ? 'คัดลอกแล้ว' : 'คัดลอก' }}</button>

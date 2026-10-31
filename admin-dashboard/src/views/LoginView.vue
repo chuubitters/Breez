@@ -15,7 +15,7 @@ async function submit() {
   error.value = ''
   emit('clear-notice')
   if (!email.value || !password.value) {
-    error.value = 'กรอกอีเมลและรหัสผ่าน'
+    error.value = 'กรุณากรอกอีเมลและรหัสผ่าน'
     return
   }
   loading.value = true
@@ -39,8 +39,8 @@ async function submit() {
     <form class="login-card" @submit.prevent="submit" novalidate>
       <img src="/breez-logo.png" alt="breez" />
       <div>
-        <h1>เข้าสู่ระบบหลังบ้าน</h1>
-        <p class="muted small">สำหรับเจ้าของระบบและผู้ดูแลเท่านั้น</p>
+        <h1>เข้าสู่ระบบผู้ดูแล</h1>
+        <p class="muted small">สำหรับผู้ดูแลระบบ Breez เท่านั้น</p>
       </div>
       <label class="field">
         <span>อีเมล</span>
@@ -57,7 +57,7 @@ async function submit() {
       <button class="btn btn-primary" style="justify-content:center" type="submit" :disabled="loading">
         {{ loading ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ' }}
       </button>
-      <p class="muted small">ลืมรหัสผ่าน? ติดต่อเจ้าของระบบเพื่อรีเซ็ต</p>
+      <p class="muted small">หากลืมรหัสผ่าน กรุณาติดต่อ Super Admin เพื่อตั้งรหัสผ่านใหม่</p>
     </form>
   </div>
 </template>

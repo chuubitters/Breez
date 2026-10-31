@@ -18,8 +18,8 @@ async function load() {
 load()
 
 const ROLES = [
-  { v: 'admin', t: 'Admin', d: 'ดูข้อมูลการฝึก แต่ละโหมด ประวัติการเล่น และอุปกรณ์' },
-  { v: 'owner', t: 'Super Admin', d: 'ทำได้ทุกอย่าง รวมถึงดูข้อมูลอารมณ์และเพิ่ม/ลบแอดมิน' },
+  { v: 'admin', t: 'Admin', d: 'ดูภาพรวม ข้อมูลแต่ละโหมด ประวัติการเล่น และอุปกรณ์' },
+  { v: 'owner', t: 'Super Admin', d: 'ใช้งานได้ทุกส่วน รวมถึงข้อมูลอารมณ์และการจัดการแอดมิน' },
 ]
 const roleName = r => (r === 'owner' ? 'Super Admin' : 'Admin')
 const addMode = ref('new') // new = สร้างบัญชีใหม่, existing = ให้สิทธิ์บัญชีที่มีอยู่
@@ -35,7 +35,7 @@ async function createStaff() {
       try { detail = (await err.context.json()).error || detail } catch { /* ใช้ข้อความเดิม */ }
       throw new Error(detail)
     }
-    msg.value = `เพิ่ม ${data.email} เป็น ${roleName(data.role)} แล้ว ส่งอีเมลและรหัสผ่านให้เจ้าตัวได้เลย`
+    msg.value = `เพิ่ม ${data.email} เป็น ${roleName(data.role)} เรียบร้อยแล้ว กรุณาแจ้งอีเมลและรหัสผ่านให้ผู้ใช้งาน`
     form.value = { name: '', email: '', password: '', role: 'admin' }
     await load()
   } catch (e) { error.value = e.message } finally { creating.value = false }
@@ -46,7 +46,7 @@ async function grant() {
   creating.value = true
   try {
     await rpc('staff_set_role', { p_email: form.value.email, p_role: form.value.role })
-    msg.value = `ให้สิทธิ์ ${roleName(form.value.role)} กับ ${form.value.email} แล้ว`
+    msg.value = `กำหนดสิทธิ์ ${roleName(form.value.role)} ให้ ${form.value.email} เรียบร้อยแล้ว`
     form.value = { name: '', email: '', password: '', role: 'admin' }
     await load()
   } catch (e) { error.value = e.message } finally { creating.value = false }
@@ -58,16 +58,16 @@ async function changeRole(s, role) {
   try { await rpc('staff_set_role', { p_email: s.email, p_role: role }); await load() } catch (e) { error.value = e.message }
 }
 async function remove(s) {
-  if (!window.confirm(`ถอนสิทธิ์แอดมินของ ${s.email}?\n(บัญชียังอยู่ แต่จะเข้าแดชบอร์ดไม่ได้)`)) return
+  if (!window.confirm(`ยืนยันการถอนสิทธิ์แอดมินของ ${s.email} หรือไม่\n(บัญชีจะยังคงอยู่ แต่จะไม่สามารถเข้าใช้แดชบอร์ดได้)`)) return
   msg.value = ''; error.value = ''
   try { await rpc('staff_remove', { p_user_id: s.user_id }); await load() } catch (e) { error.value = e.message }
 }
 
 const matrix = [
-  ['ภาพรวม / แต่ละโหมด / ประวัติการเล่น', true, true],
+  ['ภาพรวม ข้อมูลแต่ละโหมด และประวัติการเล่น', true, true],
   ['อุปกรณ์', true, true],
-  ['อารมณ์ (รายคนและภาพรวม)', true, false],
-  ['เพิ่ม / เปลี่ยนสิทธิ์ / ถอนสิทธิ์แอดมิน', true, false],
+  ['ข้อมูลอารมณ์ (รายบุคคลและภาพรวม)', true, false],
+  ['เพิ่ม เปลี่ยนสิทธิ์ และถอนสิทธิ์แอดมิน', true, false],
 ]
 const supers = computed(() => staff.value.filter(s => s.role === 'owner').length)
 </script>
@@ -77,10 +77,10 @@ const supers = computed(() => staff.value.filter(s => s.role === 'owner').length
   <p v-if="error" class="banner err">{{ error }}</p>
 
   <section class="card">
-    <div class="card-head"><h2>แอดมินทั้งหมด</h2><p>{{ staff.length }} บัญชี · Super Admin {{ supers }} · Admin {{ staff.length - supers }}</p></div>
+    <div class="card-head"><h2>แอดมินทั้งหมด</h2><p>ทั้งหมด {{ staff.length }} บัญชี · Super Admin {{ supers }} · Admin {{ staff.length - supers }}</p></div>
     <div class="table-wrap" :class="{ loading }">
       <table>
-        <thead><tr><th>ชื่อ</th><th>สิทธิ์</th><th>เข้าใช้ล่าสุด</th><th></th></tr></thead>
+        <thead><tr><th>ชื่อ</th><th>สิทธิ์</th><th>เข้าใช้งานล่าสุด</th><th></th></tr></thead>
         <tbody>
           <tr v-for="s in staff" :key="s.user_id">
             <td><strong>{{ s.name }}</strong><span v-if="s.user_id === me.user_id" class="muted"> (คุณ)</span><span class="sub">{{ s.email }}</span></td>
@@ -105,7 +105,7 @@ const supers = computed(() => staff.value.filter(s => s.role === 'owner').length
         <button type="button" :class="{ on: addMode === 'new' }" @click="addMode = 'new'">สร้างบัญชีใหม่</button>
         <button type="button" :class="{ on: addMode === 'existing' }" @click="addMode = 'existing'">ใช้บัญชีที่มีอยู่แล้ว</button>
       </div>
-      <p class="muted small" style="margin:0">{{ addMode === 'new' ? 'สำหรับคนที่ยังไม่มีบัญชี ระบบจะสร้างบัญชีให้ด้วยอีเมลและรหัสผ่านนี้' : 'สำหรับคนที่สมัครผ่านเกมแล้ว ใส่อีเมลที่ใช้สมัคร' }}</p>
+      <p class="muted small" style="margin:0">{{ addMode === 'new' ? 'สำหรับผู้ที่ยังไม่มีบัญชี ระบบจะสร้างบัญชีจากอีเมลและรหัสผ่านที่ระบุ' : 'สำหรับผู้ที่สมัครใช้งานแอปพลิเคชันแล้ว กรุณาระบุอีเมลที่ใช้สมัคร' }}</p>
       <label v-if="addMode === 'new'" class="field"><span>ชื่อที่แสดง</span><input v-model="form.name" class="input" /></label>
       <label class="field"><span>อีเมล</span><input v-model="form.email" class="input" type="email" required /></label>
       <label v-if="addMode === 'new'" class="field"><span>รหัสผ่านเริ่มต้น (อย่างน้อย 8 ตัว)</span><input v-model="form.password" class="input" type="text" minlength="8" required autocomplete="new-password" /></label>
@@ -123,7 +123,7 @@ const supers = computed(() => staff.value.filter(s => s.role === 'owner').length
     <article class="card">
       <div class="card-head"><h2>สิทธิ์แต่ละระดับ</h2></div>
       <table>
-        <thead><tr><th>ส่วน</th><th>Super Admin</th><th>Admin</th></tr></thead>
+        <thead><tr><th>ส่วนการใช้งาน</th><th>Super Admin</th><th>Admin</th></tr></thead>
         <tbody>
           <tr v-for="r in matrix" :key="r[0]">
             <td>{{ r[0] }}</td>
@@ -131,7 +131,7 @@ const supers = computed(() => staff.value.filter(s => s.role === 'owner').length
           </tr>
         </tbody>
       </table>
-      <p class="muted small" style="margin-top:12px">บัญชีแอดมินไม่ถูกนับเป็นผู้เล่นในสถิติ · เปลี่ยนสิทธิ์หรือถอนสิทธิ์ตัวเองไม่ได้</p>
+      <p class="muted small" style="margin-top:12px">บัญชีแอดมินจะไม่ถูกนับรวมในสถิติผู้ใช้ · ไม่สามารถเปลี่ยนหรือถอนสิทธิ์ของบัญชีตนเองได้</p>
     </article>
   </section>
 </template>
