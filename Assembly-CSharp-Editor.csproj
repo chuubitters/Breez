@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Script/Editor/BreezDailyHistoryBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezPolishUI.cs" />
     <Compile Include="Assets/Script/Editor/BreezBreathFocusRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezGadgetSceneBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezSoundscapeBuilder.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Assets/Script/Editor/BreezSerialSetup.cs" />
     <Compile Include="Assets/Script/Editor/BreezLoginSceneBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezBreathPlayLayers.cs" />
+    <Compile Include="Assets/Script/Editor/BreezGadgetSettingRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezPowerReleaseRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezStatusElementsBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezMoodSceneBuilder.cs" />
