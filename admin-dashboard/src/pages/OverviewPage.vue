@@ -1,11 +1,14 @@
 <script setup>
-// ภาพรวม: ตัวเลขหลัก + ข้อสังเกตที่ควรปรับ + การเล่นรายวัน + ตารางโหมด
+// ภาพรวม: ตัวเลขหลัก + ข้อสังเกต + กราฟวงกลม/แท่งหลายมุม + ตารางโหมด
 import { computed, ref, watch } from 'vue'
-import { loadSessions, summarize, changePct, dailyByMode, modeTable, findings, secText, moodSummary, loadMoods } from '../lib/stats'
-import { MODE_COLOR, MODE_INFO, number } from '../lib/format'
+import { loadSessions, summarize, changePct, dailyByMode, modeTable, findings, secText, moodSummary, loadMoods,
+  byHour, byWeekday, durationBuckets, frequencyBuckets, dailyPlayers, MOOD_KEYS } from '../lib/stats'
+import { rpc } from '../lib/supabase'
+import { MODE_COLOR, MODE_INFO, MOODS, number } from '../lib/format'
 import DailyChart from '../components/DailyChart.vue'
-import ShareBar from '../components/ShareBar.vue'
 import MoodPulse from '../components/MoodPulse.vue'
+import Donut from '../components/Donut.vue'
+import Columns from '../components/Columns.vue'
 
 const props = defineProps({ days: Number, me: Object })
 const emit = defineEmits(['navigate'])
@@ -38,24 +41,50 @@ watch(() => props.days, fetchMoods, { immediate: true })
 const s = computed(() => summarize(data.value.cur))
 const p = computed(() => summarize(data.value.prev))
 const delta = key => (props.days ? changePct(s.value[key], p.value[key]) : null)
+// อุปกรณ์ (ทุกบัญชีเห็นได้)
+const devices = ref([])
+rpc('dashboard_devices', { p_search: null }).then(r => { devices.value = r ?? [] }).catch(() => {})
+
 const kpis = computed(() => [
   { label: 'คนที่เข้ามาฝึก', value: number(s.value.players), unit: 'คน', d: delta('players'), foot: 'นับคนไม่ซ้ำ' },
-  { label: 'จำนวนครั้งที่ฝึก', value: number(s.value.sessions), unit: 'ครั้ง', d: delta('sessions'), foot: `รวม ${number(s.value.minutes, 0)} นาที` },
+  { label: 'จำนวนครั้งที่ฝึก', value: number(s.value.sessions), unit: 'ครั้ง', d: delta('sessions'), foot: 'ทุกโหมดรวมกัน' },
+  { label: 'เวลาฝึกรวม', value: number(s.value.minutes / 60, 1), unit: 'ชม.', d: delta('minutes'), foot: `${number(s.value.minutes, 0)} นาที` },
   { label: 'เวลาต่อครั้ง (มัธยฐาน)', value: secText(s.value.medianDuration), unit: '', d: delta('medianDuration'), foot: `เฉลี่ย ${secText(s.value.avgDuration)}` },
-  { label: 'กลับมาเล่นซ้ำ', value: `${s.value.returningPct}%`, unit: '', d: null, foot: `${s.value.returning} จาก ${s.value.players} คน เล่นมากกว่า 1 วัน` },
+  { label: 'กลับมาเล่นซ้ำ', value: `${s.value.returningPct}%`, unit: '', d: null, foot: `${s.value.returning} จาก ${s.value.players} คน ฝึกมากกว่า 1 วัน` },
+  { label: 'อุปกรณ์ออนไลน์', value: `${devices.value.filter(d => d.is_online).length}/${devices.value.length}`, unit: 'เครื่อง', d: null, foot: `แบตต่ำ ${devices.value.filter(lowBatt).length} เครื่อง` },
 ])
+const lowBatt = d => d.battery_level != null && d.battery_level < 20
+const cur = computed(() => data.value.cur)
+const donutModes = computed(() => modes.value.map(m => ({ label: m.mode, value: m.sessions, color: MODE_COLOR[m.mode] })))
+const donutMoods = computed(() => (moods.value.cur ? MOOD_KEYS.map(k => ({ label: MOODS[k].th, value: moods.value.cur.byMood.find(x => x.key === k).people, color: MOODS[k].color })) : []))
+const donutChannel = computed(() => {
+  const gadget = cur.value.filter(r => r.mode === 'Quick Session').length
+  return [{ label: 'ในแอป / เกม', value: cur.value.length - gadget, color: '#6f9a52' }, { label: 'บนตัวเครื่อง Breath Gadget', value: gadget, color: '#9a86cf' }]
+})
+const FREQ_COLORS = ['#dfe6d6', '#b9cf9f', '#86ad62', '#4f7a3a']
+const donutFreq = computed(() => frequencyBuckets(cur.value).map((b, i) => ({ ...b, color: FREQ_COLORS[i] })))
+const DUR_COLORS = ['#f1d9a8', '#e8c171', '#d9a441', '#b88a2e', '#8c6a22']
+const donutDur = computed(() => durationBuckets(cur.value).map((b, i) => ({ ...b, color: DUR_COLORS[i] })))
+const donutDevices = computed(() => {
+  const on = devices.value.filter(d => d.is_online).length
+  const low = devices.value.filter(lowBatt).length
+  return [{ label: 'ออนไลน์', value: on, color: '#5f9b4c' }, { label: 'ออฟไลน์', value: devices.value.length - on, color: '#c9cdc4' }, { label: 'แบตต่ำกว่า 20%', value: low, color: '#c9564f' }]
+})
+const hours = computed(() => byHour(cur.value))
+const weekdays = computed(() => byWeekday(cur.value))
+const playersDaily = computed(() => dailyPlayers(cur.value, props.days))
+const peakHour = computed(() => hours.value.reduce((a, h) => (h.value > a.value ? h : a), hours.value[0]))
 const notes = computed(() => findings(data.value.cur, data.value.prev))
 const daily = computed(() => dailyByMode(data.value.cur, props.days))
 const modes = computed(() => modeTable(data.value.cur))
 const periodText = computed(() => (props.days ? `${props.days} วันล่าสุด` : 'ทั้งหมด'))
-const shareParts = computed(() => modes.value.map(m => ({ label: m.mode, pct: m.share, color: MODE_COLOR[m.mode] })))
 </script>
 
 <template>
   <p v-if="error" class="banner err">{{ error }}</p>
   <p v-if="data.truncated" class="banner note">ข้อมูลเยอะเกิน 8,000 ครั้ง ตัวเลขคำนวณจาก 8,000 ครั้งล่าสุด ลองเลือกช่วงเวลาที่สั้นลง</p>
 
-  <section class="kpis" :class="{ loading }">
+  <section class="kpis six" :class="{ loading }">
     <div v-for="k in kpis" :key="k.label" class="kpi">
       <div class="label">{{ k.label }}</div>
       <div class="value">{{ k.value }}<small v-if="k.unit">{{ k.unit }}</small></div>
@@ -77,15 +106,59 @@ const shareParts = computed(() => modes.value.map(m => ({ label: m.mode, pct: m.
     </ul>
   </section>
 
+
+  <section class="grid-3eq" :class="{ loading }">
+    <article class="card">
+      <div class="card-head"><h2>สัดส่วนรูปแบบการฝึก</h2><p>จำนวนครั้ง</p></div>
+      <Donut :parts="donutModes" :center-sub="'ครั้ง'" unit="ครั้ง" />
+    </article>
+    <article v-if="isSuper && moods.cur" class="card">
+      <div class="card-head"><h2>อารมณ์ผู้ใช้</h2><p>จำนวนคน (อารมณ์ล่าสุด)</p></div>
+      <Donut :parts="donutMoods" :center="moods.cur.tensePct + '%'" center-sub="เครียด/โกรธ" unit="คน" />
+    </article>
+    <article class="card">
+      <div class="card-head"><h2>ฝึกผ่านช่องทางไหน</h2><p>จำนวนครั้ง</p></div>
+      <Donut :parts="donutChannel" center-sub="ครั้ง" unit="ครั้ง" />
+    </article>
+    <article class="card">
+      <div class="card-head"><h2>แต่ละคนฝึกบ่อยแค่ไหน</h2><p>จำนวนคน</p></div>
+      <Donut :parts="donutFreq" center-sub="คน" unit="คน" />
+    </article>
+    <article class="card">
+      <div class="card-head"><h2>ฝึกนานแค่ไหนต่อครั้ง</h2><p>จำนวนครั้ง</p></div>
+      <Donut :parts="donutDur" center-sub="ครั้ง" unit="ครั้ง" />
+    </article>
+    <article class="card">
+      <div class="card-head"><h2>สถานะอุปกรณ์</h2><button class="btn-link small" @click="emit('navigate', 'devices')">ดูอุปกรณ์</button></div>
+      <Donut :parts="donutDevices.slice(0, 2)" center-sub="เครื่อง" unit="เครื่อง" />
+      <p v-if="donutDevices[2].value" class="small" style="margin-top:10px;color:#a3463f">แบตต่ำกว่า 20%: {{ donutDevices[2].value }} เครื่อง</p>
+    </article>
+  </section>
+
   <section class="card" :class="{ loading }">
-    <div class="card-head"><h2>จำนวนครั้งที่เล่นต่อวัน</h2><p>{{ days && days <= 60 ? periodText : '60 วันล่าสุด' }}</p></div>
+    <div class="card-head"><h2>จำนวนครั้งที่ฝึกต่อวัน</h2><p>{{ days && days <= 60 ? periodText : '60 วันล่าสุด' }} · แยกตามโหมด</p></div>
     <DailyChart :days="daily" />
   </section>
 
   <section class="card" :class="{ loading }">
-    <div class="card-head"><h2>รูปแบบการฝึก</h2><p>{{ number(s.players) }} คน · {{ number(s.sessions) }} ครั้ง · สัดส่วนคิดจากจำนวนครั้ง</p></div>
-    <ShareBar :parts="shareParts" />
-    <div class="table-wrap" style="margin-top:14px">
+    <div class="card-head"><h2>คนที่เข้ามาฝึกต่อวัน</h2><p>นับคนไม่ซ้ำในแต่ละวัน</p></div>
+    <Columns :data="playersDaily" :every="playersDaily.length > 14 ? 3 : 1" unit="คน" />
+  </section>
+
+  <section class="grid-2" :class="{ loading }">
+    <article class="card">
+      <div class="card-head"><h2>ช่วงเวลาที่ฝึก</h2><p>คนฝึกมากสุดตอน {{ peakHour?.label }}:00 น.</p></div>
+      <Columns :data="hours" :every="3" color="#6f9a52" unit="ครั้ง" />
+    </article>
+    <article class="card">
+      <div class="card-head"><h2>วันในสัปดาห์</h2><p>จำนวนครั้ง</p></div>
+      <Columns :data="weekdays" color="#d9a441" unit="ครั้ง" />
+    </article>
+  </section>
+
+  <section class="card" :class="{ loading }">
+    <div class="card-head"><h2>ตารางรูปแบบการฝึก</h2><p>{{ number(s.players) }} คน · {{ number(s.sessions) }} ครั้ง · สัดส่วนคิดจากจำนวนครั้ง</p></div>
+    <div class="table-wrap">
       <table>
         <thead><tr><th>รูปแบบ</th><th class="r">คนที่ฝึก</th><th class="r">ครั้ง</th><th class="r">เวลาเฉลี่ย/ครั้ง</th><th class="r">สัดส่วน</th></tr></thead>
         <tbody>
