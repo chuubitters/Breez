@@ -58,7 +58,7 @@ export function mockRpc(name, a = {}) {
     case 'dashboard_devices':
       return users.slice(0, 7).map((u, i) => ({ device_id: `d-${i}`, device_name: i ? `${u.name}'s Gadget` : 'Breath Gadget', device_icon: 'cat|#A9C77E', owner_name: u.name, user_id: u.user_id, battery_level: [92, 15, 64, null, 48, 8, 77][i], connection_status: i % 3 ? 'disconnected' : 'connected', is_online: i % 3 === 0, updated_at: new Date(Date.now() - i * 7200e3).toISOString(), sessions: 10 + i * 4 }))
     case 'staff_list':
-      return [{ user_id: 'u-0', email: 'chuu@mail.com', name: 'chuu', role: 'owner', created_at: users[0].created_at, last_sign_in_at: new Date().toISOString() }]
+      return [{ user_id: 'u-0', email: 'chuu@mail.com', name: 'chuu', role: 'owner', created_at: users[0].created_at, last_sign_in_at: new Date().toISOString() }, { user_id: 'u-1', email: 'gift@mail.com', name: 'gift', role: 'admin', created_at: users[1].created_at, last_sign_in_at: new Date(Date.now() - 864e5).toISOString() }]
     default: return null
   }
 }

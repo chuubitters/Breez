@@ -203,3 +203,33 @@ td .sub { display: block; font-size: 12px; color: var(--muted) }
   .search { width: 100% }
   .bar-row { grid-template-columns: 96px 1fr 48px }
 }
+
+/* แถบสัดส่วน */
+.share { display: grid; gap: 10px }
+.share-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #eef0ec }
+.share-bar span { height: 100%; min-width: 2px }
+.share-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-2) }
+.share-legend b { color: var(--ink); font-weight: 600 }
+
+/* ภาพรวมอารมณ์ */
+.pulse { display: grid; gap: 14px }
+.pulse-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.pulse-value { font-size: 34px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums }
+.pulse-value small { font-size: 18px; color: var(--muted) }
+.pulse-diff { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: #f2f3f0 }
+.pulse-diff.down { color: #a3463f; background: #f8e9e7 }
+.pulse-diff.up { color: var(--accent); background: var(--accent-soft) }
+.pulse-msgs { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px }
+.pulse-msg { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; background: #f7f8f6; font-size: 13px }
+.btn-sm { padding: 4px 10px; font-size: 12px; flex: none }
+.share-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end }
+.share-cell .track { width: 90px; height: 6px; border-radius: 3px; background: #eef0ec; overflow: hidden }
+.share-cell .track span { display: block; height: 100% }
+.role-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #f2f3f0; color: var(--ink-2) }
+.role-pill.super { background: var(--accent-soft); color: var(--accent) }
+.role-options { display: grid; gap: 8px }
+.role-option { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer }
+.role-option.on { border-color: var(--accent); background: var(--accent-soft) }
+.role-option input { margin-top: 3px; accent-color: var(--accent) }
+.role-option span { display: grid; gap: 2px }
+.role-option small { color: var(--muted); font-size: 12px }
