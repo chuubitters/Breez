@@ -230,7 +230,7 @@ export function modeDetail(mode, all) {
     ]
     base.charts = [
       {
-        title: 'จำนวนครั้งแยกตามฉาก',
+        title: 'จำนวนครั้งแยกตามฉาก', type: 'donut',
         data: [...scenes.entries()].sort((a, b) => b[1].length - a[1].length)
           .map(([k, v]) => ({ label: k, value: v.length, extra: `เฉลี่ย ${secText(avg(v.map(r => r.duration || 0)))}` })),
       },
