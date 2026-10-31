@@ -295,3 +295,6 @@ td .sub { display: block; font-size: 12px; color: var(--muted) }
 .dev-stats b.bad { color: #b5473f }
 @media (max-width: 1100px) { .grid-2.wide-left { grid-template-columns: 1fr } }
 @media (max-width: 760px) { .rank li { grid-template-columns: 18px minmax(0, 1fr) 80px } .rank-bar { display: none } }
+.donut-num.sm { font-size: 16px }
+.donut-legend li.top { background: #f5f7f2; font-weight: 600 }
+.donut-legend li.top .lbl::after { content: 'มากที่สุด'; margin-left: 6px; font-size: 10px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 999px }
