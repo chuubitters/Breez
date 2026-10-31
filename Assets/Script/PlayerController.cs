@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour
     public bool clampToTop = true;
     [Tooltip("เว้นระยะจากขอบจอบน (หน่วย world)")]
     public float topMargin = 0.15f;
+    [Tooltip("ไม่ให้ตกพ้นขอบจอล่าง (โหมดเก็บดอกไม้: ไม่มีการตาย)")]
+    public bool clampToBottom = false;
+    public float bottomMargin = 0.15f;
 
     private Rigidbody2D rb;
     private Animator anim;
@@ -119,6 +122,22 @@ public class PlayerController : MonoBehaviour
         }
 
         ClampTop();
+        ClampBottom();
+    }
+
+    void ClampBottom()
+    {
+        if (!clampToBottom) return;
+        var cam = Camera.main;
+        float bottom = cam != null && cam.orthographic ? cam.transform.position.y - cam.orthographicSize : -5f;
+        float half = 0.5f;
+        var col = GetComponent<Collider2D>();
+        if (col != null) half = col.bounds.extents.y;
+        float centerOffset = col != null ? col.bounds.center.y - rb.position.y : 0f;
+        float limit = bottom + half - centerOffset + bottomMargin;
+        if (rb.position.y > limit) return;
+        rb.position = new Vector2(rb.position.x, limit);
+        if (rb.velocity.y < 0f) rb.velocity = new Vector2(rb.velocity.x, 0f);
     }
 
     // กันไม่ให้ลอยพ้นขอบจอบน: หยุดที่ขอบ (ความเร็วขาขึ้น = 0) แต่ตกลงได้ปกติ

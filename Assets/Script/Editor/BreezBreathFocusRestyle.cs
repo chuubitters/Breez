@@ -31,7 +31,9 @@ public static class BreezBreathFocusRestyle
     static Sprite pill, card, arrow;
 
     [MenuItem("Breez/Restyle Breathe & Focus")]
-    public static void Restyle()
+    public static void Restyle() => Build(false);
+
+    public static void Build(bool silent)
     {
         if (!File.Exists(ScenePath)) { EditorUtility.DisplayDialog("Breez", "ไม่พบ " + ScenePath, "OK"); return; }
         if (EditorSceneManager.GetActiveScene().path != ScenePath)
@@ -111,17 +113,52 @@ public static class BreezBreathFocusRestyle
         var head = Img(R, "Header", pill, HeaderPink); head.type = Image.Type.Sliced;
         Place(head.rectTransform, 0, 312, 266, 92);
         Text(head.transform, "Text", "ผลลัพธ์", bold, 38, Ink, 0, 0, 266, 92);
-        Text(R, "ScoreLabel", "คะแนน", regular, 34, Ink, 0, 205, 400, 50);
-        gm.resultScoreText = Text(R, "Score", "0", regular, 130, Ink, 0, 102, 700, 150);
-        Left(Text(R, "TimeLabel", "ระยะเวลาที่ใช้", regular, 32, Ink, 0, -24, 420, 46), -367);
-        gm.resultTimeText = Left(Text(R, "Time", "00:00<size=40%>  นาที</size>", regular, 84, Ink, 0, -102, 440, 100), -367);
-        Left(Text(R, "ObstacleLabel", "คุณข้ามสิ่งกีดขวางได้ทั้งหมด", regular, 32, Ink, 0, -24, 520, 46), 75);
-        gm.resultObstacleText = Left(Text(R, "Obstacles", "0<size=40%>  ชิ้น</size>", regular, 84, Ink, 0, -102, 440, 100), 75);
+        bool flowers = gm.spawner != null;
+        if (!flowers)
+        {
+            Text(R, "ScoreLabel", "คะแนน", regular, 34, Ink, 0, 205, 400, 50);
+            gm.resultScoreText = Text(R, "Score", "0", regular, 130, Ink, 0, 102, 700, 150);
+            Left(Text(R, "TimeLabel", "ระยะเวลาที่ใช้", regular, 32, Ink, 0, -24, 420, 46), -367);
+            gm.resultTimeText = Left(Text(R, "Time", "00:00<size=40%>  นาที</size>", regular, 84, Ink, 0, -102, 440, 100), -367);
+            Left(Text(R, "ObstacleLabel", "คุณข้ามสิ่งกีดขวางได้ทั้งหมด", regular, 32, Ink, 0, -24, 520, 46), 75);
+            gm.resultObstacleText = Left(Text(R, "Obstacles", "0<size=40%>  ชิ้น</size>", regular, 84, Ink, 0, -102, 440, 100), 75);
+            gm.resultFlowerCounts = new TMP_Text[0];
+        }
+        else
+        {
+            // ผึ้งเก็บดอกไม้: คะแนน / เวลา / ดอกไม้ทั้งหมด + แถวดอกไม้ 3 สี (เด้ง + โยก)
+            Text(R, "ScoreLabel", "คะแนน", regular, 32, Ink, 0, 232, 400, 46);
+            gm.resultScoreText = Text(R, "Score", "0", regular, 112, Ink, 0, 150, 700, 130);
+            Left(Text(R, "TimeLabel", "ระยะเวลาที่เล่น", regular, 30, Ink, 0, 52, 420, 44), -367);
+            gm.resultTimeText = Left(Text(R, "Time", "00:00<size=40%>  นาที</size>", regular, 70, Ink, 0, -12, 440, 86), -367);
+            Left(Text(R, "ObstacleLabel", "ดอกไม้ที่เก็บได้ทั้งหมด", regular, 30, Ink, 0, 52, 520, 44), 75);
+            gm.resultObstacleText = Left(Text(R, "Obstacles", "0<size=40%>  ดอก</size>", regular, 70, Ink, 0, -12, 440, 86), 75);
 
-        var replay = Button(R, "ReplayButton", Pink, -134, -274, 238, 96, "Replay", 36);
+            var row = Img(R, "FlowerRow", card, new Color32(0xFB, 0xF7, 0xEE, 255)); row.type = Image.Type.Sliced;
+            Place(row.rectTransform, 0, -142, 1000, 130);
+            var counts = new TMP_Text[gm.spawner.types.Length];
+            if (BreezBreathFocusBee.PetalsSprite == null) BreezBreathFocusBee.EnsureArt();
+            for (int i = 0; i < gm.spawner.types.Length; i++)
+            {
+                var ft = gm.spawner.types[i];
+                float x = -330 + i * 330;
+                var icon = Img(row.transform, "Flower_" + ft.id, BreezBreathFocusBee.PetalsSprite, ft.color);
+                icon.preserveAspect = true;
+                Place(icon.rectTransform, x - 70, 0, 92, 92);
+                var center = Img(icon.transform, "Center", BreezBreathFocusBee.CenterSprite, ft.id == "yellow" ? (Color)new Color32(0xE0, 0x8A, 0x2E, 255) : new Color32(0xFF, 0xE3, 0x7A, 255));
+                Place(center.rectTransform, 0, 0, 34, 34);
+                icon.gameObject.AddComponent<FlowerResultIcon>().delay = 0.25f + i * 0.18f;
+                counts[i] = Left(Text(row.transform, "Count_" + ft.id, "0", bold, 50, Ink, 0, 14, 160, 60), x - 12);
+                Left(Text(row.transform, "Points_" + ft.id, $"{ft.points} คะแนน/ดอก", regular, 22, Grey, 0, -30, 200, 32), x - 12);
+            }
+            gm.resultFlowerCounts = counts;
+        }
+
+        float by = gm.spawner != null ? -296 : -274;
+        var replay = Button(R, "ReplayButton", Pink, -134, by, 238, 96, "Replay", 36);
         var loader = replay.gameObject.AddComponent<SceneLoader>();
         UnityEventTools.AddVoidPersistentListener(replay.onClick, loader.ReloadCurrent);
-        var home = Button(R, "HomeButton", Green, 134, -274, 238, 96, "Home", 36);
+        var home = Button(R, "HomeButton", Green, 134, by, 238, 96, "Home", 36);
         LoadScene(home, SceneInBuild("Mode") ? "Mode" : "BreathPlay");   // หน้าหลัก = หน้าเลือกโหมด
         BackButton(res);
         res.gameObject.SetActive(false);
@@ -139,7 +176,7 @@ public static class BreezBreathFocusRestyle
         EditorUtility.SetDirty(gm);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        EditorUtility.DisplayDialog("Breez", "จัดหน้า Breathe & Focus แล้ว\n\n• หน้าวิธีการเล่น + ปุ่มเริ่ม\n• หน้าผลลัพธ์ใหม่ + Replay / Home\n\nกด Play เพื่อทดสอบ", "OK");
+        if (!silent) EditorUtility.DisplayDialog("Breez", "จัดหน้า Breathe & Focus แล้ว\n\n• หน้าวิธีการเล่น + ปุ่มเริ่ม\n• หน้าผลลัพธ์ใหม่ + Replay / Home\n\nกด Play เพื่อทดสอบ", "OK");
     }
 
     // ---------------------------------------------------------------
