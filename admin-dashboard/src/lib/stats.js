@@ -391,3 +391,48 @@ export async function loadMoods(days) {
     prev: days ? rows.filter(r => new Date(r.recorded_at).getTime() < cut) : [],
   }
 }
+
+// ---------- กราฟหน้าภาพรวม ----------
+const bkkParts = iso => {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Bangkok', hour: 'numeric', hourCycle: 'h23', weekday: 'short' }).formatToParts(new Date(iso))
+  return { hour: +p.find(x => x.type === 'hour').value % 24, wd: p.find(x => x.type === 'weekday').value }
+}
+// ช่วงเวลาที่คนฝึก (ชั่วโมงตามเวลาไทย)
+export function byHour(rows) {
+  const n = Array(24).fill(0)
+  for (const r of rows) n[bkkParts(r.played_at).hour]++
+  return n.map((v, h) => ({ label: String(h).padStart(2, '0'), value: v }))
+}
+// วันในสัปดาห์
+export function byWeekday(rows) {
+  const keys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], th = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.']
+  const n = Object.fromEntries(keys.map(k => [k, 0]))
+  for (const r of rows) n[bkkParts(r.played_at).wd]++
+  return keys.map((k, i) => ({ label: th[i], value: n[k] }))
+}
+// ระยะเวลาต่อครั้ง
+export function durationBuckets(rows) {
+  const b = [['< 30 วิ', 30], ['30–60 วิ', 60], ['1–2 นาที', 120], ['2–5 นาที', 300], ['5 นาที+', Infinity]]
+  const n = b.map(() => 0)
+  for (const r of rows) n[b.findIndex(([, max]) => (r.duration || 0) < max)]++
+  return b.map(([label], i) => ({ label, value: n[i] }))
+}
+// จำนวนครั้งที่แต่ละคนฝึก (กลุ่ม)
+export function frequencyBuckets(rows) {
+  const per = new Map()
+  for (const r of rows) per.set(r.user_id, (per.get(r.user_id) || 0) + 1)
+  const b = [['1 ครั้ง', 1, 1], ['2–5 ครั้ง', 2, 5], ['6–20 ครั้ง', 6, 20], ['21 ครั้งขึ้นไป', 21, Infinity]]
+  return b.map(([label, lo, hi]) => ({ label, value: [...per.values()].filter(v => v >= lo && v <= hi).length }))
+}
+// คนที่ฝึกต่อวัน (ไม่ซ้ำ)
+export function dailyPlayers(rows, days) {
+  const n = Math.min(days || 60, 60)
+  const map = new Map()
+  for (const r of rows) { const d = bkkDay(r.played_at); if (!map.has(d)) map.set(d, new Set()); map.get(d).add(r.user_id) }
+  const out = []
+  for (let i = n - 1; i >= 0; i--) {
+    const d = bkkDay(new Date(Date.now() - i * 864e5).toISOString())
+    out.push({ label: d.slice(8), day: d, value: map.get(d)?.size || 0 })
+  }
+  return out
+}
