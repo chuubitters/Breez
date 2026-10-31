@@ -1,48 +1,34 @@
-export const MODES = ['Calm Flow', 'Power Release', 'Breathe & Focus', 'Soundscape', 'Quick Session']
+export const MODES = ['Power Release', 'Breathe & Focus', 'Calm Flow', 'Soundscape', 'Quick Session']
 
-// พาเลต: เขียวเหลืองอ่อน · เหลืองอ่อน · ชมพูอ่อน
-export const MODE_STYLE = {
-  'Calm Flow':       { key: 'calm',       pill: 'mode-calm',  color: '#c9de8c', icon: '✿' },
-  'Power Release':   { key: 'power',      pill: 'mode-power', color: '#f3bccb', icon: '◯' },
-  'Breathe & Focus': { key: 'focus',      pill: 'mode-focus', color: '#f1dc86', icon: '☁' },
-  'Soundscape':      { key: 'soundscape', pill: 'mode-relax', color: '#b8d9a4', icon: '♪' },
-  'Quick Session':   { key: 'quick',      pill: 'mode-quick', color: '#f7cfbd', icon: '◷' },
+/** สีประจำโหมด (จุด/แท่งกราฟ) */
+export const MODE_COLOR = {
+  'Power Release': 'var(--m-power)',
+  'Breathe & Focus': 'var(--m-focus)',
+  'Calm Flow': 'var(--m-calm)',
+  'Soundscape': 'var(--m-sound)',
+  'Quick Session': 'var(--m-quick)',
+}
+
+/** คำอธิบายสั้นของแต่ละโหมด */
+export const MODE_INFO = {
+  'Power Release': 'เป่าลูกโป่งให้แตกครบก่อนหมดเวลา',
+  'Breathe & Focus': 'ควบคุมลมหายใจหลบสิ่งกีดขวาง',
+  'Calm Flow': 'หายใจออกยาวๆ ให้ดอกไม้บาน',
+  'Soundscape': 'หายใจเข้า 5 ออก 5 พร้อมเสียงธรรมชาติ',
+  'Quick Session': 'หายใจ 4-7-8 บนตัวเครื่อง',
 }
 
 export const MOODS = {
-  Happy:  { emoji: '☀', cls: 'mood-happy', th: 'มีความสุข' },
-  Lovely: { emoji: '✿', cls: 'mood-lovely', th: 'อบอุ่นใจ' },
-  Bored:  { emoji: '☁', cls: 'mood-bored', th: 'เบื่อ' },
-  Angry:  { emoji: '✸', cls: 'mood-angry', th: 'โกรธ' },
-  Stress: { emoji: '〰', cls: 'mood-stress', th: 'เครียด' },
-}
-
-// คำอธิบายรูปแบบการฝึก
-export const TRAINING_INFO = {
-  'Calm Flow':       { label: 'ผ่อนลมหายใจให้ดอกไม้บาน' },
-  'Power Release':   { label: 'เป่าลูกโป่งระบายพลัง' },
-  'Breathe & Focus': { label: 'หายใจหลบสิ่งกีดขวาง' },
-  'Soundscape':      { label: 'หายใจเข้า 5 ออก 5 พร้อมเสียงธรรมชาติ' },
-  'Quick Session':   { label: 'หายใจ 4-7-8 บนตัวเครื่อง' },
+  Happy:  { th: 'มีความสุข', color: '#e3b93f' },
+  Lovely: { th: 'อบอุ่นใจ', color: '#e8899e' },
+  Bored:  { th: 'เบื่อ', color: '#8fb35a' },
+  Angry:  { th: 'โกรธ', color: '#c9564f' },
+  Stress: { th: 'เครียด', color: '#8a72c4' },
 }
 
 export function pct(part, total) {
   part = Number(part || 0); total = Number(total || 0)
   return total ? Math.round((part / total) * 100) : 0
-}
-
-const AVATAR_COLORS = ['peach', 'green', 'lilac', 'yellow', 'blue', 'pink']
-
-export function avatarColor(id = '') {
-  let h = 0
-  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  return AVATAR_COLORS[h % AVATAR_COLORS.length]
-}
-
-export function initials(name = '') {
-  const parts = String(name).trim().split(/\s+/).filter(Boolean)
-  if (!parts.length) return '?'
-  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase()
 }
 
 export function shortId(uuid = '') {
@@ -85,22 +71,14 @@ export function dayOfMonth(isoDate) {
   return Number(isoDate.slice(8, 10))
 }
 
-export function trend(cur, prev) {
-  cur = Number(cur || 0); prev = Number(prev || 0)
-  if (!prev) return cur ? { text: 'ใหม่', up: true } : null
-  const p = ((cur - prev) / prev) * 100
-  return { text: `${p >= 0 ? '↗' : '↘'} ${Math.abs(p).toFixed(1)}%`, up: p >= 0 }
+/** สถานะผู้เล่นจากวันที่ใช้งานล่าสุด */
+export function activity(lastActive) {
+  if (!lastActive) return { cls: '', text: 'ยังไม่เคยเล่น' }
+  const days = (Date.now() - new Date(lastActive).getTime()) / 864e5
+  if (days < 7) return { cls: 'on', text: 'ใช้งานใน 7 วัน' }
+  if (days < 30) return { cls: 'idle', text: 'หายไป 1–4 สัปดาห์' }
+  return { cls: '', text: 'ไม่ได้ใช้งานเกิน 30 วัน' }
 }
-
-export function activityStatus(lastActive) {
-  if (!lastActive) return 'inactive'
-  const age = Date.now() - new Date(lastActive).getTime()
-  if (age < 864e5) return 'active'
-  if (age < 7 * 864e5) return 'idle'
-  return 'inactive'
-}
-
-export const STATUS_LABEL = { active: 'ใช้งานวันนี้', idle: 'ใช้งานใน 7 วัน', inactive: 'ไม่ได้ใช้งาน' }
 
 const sec1 = ms => (Number(ms || 0) / 1000).toFixed(1)
 
@@ -127,7 +105,6 @@ export function sessionDetail(s) {
       const parts = []
       if (s.rounds != null) parts.push(`${s.rounds}/4 รอบ`)
       if (s.blow_pct != null) parts.push(`เป่าได้ ${s.blow_pct}%`)
-      if (s.source === 'gadget') parts.push('บนตัวเครื่อง')
       return parts.length ? parts.join(' · ') : 'ฝึกหายใจ 4-7-8 บนตัวเครื่อง'
     }
     default:

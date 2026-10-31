@@ -1,145 +1,115 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { rpc } from '../lib/supabase'
-import { initials, number } from '../lib/format'
+import { clearSessionCache } from '../lib/stats'
 import OverviewPage from '../pages/OverviewPage.vue'
-import PlayersPage from '../pages/PlayersPage.vue'
 import ModesPage from '../pages/ModesPage.vue'
-import RelaxPage from '../pages/RelaxPage.vue'
 import SessionsPage from '../pages/SessionsPage.vue'
+import PlayersPage from '../pages/PlayersPage.vue'
 import MoodsPage from '../pages/MoodsPage.vue'
 import DevicesPage from '../pages/DevicesPage.vue'
 import StaffPage from '../pages/StaffPage.vue'
-import BreezFlower from '../components/BreezFlower.vue'
 
 const props = defineProps({ me: { type: Object, required: true } })
 const emit = defineEmits(['sign-out'])
-
 const isOwner = computed(() => props.me.role === 'owner')
 
+// เมนู: ข้อมูลการเล่น (ใช้ปรับเกม) → ผู้ใช้ → ระบบ
+const ICON = {
+  overview: 'M4 13h6V4H4zM14 20h6V11h-6zM4 20h6v-3H4zM14 7h6V4h-6z',
+  modes: 'M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a5 5 0 0 1 5-5z',
+  sessions: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+  players: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  moods: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z',
+  devices: 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01',
+  staff: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+}
 const allNav = [
-  { id: 'overview', label: 'ภาพรวม', icon: '◫', title: 'ภาพรวมระบบ', page: OverviewPage },
-  { id: 'modes', label: 'โหมดการฝึก', icon: '✿', title: 'โหมดการฝึก', page: ModesPage },
-  { id: 'relax', label: 'Soundscape & Quick', icon: '♪', title: 'โหมดผ่อนคลาย', page: RelaxPage },
-  { id: 'players', label: 'ผู้เล่น', icon: '♙', title: 'ผู้เล่น', page: PlayersPage },
-  { id: 'sessions', label: 'ประวัติการเล่น', icon: '▷', title: 'ประวัติการเล่น', page: SessionsPage },
-  { id: 'moods', label: 'บันทึกอารมณ์', icon: '♡', title: 'บันทึกอารมณ์', page: MoodsPage, owner: true },
-  { id: 'devices', label: 'อุปกรณ์', icon: '⌁', title: 'อุปกรณ์ Breath Gadget', page: DevicesPage },
-  { id: 'staff', label: 'ผู้ดูแลระบบ', icon: '⚿', title: 'ผู้ดูแลระบบ', page: StaffPage, owner: true },
+  { group: 'ข้อมูลการเล่น' },
+  { id: 'overview', label: 'ภาพรวม', desc: 'ตัวเลขหลักและจุดที่ควรปรับในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
+  { id: 'modes', label: 'แต่ละโหมด', desc: 'ตัวชี้วัดความยาก/ความสนุกของแต่ละเกม ใช้ปรับสมดุลเกม', page: ModesPage, period: true },
+  { id: 'sessions', label: 'ประวัติการเล่น', desc: 'ผลการเล่นทุกครั้ง ค้นหา กรอง และส่งออก CSV', page: SessionsPage, period: true },
+  { group: 'ผู้ใช้' },
+  { id: 'players', label: 'ผู้เล่น', desc: 'ใครเล่นบ่อย ใครหายไป', page: PlayersPage },
+  { id: 'moods', label: 'อารมณ์', desc: 'อารมณ์ที่ผู้เล่นบันทึก', page: MoodsPage, period: true, owner: true },
+  { group: 'ระบบ' },
+  { id: 'devices', label: 'อุปกรณ์', desc: 'สถานะ Breath Gadget และแบตเตอรี่', page: DevicesPage },
+  { id: 'staff', label: 'ผู้ดูแลระบบ', desc: 'เพิ่ม/ถอนสิทธิ์ผู้ดูแล', page: StaffPage, owner: true },
 ]
-const navItems = computed(() => allNav.filter(n => !n.owner || isOwner.value))
+const nav = computed(() => allNav.filter(n => !n.owner || isOwner.value))
+const pages = computed(() => nav.value.filter(n => n.id))
 
 function fromHash() {
   const id = location.hash.replace('#/', '').split('?')[0]
-  return navItems.value.some(n => n.id === id) ? id : 'overview'
+  return pages.value.some(n => n.id === id) ? id : 'overview'
 }
 const active = ref(fromHash())
-const search = ref('')
-const playerFilter = ref(null) // { id, name } ใช้เมื่อกดดูประวัติจากหน้าผู้เล่น
-const showNotifications = ref(false)
-const showMenu = ref(false)
-const summary = ref(null)
+const current = computed(() => pages.value.find(n => n.id === active.value) ?? pages.value[0])
+const playerFilter = ref(null)   // { id, name } เมื่อกดดูประวัติของผู้เล่น
+const modeFilter = ref('')
 
-const current = computed(() => navItems.value.find(n => n.id === active.value) ?? navItems.value[0])
+// ช่วงเวลา ใช้ร่วมกันทุกหน้า (จำไว้ในเครื่อง)
+const PERIODS = [{ v: 7, t: '7 วัน' }, { v: 30, t: '30 วัน' }, { v: 90, t: '90 วัน' }, { v: null, t: 'ทั้งหมด' }]
+const saved = (() => { try { return JSON.parse(localStorage.getItem('breez-admin-period')) } catch { return undefined } })()
+const days = ref(saved === undefined ? 30 : saved)
+function setDays(v) { days.value = v; try { localStorage.setItem('breez-admin-period', JSON.stringify(v)) } catch { /* ไม่เป็นไร */ } }
+
+const reloadKey = ref(0)
+function refresh() { clearSessionCache(); reloadKey.value++ }
 
 function go(id, opts = {}) {
   active.value = id
-  search.value = ''
   playerFilter.value = opts.player ?? null
-  showNotifications.value = false
+  modeFilter.value = opts.mode ?? ''
   location.hash = `#/${id}`
 }
-
 const onHash = () => { const id = fromHash(); if (id !== active.value) go(id) }
+
+const lowBattery = ref(0)
 onMounted(async () => {
   window.addEventListener('hashchange', onHash)
-  try { summary.value = await rpc('dashboard_overview', { p_days: 7 }) } catch { /* แสดงหน้าได้ปกติ */ }
+  try { lowBattery.value = (await rpc('dashboard_devices', { p_search: null }) ?? []).filter(d => d.battery_level != null && d.battery_level < 20).length } catch { /* ไม่แสดงตัวเลข */ }
 })
 onBeforeUnmount(() => window.removeEventListener('hashchange', onHash))
-
-// รวมบัญชีผู้ดูแลในสถิติ (owner เปิด/ปิดได้) — ถ้าฐานข้อมูลยังไม่มีฟังก์ชันนี้ จะซ่อนปุ่ม
-const includeStaff = ref(null)
-const pageKey = ref(0)
-rpc('dashboard_settings_get').then(r => { includeStaff.value = !!r?.include_staff }).catch(() => { includeStaff.value = null })
-async function toggleStaff() {
-  if (!isOwner.value || includeStaff.value === null) return
-  try {
-    includeStaff.value = !!(await rpc('dashboard_set_include_staff', { p_include: !includeStaff.value }))
-    pageKey.value++
-  } catch (e) { alert(e.message) }
-}
-watch(search, () => { if (search.value) playerFilter.value = null })
-
-const notifications = computed(() => {
-  const s = summary.value
-  if (!s) return []
-  const list = []
-  if (s.devices_low_battery) list.push(`มีอุปกรณ์แบตเตอรี่ต่ำกว่า 20% จำนวน ${number(s.devices_low_battery)} เครื่อง`)
-  if (s.players_new) list.push(`มีผู้เล่นใหม่ใน 7 วันล่าสุด ${number(s.players_new)} คน`)
-  if (s.sessions) list.push(`มีการเล่น ${number(s.sessions)} ครั้งใน 7 วันล่าสุด`)
-  return list
-})
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app">
     <aside class="sidebar">
-      <div class="brand">
-        <img class="brand-logo" src="/breez-logo.png" alt="breez" />
-        <BreezFlower class="brand-mark" :size="40" :petals="5" />
-        <span class="brand-sub">ADMIN</span>
-      </div>
-      <div class="workspace-label">WORKSPACE</div>
-      <nav class="nav-list">
-        <button v-for="item in navItems" :key="item.id" class="nav-item" :class="{ active: active === item.id }" @click="go(item.id)" :title="item.label">
-          <span class="nav-icon">{{ item.icon }}</span><span>{{ item.label }}</span>
-          <span v-if="item.id === 'devices' && summary?.devices_low_battery" class="nav-count">{{ summary.devices_low_battery }}</span>
-        </button>
+      <div class="brand"><img src="/breez-logo.png" alt="breez" /><span>Admin</span></div>
+      <nav class="nav">
+        <template v-for="n in nav" :key="n.id || n.group">
+          <div v-if="n.group" class="nav-group">{{ n.group }}</div>
+          <button v-else class="nav-item" :class="{ active: active === n.id }" @click="go(n.id)">
+            <svg viewBox="0 0 24 24"><path :d="ICON[n.id]" /></svg>
+            {{ n.label }}
+            <span v-if="n.id === 'devices' && lowBattery" class="nav-badge" title="แบตเตอรี่ต่ำกว่า 20%">{{ lowBattery }}</span>
+          </button>
+        </template>
       </nav>
-      <div class="sidebar-bottom">
-        <div class="help-card">
-          <strong>หายใจเข้า… หายใจออก</strong>
-          <p>ทุกลมหายใจคือการเริ่มต้นใหม่</p>
-          <BreezFlower class="help-flower" :size="82" :petals="5" />
-        </div>
-        <div class="admin-profile">
-          <button class="admin-avatar" @click="showMenu = !showMenu" aria-label="เมนูบัญชี">{{ initials(me.name) }}</button>
-          <div class="admin-info"><strong>{{ me.name }}</strong><span>{{ isOwner ? 'เจ้าของระบบ' : 'ผู้ดูแล' }}</span></div>
-          <button class="more more-button" @click="showMenu = !showMenu" aria-label="เมนูบัญชี">···</button>
-          <div v-if="showMenu" class="account-pop">
-            <small>{{ me.email }}</small>
-            <button @click="emit('sign-out')">ออกจากระบบ</button>
-          </div>
-        </div>
+      <div class="side-foot">
+        <div class="row"><strong>{{ me.name }}</strong><span class="role">{{ me.role }}</span></div>
+        <span class="muted small">{{ me.email }}</span>
+        <button class="btn-link small" style="justify-self:start;margin-top:6px" @click="emit('sign-out')">ออกจากระบบ</button>
       </div>
     </aside>
 
-    <main class="main-area">
+    <main class="main">
       <header class="topbar">
-        <div class="breadcrumb"><span>breez Admin</span><span class="crumb-slash">/</span><strong>{{ current.title }}</strong></div>
-        <div class="top-actions">
-          <div v-if="!['overview', 'staff', 'players', 'modes', 'relax'].includes(current.id)" class="search-box">
-            <span>⌕</span><input v-model="search" placeholder="ค้นหาชื่อผู้เล่น หรือรหัส..." aria-label="ค้นหา" />
+        <div>
+          <h1>{{ current.label }}</h1>
+          <p class="desc">{{ current.desc }}</p>
+        </div>
+        <div class="actions">
+          <div v-if="current.period" class="seg" role="group" aria-label="ช่วงเวลา">
+            <button v-for="p in PERIODS" :key="String(p.v)" :class="{ on: days === p.v }" @click="setDays(p.v)">{{ p.t }}</button>
           </div>
-          <button class="icon-button notification-button" @click="showNotifications = !showNotifications" aria-label="การแจ้งเตือน">♧<i v-if="notifications.length"></i></button>
-          <div v-if="showNotifications" class="notification-pop">
-            <strong>การแจ้งเตือน</strong>
-            <p v-for="n in notifications" :key="n">{{ n }}</p>
-            <p v-if="!notifications.length">ยังไม่มีการแจ้งเตือน</p>
-          </div>
-          <button v-if="includeStaff !== null" class="staff-toggle" :class="{ on: includeStaff }" :disabled="!isOwner"
-            :title="isOwner ? 'กดเพื่อสลับ' : 'เฉพาะ owner'" @click="toggleStaff">
-            <i></i>{{ includeStaff ? 'รวมบัญชีผู้ดูแล' : 'ไม่รวมบัญชีผู้ดูแล' }}
-          </button>
-          <span class="role-badge" :class="me.role">{{ isOwner ? 'OWNER' : 'ADMIN' }}</span>
-          <button class="top-avatar" @click="showMenu = !showMenu" :title="me.email">{{ initials(me.name) }}</button>
+          <button class="btn" title="โหลดข้อมูลใหม่" @click="refresh">รีเฟรช</button>
         </div>
       </header>
-
-      <div class="page-content">
-        <component :is="current.page" :key="current.id + ':' + pageKey" :me="me" :search="search" :player-filter="playerFilter"
+      <div class="content">
+        <component :is="current.page" :key="current.id + reloadKey" :me="me" :days="days" :player-filter="playerFilter" :mode-filter="modeFilter"
           @navigate="(id, opts) => go(id, opts)" @clear-player="playerFilter = null" />
-        <footer class="page-footer"><span><img src="/breez-logo.png" alt="breez" /> admin dashboard</span><span>เชื่อมต่อ Supabase · ข้อมูลจริง</span></footer>
       </div>
     </main>
   </div>

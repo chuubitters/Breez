@@ -9,7 +9,11 @@ export const supabase = createClient(url, key, {
   auth: { persistSession: true, autoRefreshToken: true, storageKey: 'breez-admin-auth' },
 })
 
+// โหมดตัวอย่าง (VITE_MOCK=1): ใช้ข้อมูลจำลองสำหรับดูหน้าตา ไม่เชื่อมฐานข้อมูล
+export const MOCK = !!import.meta.env.VITE_MOCK
+
 export async function rpc(name, args = {}) {
+  if (MOCK) return (await import('./mock.js')).mockRpc(name, args)
   const { data, error } = await supabase.rpc(name, args)
   if (error) throw new Error(translateError(error.message))
   return data

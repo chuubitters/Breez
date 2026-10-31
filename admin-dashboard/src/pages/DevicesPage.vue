@@ -1,74 +1,65 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+// อุปกรณ์: เครื่องไหนออนไลน์ แบตใกล้หมด หรือเงียบไปนาน
+import { computed, ref } from 'vue'
 import { rpc } from '../lib/supabase'
-import { number, shortId, when } from '../lib/format'
+import { number, when } from '../lib/format'
 
-const props = defineProps({ me: Object, search: String })
 const devices = ref([])
 const loading = ref(true)
 const error = ref('')
 const filter = ref('all')
+const search = ref('')
 
-const ICONS = { cat: '🐱', flower: '✿', cloud: '☁', star: '★', heart: '♥', moon: '☾' }
-// device_icon = "cat" หรือ "cat|#A9C77E" (ไอคอน|สีที่ผู้เล่นเลือกในเกม)
-const iconOf = d => {
-  const [id, color] = String(d.device_icon || 'cat').split('|')
-  return { glyph: ICONS[id] ?? '⌁', color: /^#[0-9a-f]{6}$/i.test(color || '') ? color : null }
-}
-
-let timer
 async function load() {
   loading.value = true
   error.value = ''
-  try {
-    devices.value = await rpc('dashboard_devices', { p_search: props.search || null }) ?? []
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loading.value = false
-  }
+  try { devices.value = await rpc('dashboard_devices', { p_search: null }) ?? [] }
+  catch (e) { error.value = e.message }
+  finally { loading.value = false }
 }
-watch(() => props.search, () => { clearTimeout(timer); timer = setTimeout(load, 300) })
 load()
 
-const stats = computed(() => ({
-  total: devices.value.length,
+const low = d => d.battery_level != null && d.battery_level < 20
+const stale = d => !d.is_online && Date.now() - new Date(d.updated_at).getTime() > 14 * 864e5
+const counts = computed(() => ({
+  all: devices.value.length,
   online: devices.value.filter(d => d.is_online).length,
-  low: devices.value.filter(d => d.battery_level != null && d.battery_level < 20).length,
+  low: devices.value.filter(low).length,
+  stale: devices.value.filter(stale).length,
 }))
-const shown = computed(() => devices.value.filter(d =>
-  filter.value === 'all' || (filter.value === 'online' ? d.is_online : filter.value === 'offline' ? !d.is_online : d.battery_level != null && d.battery_level < 20)))
+const shown = computed(() => devices.value
+  .filter(d => filter.value === 'all' || (filter.value === 'online' && d.is_online) || (filter.value === 'low' && low(d)) || (filter.value === 'stale' && stale(d)))
+  .filter(d => !search.value || `${d.device_name} ${d.owner_name}`.toLowerCase().includes(search.value.toLowerCase())))
+const iconColor = d => { const c = String(d.device_icon || '').split('|')[1]; return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#9aa39b' }
 </script>
 
 <template>
-  <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> DEVICE MANAGEMENT</div><h1>อุปกรณ์ <span class="highlight">Breath Gadget</span></h1><p class="page-description">สถานะการเชื่อมต่อและแบตเตอรี่ (ออนไลน์ = เกมส่งสถานะมาภายใน 5 นาที)</p></div>
-    <div class="header-actions">
-      <select class="filter-select" v-model="filter"><option value="all">ทั้งหมด</option><option value="online">ออนไลน์</option><option value="offline">ออฟไลน์</option><option value="low">แบตต่ำ</option></select>
-      <button class="secondary-button" @click="load">↻ รีเฟรช</button>
-    </div>
-  </section>
-
-  <section class="stats-grid compact-stats">
-    <article class="stat-card stat-lilac"><div class="stat-label">อุปกรณ์ทั้งหมด</div><div class="stat-value">{{ number(stats.total) }}</div><div class="stat-foot">อุปกรณ์ที่ลงทะเบียน</div></article>
-    <article class="stat-card stat-green"><div class="stat-label">ออนไลน์</div><div class="stat-value">{{ number(stats.online) }}</div><div class="stat-foot"><span class="online-dot"></span> เชื่อมต่ออยู่</div></article>
-    <article class="stat-card stat-peach"><div class="stat-label">ออฟไลน์</div><div class="stat-value">{{ number(stats.total - stats.online) }}</div><div class="stat-foot">ไม่ได้เชื่อมต่อในขณะนี้</div></article>
-    <article class="stat-card stat-yellow"><div class="stat-label">แบตเตอรี่ต่ำ</div><div class="stat-value">{{ number(stats.low) }}</div><div class="stat-foot">ต่ำกว่า 20%</div></article>
-  </section>
-
-  <p v-if="error" class="banner-error">{{ error }}</p>
-  <section class="device-grid" :class="{ loading }">
-    <article v-for="d in shown" :key="d.device_id" class="device-card">
-      <div class="device-card-top">
-        <div class="device-illustration" :style="iconOf(d).color ? { color: iconOf(d).color, background: iconOf(d).color + '22' } : null">{{ iconOf(d).glyph }}</div>
-        <span class="status-label" :class="d.is_online ? 'active' : 'inactive'"><i></i>{{ d.is_online ? 'ออนไลน์' : 'ออฟไลน์' }}</span>
+  <p v-if="error" class="banner err">{{ error }}</p>
+  <section class="card">
+    <div class="toolbar" style="margin-bottom:12px">
+      <div class="seg">
+        <button :class="{ on: filter === 'all' }" @click="filter = 'all'">ทั้งหมด {{ counts.all }}</button>
+        <button :class="{ on: filter === 'online' }" @click="filter = 'online'">ออนไลน์ {{ counts.online }}</button>
+        <button :class="{ on: filter === 'low' }" @click="filter = 'low'">แบตต่ำ {{ counts.low }}</button>
+        <button :class="{ on: filter === 'stale' }" @click="filter = 'stale'">เงียบเกิน 14 วัน {{ counts.stale }}</button>
       </div>
-      <h3>{{ d.device_name }}</h3>
-      <p class="device-id">{{ shortId(d.device_id) }} · {{ d.owner_name }} · {{ number(d.sessions) }} sessions</p>
-      <div class="battery-row"><span>แบตเตอรี่</span><strong :class="{ 'battery-low': d.battery_level != null && d.battery_level < 20 }">{{ d.battery_level != null ? d.battery_level + '%' : 'ไม่ทราบ' }}</strong></div>
-      <div class="battery-track"><span :style="{ width: (d.battery_level ?? 0) + '%' }" :class="{ low: d.battery_level != null && d.battery_level < 20 }"></span></div>
-      <div class="device-updated">อัปเดตล่าสุด <strong>{{ when(d.updated_at) }}</strong></div>
-    </article>
-    <p v-if="!loading && !shown.length" class="empty-state panel">ยังไม่มีอุปกรณ์{{ filter !== 'all' ? 'ในกลุ่มนี้' : '' }}</p>
+      <input v-model="search" class="input search" placeholder="ค้นหาชื่อเครื่องหรือเจ้าของ" />
+    </div>
+    <div class="table-wrap" :class="{ loading }">
+      <table>
+        <thead><tr><th>เครื่อง</th><th>เจ้าของ</th><th>สถานะ</th><th class="r">แบตเตอรี่</th><th class="r">ครั้งที่เล่น</th><th>อัปเดตล่าสุด</th></tr></thead>
+        <tbody>
+          <tr v-for="d in shown" :key="d.device_id">
+            <td><i class="dot" :style="{ background: iconColor(d) }"></i>{{ d.device_name || 'Breath Gadget' }}</td>
+            <td>{{ d.owner_name }}</td>
+            <td><span class="status" :class="d.is_online ? 'on' : ''">{{ d.is_online ? 'ออนไลน์' : 'ออฟไลน์' }}</span></td>
+            <td class="r num"><span :class="{ 'status bad': low(d) }">{{ d.battery_level != null ? d.battery_level + '%' : '—' }}</span></td>
+            <td class="r num">{{ number(d.sessions) }}</td>
+            <td class="muted">{{ when(d.updated_at) }}</td>
+          </tr>
+          <tr v-if="!loading && !shown.length"><td colspan="6" class="empty">ไม่มีอุปกรณ์ในกลุ่มนี้</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 </template>

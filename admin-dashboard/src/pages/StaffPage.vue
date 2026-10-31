@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { rpc, supabase } from '../lib/supabase'
-import { avatarColor, initials, when } from '../lib/format'
+import { when } from '../lib/format'
 
 const props = defineProps({ me: Object })
 
@@ -58,79 +58,66 @@ async function remove(s) {
 }
 
 const matrix = [
-  ['ภาพรวม / กราฟ', true, true],
-  ['ภาพรวมผู้เล่น / อารมณ์ (ไม่ระบุตัวตน)', true, true],
-  ['ประวัติการเล่น + ส่งออก CSV', true, true],
+  ['ภาพรวม / แต่ละโหมด / ประวัติการเล่น', true, true],
+  ['ผู้เล่น (อีเมลถูกปิดบางส่วนสำหรับ Admin)', true, true],
   ['อุปกรณ์', true, true],
-  ['บันทึกอารมณ์รายบุคคล', true, 'เห็นเฉพาะสัดส่วนรวม'],
+  ['อารมณ์รายบุคคล', true, false],
   ['จัดการผู้ดูแล', true, false],
 ]
 </script>
 
 <template>
-  <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> ACCESS CONTROL · OWNER ONLY</div><h1>ผู้ดูแล<span class="highlight">ระบบ</span></h1><p class="page-description">เพิ่มผู้ดูแล กำหนดสิทธิ์ Owner / Admin และถอนสิทธิ์</p></div>
+  <p v-if="msg" class="banner ok">{{ msg }}</p>
+  <p v-if="error" class="banner err">{{ error }}</p>
+
+  <section class="card">
+    <div class="card-head"><h2>ผู้ดูแลทั้งหมด</h2><p>{{ staff.length }} บัญชี · บัญชีผู้ดูแลไม่ถูกนับเป็นผู้เล่น</p></div>
+    <div class="table-wrap" :class="{ loading }">
+      <table>
+        <thead><tr><th>ผู้ดูแล</th><th>สิทธิ์</th><th>เข้าใช้ล่าสุด</th><th></th></tr></thead>
+        <tbody>
+          <tr v-for="s in staff" :key="s.user_id">
+            <td><strong>{{ s.name }}</strong><span v-if="s.user_id === me.user_id" class="muted"> (คุณ)</span><span class="sub">{{ s.email }}</span></td>
+            <td>
+              <select class="select" :value="s.role" :disabled="s.user_id === me.user_id" @change="changeRole(s, $event.target.value)">
+                <option value="owner">Owner</option><option value="admin">Admin</option>
+              </select>
+            </td>
+            <td class="muted">{{ when(s.last_sign_in_at) }}</td>
+            <td class="r"><button v-if="s.user_id !== me.user_id" class="btn-link danger" @click="remove(s)">ถอนสิทธิ์</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
-  <p v-if="msg" class="banner-ok">{{ msg }}</p>
-  <p v-if="error" class="banner-error">{{ error }}</p>
+  <section class="grid-2">
+    <form class="card form" style="max-width:none" @submit.prevent="createStaff">
+      <div class="card-head" style="margin:0"><h2>สร้างบัญชีผู้ดูแลใหม่</h2><p>สำหรับคนที่ยังไม่มีบัญชี</p></div>
+      <label class="field"><span>ชื่อที่แสดง</span><input v-model="form.name" class="input" /></label>
+      <label class="field"><span>อีเมล</span><input v-model="form.email" class="input" type="email" required /></label>
+      <label class="field"><span>รหัสผ่านเริ่มต้น (อย่างน้อย 8 ตัว)</span><input v-model="form.password" class="input" type="text" minlength="8" required autocomplete="new-password" /></label>
+      <label class="field"><span>สิทธิ์</span><select v-model="form.role" class="select"><option value="admin">Admin</option><option value="owner">Owner</option></select></label>
+      <button class="btn btn-primary" style="justify-self:start" :disabled="creating">{{ creating ? 'กำลังสร้าง…' : 'สร้างบัญชี' }}</button>
+    </form>
 
-  <section class="lower-grid staff-grid">
-    <article class="panel">
-      <div class="panel-heading"><div><h2>ผู้ดูแลทั้งหมด</h2><p>{{ staff.length }} บัญชี</p></div></div>
-      <div class="table-wrap" :class="{ loading }">
-        <table>
-          <thead><tr><th>ผู้ดูแล</th><th>สิทธิ์</th><th>เข้าใช้ล่าสุด</th><th></th></tr></thead>
-          <tbody>
-            <tr v-for="s in staff" :key="s.user_id">
-              <td><div class="player-cell"><div class="tiny-avatar" :class="avatarColor(s.user_id)">{{ initials(s.name) }}</div><div><strong>{{ s.name }}<span v-if="s.user_id === me.user_id" class="you"> (คุณ)</span></strong><small>{{ s.email }}</small></div></div></td>
-              <td>
-                <select class="filter-select" :value="s.role" :disabled="s.user_id === me.user_id" @change="changeRole(s, $event.target.value)">
-                  <option value="owner">Owner</option><option value="admin">Admin</option>
-                </select>
-              </td>
-              <td>{{ when(s.last_sign_in_at) }}</td>
-              <td><button v-if="s.user_id !== me.user_id" class="text-button danger" @click="remove(s)">ถอนสิทธิ์</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </article>
-
-    <article class="panel">
-      <div class="panel-heading"><div><h2>สิทธิ์ของแต่ละระดับ</h2><p>บังคับใช้ที่ฐานข้อมูล ไม่ใช่แค่ซ่อนปุ่ม</p></div></div>
-      <div class="table-wrap">
+    <form class="card form" style="max-width:none" @submit.prevent="grant">
+      <div class="card-head" style="margin:0"><h2>ให้สิทธิ์บัญชีที่มีอยู่</h2><p>เช่น ผู้เล่นที่สมัครผ่านเกมแล้ว</p></div>
+      <label class="field"><span>อีเมลของบัญชี</span><input v-model="grantEmail" class="input" type="email" required /></label>
+      <label class="field"><span>สิทธิ์</span><select v-model="grantRole" class="select"><option value="admin">Admin</option><option value="owner">Owner</option></select></label>
+      <button class="btn" style="justify-self:start">ให้สิทธิ์</button>
+      <div>
+        <p class="small" style="font-weight:600;margin:8px 0 4px">สิทธิ์แต่ละระดับ</p>
         <table>
           <thead><tr><th>ส่วน</th><th>Owner</th><th>Admin</th></tr></thead>
           <tbody>
             <tr v-for="r in matrix" :key="r[0]">
-              <td><strong>{{ r[0] }}</strong></td>
-              <td v-for="(v, i) in [r[1], r[2]]" :key="i">
-                <span v-if="v === true" class="yes">✓</span><span v-else-if="v === false" class="no">✕</span><span v-else class="muted">{{ v }}</span>
-              </td>
+              <td class="small">{{ r[0] }}</td>
+              <td v-for="(v, i) in [r[1], r[2]]" :key="i" class="small">{{ v === true ? 'ได้' : v === false ? 'ไม่ได้' : v }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-    </article>
-  </section>
-
-  <section class="lower-grid staff-grid">
-    <form class="panel stack-form" @submit.prevent="createStaff">
-      <div class="panel-heading"><div><h2>สร้างบัญชีผู้ดูแลใหม่</h2><p>ใช้เมื่อคนนั้นยังไม่มีบัญชีในระบบ</p></div></div>
-      <label class="field"><span>ชื่อที่แสดง</span><input v-model="form.name" placeholder="เช่น Mint" /></label>
-      <label class="field"><span>อีเมล</span><input v-model="form.email" type="email" required placeholder="admin@example.com" /></label>
-      <label class="field"><span>รหัสผ่านเริ่มต้น (อย่างน้อย 8 ตัว)</span><input v-model="form.password" type="text" minlength="8" required autocomplete="new-password" /></label>
-      <label class="field"><span>สิทธิ์</span><select v-model="form.role" class="filter-select"><option value="admin">Admin</option><option value="owner">Owner</option></select></label>
-      <button class="primary-button" :disabled="creating">{{ creating ? 'กำลังสร้าง…' : 'สร้างบัญชี' }}</button>
-    </form>
-
-    <form class="panel stack-form" @submit.prevent="grant">
-      <div class="panel-heading"><div><h2>ให้สิทธิ์บัญชีที่มีอยู่</h2><p>เช่น ผู้เล่นที่สมัครผ่านเกมแล้ว และต้องการให้เป็นผู้ดูแลด้วย</p></div></div>
-      <label class="field"><span>อีเมลของบัญชี</span><input v-model="grantEmail" type="email" required placeholder="user@example.com" /></label>
-      <label class="field"><span>สิทธิ์</span><select v-model="grantRole" class="filter-select"><option value="admin">Admin</option><option value="owner">Owner</option></select></label>
-      <button class="secondary-button">ให้สิทธิ์</button>
-      <p class="page-description">หมายเหตุ: บัญชีที่เป็นผู้ดูแลจะไม่ถูกนับเป็นผู้เล่นในสถิติ</p>
     </form>
   </section>
 </template>
