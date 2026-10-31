@@ -1,100 +1,55 @@
 <script setup>
-// หน้า ผู้เล่น: ภาพรวมการเติบโตและการกลับมาฝึก (ไม่แสดงรายชื่อรายบุคคล)
-import { computed, ref, watch } from 'vue'
+// ผู้เล่น: ใครเล่นบ่อย เล่นโหมดไหน ใครหายไป — กดแถวเพื่อดูประวัติการเล่นของคนนั้น
+import { computed, ref } from 'vue'
 import { rpc } from '../lib/supabase'
-import { dayOfMonth, number, pct, trend, weekdayShort } from '../lib/format'
+import { useRemoteList } from '../lib/useRemoteList'
+import { loadSessions } from '../lib/stats'
+import { MODE_COLOR, MOODS, activity, number, when } from '../lib/format'
+import Pager from '../components/Pager.vue'
 
-const props = defineProps({ me: Object })
+const emit = defineEmits(['navigate'])
+const search = ref('')
+const list = useRemoteList(
+  ({ limit, offset }) => rpc('dashboard_players', { p_search: search.value || null, p_limit: limit, p_offset: offset }),
+  { pageSize: 25, deps: [search] },
+)
 
-const period = ref(30)
-const data = ref(null)
-const loading = ref(true)
-const error = ref('')
+// โหมดที่เล่นบ่อยที่สุดของแต่ละคน (90 วันล่าสุด)
+const favorite = ref({})
+loadSessions(90).then(({ cur }) => {
+  const by = {}
+  for (const r of cur) { by[r.user_id] ??= {}; by[r.user_id][r.mode] = (by[r.user_id][r.mode] || 0) + 1 }
+  favorite.value = Object.fromEntries(Object.entries(by).map(([u, m]) => [u, Object.entries(m).sort((a, b) => b[1] - a[1])[0][0]]))
+}).catch(() => {})
 
-async function load() {
-  loading.value = true
-  error.value = ''
-  try { data.value = await rpc('dashboard_insights', { p_days: period.value }) }
-  catch (e) { error.value = e.message }
-  finally { loading.value = false }
-}
-watch(period, load, { immediate: true })
-
-const periodLabel = computed(() => period.value ? `${period.value} วันล่าสุด` : 'ทั้งหมด')
-const newTrend = computed(() => trend(data.value?.players_new, data.value?.players_new_prev))
-const returningPct = computed(() => pct(data.value?.returning_players, data.value?.practitioners))
-
-const daily = computed(() => data.value?.daily ?? [])
-const max = computed(() => {
-  const m = Math.max(1, ...daily.value.flatMap(d => [d.people, d.new_players]))
-  return Math.max(1, Math.ceil(m / 4)) * 4
-})
-const yLabels = computed(() => [4, 3, 2, 1, 0].map(i => (max.value / 4) * i))
-const xLabel = d => daily.value.length > 10 ? dayOfMonth(d.day) : weekdayShort(d.day)
-
-// เส้นทางผู้เล่น: สมัคร -> เคยฝึก -> มาฝึกในช่วงนี้ -> กลับมาซ้ำ
-const funnel = computed(() => {
-  const d = data.value
-  if (!d) return []
-  const total = d.players_total || 0
-  const played = total - (d.never_played || 0)
-  return [
-    { label: 'สมัครสมาชิก', value: total, color: 'var(--lavender)' },
-    { label: 'เคยฝึกอย่างน้อย 1 ครั้ง', value: played, color: 'var(--pink)' },
-    { label: `มาฝึกใน ${periodLabel.value}`, value: d.practitioners, color: 'var(--sage)' },
-    { label: 'กลับมาฝึกซ้ำ (≥ 2 วัน)', value: d.returning_players, color: '#e2dc8f' },
-  ].map(s => ({ ...s, percent: pct(s.value, total) }))
-})
+const rows = computed(() => list.rows.value.map(p => ({ ...p, status: activity(p.last_active), fav: favorite.value[p.user_id] })))
 </script>
 
 <template>
-  <section class="welcome-row section-welcome">
-    <div><div class="eyebrow"><span class="eyebrow-dot"></span> PLAYERS</div><h1>ผู้เล่นของ <span class="highlight">breez</span></h1><p class="page-description">การเติบโตของผู้เล่นและการกลับมาฝึกหายใจ</p></div>
-    <div class="period-select">
-      <span>ช่วงเวลา</span>
-      <select v-model="period"><option :value="7">7 วันล่าสุด</option><option :value="30">30 วันล่าสุด</option><option :value="null">ทั้งหมด</option></select>
+  <section class="card">
+    <div class="toolbar" style="margin-bottom:12px">
+      <input v-model="search" class="input search" placeholder="ค้นหาชื่อหรืออีเมล" />
+      <span class="spacer"></span>
+      <span class="muted small">กดที่แถวเพื่อดูประวัติการเล่นของผู้เล่นคนนั้น · ไม่รวมบัญชีผู้ดูแล</span>
     </div>
-  </section>
-
-  <p v-if="error" class="banner-error">{{ error }}</p>
-
-  <section class="stats-grid compact-stats" :class="{ loading }">
-    <article class="stat-card stat-lilac"><div class="stat-label">ผู้เล่นทั้งหมด</div><div class="stat-value">{{ number(data?.players_total) }}<span class="stat-unit">คน</span></div><div class="stat-foot">บัญชีที่ลงทะเบียนผ่านเกม</div></article>
-    <article class="stat-card stat-green"><div class="stat-label">มาฝึกหายใจ</div><div class="stat-value">{{ number(data?.practitioners) }}<span class="stat-unit">คน</span></div><div class="stat-foot"><span class="online-dot"></span> {{ periodLabel }}</div></article>
-    <article class="stat-card stat-peach"><div class="stat-label">ผู้เล่นใหม่</div><div class="stat-value">+{{ number(data?.players_new) }}</div><div class="stat-foot"><span v-if="newTrend" class="trend" :class="{ down: !newTrend.up }">{{ newTrend.text }}</span><span>{{ periodLabel }}</span></div></article>
-    <article class="stat-card stat-yellow"><div class="stat-label">กลับมาฝึกซ้ำ</div><div class="stat-value">{{ returningPct }}<span class="stat-unit">%</span></div><div class="stat-foot">{{ number(data?.returning_players) }} คน ฝึกมากกว่า 1 วัน</div></article>
-  </section>
-
-  <section class="dashboard-grid">
-    <article class="panel">
-      <div class="panel-heading"><div><h2>ผู้เล่นรายวัน</h2><p>จำนวนคนที่มาฝึก และผู้เล่นใหม่ในแต่ละวัน</p></div></div>
-      <div class="chart-legend"><span><i class="legend-dot legend-sage"></i>คนที่มาฝึก</span><span><i class="legend-dot legend-coral"></i>ผู้เล่นใหม่</span></div>
-      <div class="activity-chart">
-        <div class="y-labels"><span v-for="y in yLabels" :key="y">{{ number(y) }}</span></div>
-        <div class="chart-body">
-          <div class="grid-lines"><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="bar-groups">
-            <div v-for="d in daily" :key="d.day" class="bar-group" :title="`${d.day}: มาฝึก ${d.people} คน · ใหม่ ${d.new_players} คน`">
-              <div class="bars">
-                <span class="bar sage-bar wide" :style="{ height: (d.people / max) * 100 + '%' }"></span>
-                <span class="bar coral-bar wide" :style="{ height: (d.new_players / max) * 100 + '%' }"></span>
-              </div>
-              <span class="x-label">{{ xLabel(d) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="panel">
-      <div class="panel-heading"><div><h2>เส้นทางผู้เล่น</h2><p>เทียบกับผู้เล่นทั้งหมด</p></div></div>
-      <div class="funnel">
-        <div v-for="s in funnel" :key="s.label" class="funnel-row">
-          <div class="funnel-top"><span>{{ s.label }}</span><b>{{ number(s.value) }} คน · {{ s.percent }}%</b></div>
-          <div class="funnel-track"><span :style="{ width: Math.max(s.percent, s.value ? 3 : 0) + '%', background: s.color }"></span></div>
-        </div>
-      </div>
-      <p class="page-description funnel-note">รายชื่อและประวัติรายบุคคลดูได้ในหน้า "ประวัติการเล่น"</p>
-    </article>
+    <p v-if="list.error.value" class="banner err">{{ list.error.value }}</p>
+    <div class="table-wrap" :class="{ loading: list.loading.value }">
+      <table>
+        <thead><tr><th>ผู้เล่น</th><th>สถานะ</th><th class="r">ครั้งที่เล่น</th><th class="r">เวลารวม</th><th>เล่นบ่อย</th><th>อารมณ์ล่าสุด</th><th>เล่นล่าสุด</th></tr></thead>
+        <tbody>
+          <tr v-for="p in rows" :key="p.user_id" class="click" @click="emit('navigate', 'sessions', { player: { id: p.user_id, name: p.name } })">
+            <td><strong>{{ p.name }}</strong><span class="sub">{{ p.email }}</span></td>
+            <td><span class="status" :class="p.status.cls">{{ p.status.text }}</span></td>
+            <td class="r num">{{ number(p.sessions) }}</td>
+            <td class="r num">{{ number(p.minutes, 1) }} นาที</td>
+            <td><template v-if="p.fav"><i class="dot" :style="{ background: MODE_COLOR[p.fav] }"></i>{{ p.fav }}</template><span v-else class="muted">—</span></td>
+            <td>{{ p.last_mood ? (MOODS[p.last_mood]?.th ?? p.last_mood) : '—' }}</td>
+            <td class="muted">{{ when(p.last_active) }}</td>
+          </tr>
+          <tr v-if="!list.loading.value && !rows.length"><td colspan="7" class="empty">ไม่พบผู้เล่น</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <Pager v-model:page="list.page.value" :page-size="list.pageSize" :total="list.total.value" />
   </section>
 </template>

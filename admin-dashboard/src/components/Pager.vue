@@ -1,20 +1,15 @@
 <script setup>
-import { computed } from 'vue'
-const props = defineProps({ page: Number, pageSize: Number, total: Number, label: String })
+const props = defineProps({ page: Number, pageSize: Number, total: Number })
 const emit = defineEmits(['update:page'])
-const pages = computed(() => Math.max(1, Math.ceil((props.total || 0) / props.pageSize)))
-const from = computed(() => (props.total ? (props.page - 1) * props.pageSize + 1 : 0))
-const to = computed(() => Math.min(props.page * props.pageSize, props.total || 0))
+const pages = () => Math.max(1, Math.ceil((props.total || 0) / props.pageSize))
 </script>
 
 <template>
-  <div class="table-footer">
-    <span>แสดง {{ from }}–{{ to }} จาก {{ (total || 0).toLocaleString('th-TH') }} {{ label }}</span>
-    <div class="pagination">
-      <button :disabled="page <= 1" @click="emit('update:page', page - 1)">←</button>
-      <button class="current-page">{{ page }}</button>
-      <span>/ {{ pages }}</span>
-      <button :disabled="page >= pages" @click="emit('update:page', page + 1)">→</button>
+  <div class="pager">
+    <span>{{ total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} จาก ${total.toLocaleString('th-TH')}` : 'ไม่มีข้อมูล' }}</span>
+    <div class="btns">
+      <button class="btn" :disabled="page <= 1" @click="emit('update:page', page - 1)">ก่อนหน้า</button>
+      <button class="btn" :disabled="page >= pages()" @click="emit('update:page', page + 1)">ถัดไป</button>
     </div>
   </div>
 </template>
