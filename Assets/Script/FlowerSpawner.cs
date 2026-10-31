@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 // Breathe & Focus (แบบเก็บดอกไม้): สร้างดอกไม้ลอยเข้ามาจากขวาไปซ้าย
 //   • ดอกไม้ 3 แบบ คะแนนต่างกัน (ชมพู 10 / เหลือง 20 / โคลเวอร์ 50)
 //   • ความสูงของดอกถัดไปเปลี่ยนทีละน้อย ผู้เล่นตามเก็บได้ด้วยการเป่า/หยุดเป่า
-//   • โคลเวอร์ (คะแนนสูงสุด) อยู่ใกล้ขอบบน/ล่าง ต้องควบคุมลมหายใจดีถึงจะเก็บได้
+//   • ดอกส่วนใหญ่อยู่กลางจอ บน/ล่างมีน้อยกว่า (centerBias) โคลเวอร์มักอยู่ค่อนบน/ล่าง
 // ตั้งค่า sprite / font ให้อัตโนมัติจากเมนู Breez > Breathe & Focus: ผึ้งเก็บดอกไม้
 // =====================================================================
 public class FlowerSpawner : MonoBehaviour
@@ -59,6 +59,10 @@ public class FlowerSpawner : MonoBehaviour
     public float sizeVsBee = 1f;
     [Tooltip("ระยะห่างจากขอบบน/ล่างของจอ")]
     public float edgeMargin = 0.9f;
+    [Tooltip("ดอกไม้กระจุกกลางจอแค่ไหน (0 = กระจายเท่ากันทั้งจอ, 1 = กลางจอมาก)")]
+    [Range(0f, 1f)] public float centerBias = 0.6f;
+    [Tooltip("โอกาสที่ดอกคะแนนสูงสุดจะอยู่ค่อนบน/ล่าง")]
+    [Range(0f, 1f)] public float edgeChanceRare = 0.6f;
     [Tooltip("ความสูงเปลี่ยนได้มากสุดต่อดอก")]
     public float maxStep = 1.7f;
     public int sortingOrder = 5;
@@ -113,17 +117,22 @@ public class FlowerSpawner : MonoBehaviour
     void Spawn()
     {
         var type = PickType();
+        float mid = (top + bottom) * 0.5f, half = (top - bottom) * 0.5f;
         float y;
-        if (type == types[types.Length - 1])
+        if (type == types[types.Length - 1] && Random.value < edgeChanceRare)
         {
-            // ดอกคะแนนสูงสุด: ชิดขอบบนหรือล่าง
-            y = Random.value < 0.5f ? Random.Range(top - 0.6f, top) : Random.Range(bottom, bottom + 0.6f);
-            y = Mathf.Clamp(y, lastY - maxStep * 1.6f, lastY + maxStep * 1.6f);
+            // ดอกคะแนนสูงสุด: บางครั้งอยู่ค่อนไปทางบน/ล่าง (ท้าทาย) แต่ไม่ชิดขอบสุด
+            y = mid + (Random.value < 0.5f ? 1f : -1f) * half * Random.Range(0.55f, 0.85f);
         }
         else
         {
-            y = Mathf.Clamp(lastY + Random.Range(-maxStep, maxStep), bottom, top);
+            // ส่วนใหญ่อยู่กลางจอ: สุ่มแบบกระจุกตรงกลาง (ยิ่ง centerBias สูง ยิ่งกลาง)
+            float r = Random.Range(-1f, 1f);
+            float u = Mathf.Sign(r) * Mathf.Pow(Mathf.Abs(r), 1f + 2.5f * centerBias);
+            y = mid + u * half;
         }
+        // ไม่กระโดดไกลจากดอกก่อนหน้า เพื่อให้ตามเก็บได้
+        y = Mathf.Clamp(y, lastY - maxStep, lastY + maxStep);
         lastY = Mathf.Clamp(y, bottom, top);
 
         var go = new GameObject("Flower_" + type.id);
