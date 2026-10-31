@@ -71,7 +71,7 @@ const long TFT_SPI_HZ  = 20000000;
 
 // ---------------- ตั้งค่า ----------------
 const long BAUD          = 115200;
-const int  SEND_EVERY_MS = 40;   // ส่งค่าแรงเป่า ~25 ครั้ง/วินาที
+const int  SEND_EVERY_MS = 25;   // ส่งค่าแรงเป่า ~40 ครั้ง/วินาที
 const int  WINDOW_MS     = 16;   // ช่วงวัดความดัง (peak-to-peak)
 
 // ความไว: เป่าแรงแล้วไม่ถึง 100 -> ลด FULL_SCALE / เงียบแล้วไม่เป็น 0 -> เพิ่ม NOISE_GATE
@@ -467,7 +467,7 @@ void loop()
   int loud = readLoudness();
   float over = loud - baseline - NOISE_GATE;
   float target = over <= 0 ? 0 : min(100.0f, over * 100.0f / FULL_SCALE);
-  level += (target - level) * (target > level ? 0.6f : 0.25f);
+  level += (target - level) * (target > level ? 0.85f : 0.35f);   // ขาขึ้นเร็ว (ตอบสนองทันทีที่เป่า)
   if (target == 0) baseline += (loud - baseline) * 0.01f;
   digitalWrite(LED_PIN, level > 30 ? LOW : HIGH);
 
@@ -476,7 +476,16 @@ void loop()
   lastLoop = now;
 
   updateState(dt);
-  showFrame();
+
+  // วาดจอทั้งจอใช้เวลา ~50ms และระหว่างนั้นอ่านไมค์ไม่ได้
+  // => ตอนฝึก Quick Session วาดทุกรอบ, ตอนอื่น (เล่นเกมในคอม) วาดแค่ ~6 ครั้ง/วินาที ให้ค่าแรงเป่าส่งถี่และไม่ดีเลย์
+  static uint32_t lastFrame = 0;
+  bool training = state == ST_READY || state == ST_INHALE || state == ST_HOLD || state == ST_EXHALE;
+  if (training || now - lastFrame >= 160)
+  {
+    lastFrame = now;
+    showFrame();
+  }
 
   // ข้อความตรวจสอบ (Unity ไม่สนใจบรรทัดที่ขึ้นต้นด้วย #)
   if (now - lastDiag >= 10000)

@@ -18,7 +18,11 @@ public class PlayerController : MonoBehaviour
 
     [Header("Breath Settings")]
     [Range(0, 100)]
+    [Tooltip("แรงเป่าที่เริ่มนับว่าเป่า (ยิ่งต่ำยิ่งไว)")]
     public int breathThreshold = 50;
+    [Range(0, 100)]
+    [Tooltip("ต่ำกว่าค่านี้ถึงนับว่าหยุดเป่า (กันผึ้งกระตุกตอนแรงเป่าอยู่ใกล้ขีด) -1 = ใช้ breathThreshold")]
+    public int releaseThreshold = -1;
 
     [Header("Arduino")]
     public BreathReceiver breathReceiver;
@@ -39,6 +43,7 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
 
     private bool isFlying = false;
+    private bool breathing = false;
     private float nextWhoosh;
     private bool wasFlying = false;
     private bool isGameOver = false;
@@ -73,8 +78,10 @@ public class PlayerController : MonoBehaviour
 
         if (breathReceiver != null)
         {
-            breathInput =
-                breathReceiver.breathLevel >= breathThreshold;
+            int release = releaseThreshold >= 0 && releaseThreshold < breathThreshold ? releaseThreshold : breathThreshold;
+            int level = breathReceiver.breathLevel;
+            breathInput = breathing ? level >= release : level >= breathThreshold;
+            breathing = breathInput;
         }
 
         // =========================

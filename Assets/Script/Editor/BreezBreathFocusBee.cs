@@ -91,6 +91,11 @@ public static class BreezBreathFocusBee
         foreach (var pc in Object.FindObjectsOfType<PlayerCollision>(true)) { Undo.RecordObject(pc, "Bee"); pc.enabled = false; }
         player.clampToTop = true;
         player.clampToBottom = true;
+        // ตอบสนองไวขึ้น: เริ่มลอยที่แรงเป่า 25 หยุดที่ 15, เปลี่ยนทิศทันที
+        player.breathThreshold = 25;
+        player.releaseThreshold = 15;
+        player.instantControl = true;
+        player.responsiveness = Mathf.Max(player.responsiveness, 80f);
 
         // ---------- ผึ้ง ----------
         var tr = player.transform;
@@ -163,7 +168,9 @@ public static class BreezBreathFocusBee
         sp.petalBitSprite = BreezStatusElementsBuilder.MakeSprite("ui_petal", BreezSpriteArt.Petal(64), 64, 0);
         BreezThaiFontInstaller.EnsureFonts();
         sp.font = BreezThaiFontInstaller.BoldFont != null ? BreezThaiFontInstaller.BoldFont : BreezThaiFontInstaller.EnsureFonts();
-        sp.flowerSize = Mathf.Clamp(worldW * 0.8f, 0.6f, 1.4f);
+        sp.flowerSize = Mathf.Clamp(worldW * 1.2f, 1.0f, 2.0f);   // ดอกไม้ใหญ่ขึ้น
+        sp.edgeMargin = sp.flowerSize * 0.75f;
+        sp.maxStep = Mathf.Max(sp.maxStep, sp.flowerSize * 1.4f);
         sp.sortingOrder = order + 2;
         sp.types = TypesWithSprites();   // ภาพดอกไม้ 3 แบบ (Assets/element/B&F/Flowers)
         foreach (var r in sp.GetComponentsInChildren<Transform>(true)) if (r != sp.transform) Undo.DestroyObjectImmediate(r.gameObject);
