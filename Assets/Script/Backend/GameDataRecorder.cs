@@ -41,13 +41,13 @@ public static class GameDataRecorder
         RecordSession(BreatheFocus, score, durationSeconds, Json.Obj("obstacles_avoided", Json.Num(obstaclesAvoided)), done);
 
     /// <summary>Breathe & Focus แบบผึ้งเก็บดอกไม้: flowers = ดอกทั้งหมด (เก็บในช่อง obstacles_avoided เดิม) + แยกสี</summary>
-    public static void RecordBreatheFocus(int score, float durationSeconds, int flowers, int pink, int yellow, int purple, Action<bool> done = null) =>
+    public static void RecordBreatheFocus(int score, float durationSeconds, int flowers, int pink, int yellow, int clover, Action<bool> done = null) =>
         RecordSession(BreatheFocus, score, durationSeconds, Json.Obj(
             "obstacles_avoided", Json.Num(flowers),
             "flowers_collected", Json.Num(flowers),
             "flowers_pink", Json.Num(pink),
             "flowers_yellow", Json.Num(yellow),
-            "flowers_purple", Json.Num(purple)), done);
+            "flowers_clover", Json.Num(clover)), done);
 
     /// <summary>Soundscape: ฉาก (Rainy Forest / Windy Mountain), จำนวนรอบหายใจ 5-5 ที่ครบ, เวลาที่เป่า (วินาที)</summary>
     public static void RecordSoundscape(float durationSeconds, string scene = null, int breathCycles = 0, float exhaleSeconds = 0f, Action<bool> done = null) =>

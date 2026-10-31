@@ -142,11 +142,14 @@ public static class BreezBreathFocusRestyle
             {
                 var ft = gm.spawner.types[i];
                 float x = -330 + i * 330;
-                var icon = Img(row.transform, "Flower_" + ft.id, BreezBreathFocusBee.PetalsSprite, ft.color);
+                var icon = Img(row.transform, "Flower_" + ft.id, ft.sprite != null ? ft.sprite : BreezBreathFocusBee.PetalsSprite, ft.sprite != null ? Color.white : ft.color);
                 icon.preserveAspect = true;
-                Place(icon.rectTransform, x - 70, 0, 92, 92);
-                var center = Img(icon.transform, "Center", BreezBreathFocusBee.CenterSprite, FlowerSpawner.CenterColor(ft.id));
-                Place(center.rectTransform, 0, 0, 28, 28);
+                Place(icon.rectTransform, x - 70, 0, 100, 100);
+                if (ft.sprite == null)
+                {
+                    var center = Img(icon.transform, "Center", BreezBreathFocusBee.CenterSprite, FlowerSpawner.CenterColor(ft.id));
+                    Place(center.rectTransform, 0, 0, 28, 28);
+                }
                 icon.gameObject.AddComponent<FlowerResultIcon>().delay = 0.25f + i * 0.18f;
                 counts[i] = Left(Text(row.transform, "Count_" + ft.id, "0", bold, 50, Ink, 0, 14, 160, 60), x - 12);
                 Left(Text(row.transform, "Points_" + ft.id, $"{ft.points} คะแนน/ดอก", regular, 22, Grey, 0, -30, 200, 32), x - 12);

@@ -159,14 +159,14 @@ export function modeDetail(mode, all) {
   }
 
   if (mode === 'Breathe & Focus') {
-    // ผึ้งเก็บดอกไม้: obstacles_avoided = จำนวนดอกไม้ที่เก็บได้, score = คะแนน (ชมพู 10 · เหลือง 20 · ม่วง 50)
+    // ผึ้งเก็บดอกไม้: obstacles_avoided = จำนวนดอกไม้ที่เก็บได้, score = คะแนน (ชมพู 10 · เหลือง 20 · โคลเวอร์ 50)
     const fl = rs.map(r => r.obstacles_avoided ?? 0)
     const sc = rs.map(r => r.score || 0)
     base.metrics = [
       { label: 'ดอกไม้ที่เก็บได้ (เฉลี่ย / มัธยฐาน)', value: `${avg(fl).toFixed(1)} / ${median(fl)}` },
       { label: 'เก็บได้มากที่สุด', value: `${Math.max(...fl)} ดอก` },
       { label: 'คะแนนเฉลี่ย', value: avg(sc).toFixed(0) },
-      { label: 'คะแนนเฉลี่ยต่อดอก', value: avg(fl) ? (avg(sc) / avg(fl)).toFixed(1) : '—', hint: 'ยิ่งสูง แสดงว่าเก็บดอกสีม่วง/เหลืองได้มาก' },
+      { label: 'คะแนนเฉลี่ยต่อดอก', value: avg(fl) ? (avg(sc) / avg(fl)).toFixed(1) : '—', hint: 'ยิ่งสูง แสดงว่าเก็บโคลเวอร์และดอกสีเหลืองได้มาก' },
     ]
     base.charts = [
       {
