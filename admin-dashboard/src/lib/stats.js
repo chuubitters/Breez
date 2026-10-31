@@ -159,26 +159,33 @@ export function modeDetail(mode, all) {
   }
 
   if (mode === 'Breathe & Focus') {
-    const ob = rs.map(r => r.obstacles_avoided ?? 0)
-    const early = rs.filter(r => (r.duration || 0) < 15)
-    base.earlyPct = pctOf(early.length, rs.length)
+    // ผึ้งเก็บดอกไม้: obstacles_avoided = จำนวนดอกไม้ที่เก็บได้, score = คะแนน (ชมพู 10 · เหลือง 20 · ม่วง 50)
+    const fl = rs.map(r => r.obstacles_avoided ?? 0)
+    const sc = rs.map(r => r.score || 0)
     base.metrics = [
-      { label: 'สิ่งกีดขวางที่ผ่านได้ (เฉลี่ย / มัธยฐาน)', value: `${avg(ob).toFixed(1)} / ${median(ob)}` },
-      { label: 'ผ่านได้มากที่สุด', value: `${Math.max(...ob)} ชิ้น` },
-      { label: 'ระยะเวลาเล่นเฉลี่ย', value: secText(avg(durations)) },
-      { label: 'ชนสิ่งกีดขวางภายใน 15 วินาทีแรก', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
+      { label: 'ดอกไม้ที่เก็บได้ (เฉลี่ย / มัธยฐาน)', value: `${avg(fl).toFixed(1)} / ${median(fl)}` },
+      { label: 'เก็บได้มากที่สุด', value: `${Math.max(...fl)} ดอก` },
+      { label: 'คะแนนเฉลี่ย', value: avg(sc).toFixed(0) },
+      { label: 'คะแนนเฉลี่ยต่อดอก', value: avg(fl) ? (avg(sc) / avg(fl)).toFixed(1) : '—', hint: 'ยิ่งสูง แสดงว่าเก็บดอกสีม่วง/เหลืองได้มาก' },
     ]
     base.charts = [
       {
-        title: 'จำนวนสิ่งกีดขวางที่ผ่านได้ต่อครั้ง',
-        note: 'ช่วงที่ผู้ใช้ส่วนใหญ่ชน คือจุดที่ระดับความยากอาจเพิ่มขึ้นเร็วเกินไป',
-        data: histogram(ob, [
-          { label: '0', test: v => v === 0 }, { label: '1–2', test: v => v >= 1 && v <= 2 },
-          { label: '3–5', test: v => v >= 3 && v <= 5 }, { label: '6–10', test: v => v >= 6 && v <= 10 },
-          { label: '11–20', test: v => v >= 11 && v <= 20 }, { label: '21+', test: v => v >= 21 },
+        title: 'จำนวนดอกไม้ที่เก็บได้ต่อครั้ง',
+        note: 'หากส่วนใหญ่เก็บได้น้อย ควรพิจารณาลดความเร็วของดอกไม้หรือเพิ่มจำนวนดอก',
+        data: histogram(fl, [
+          { label: '0–5', test: v => v <= 5 }, { label: '6–10', test: v => v >= 6 && v <= 10 },
+          { label: '11–20', test: v => v >= 11 && v <= 20 }, { label: '21–30', test: v => v >= 21 && v <= 30 },
+          { label: '31+', test: v => v >= 31 },
         ]),
       },
-      { title: 'ระยะเวลาที่เล่นได้ต่อครั้ง', data: histogram(durations, secBuckets([15, 30, 60, 120])) },
+      {
+        title: 'คะแนนต่อครั้ง',
+        data: histogram(sc, [
+          { label: '0–100', test: v => v <= 100 }, { label: '101–200', test: v => v > 100 && v <= 200 },
+          { label: '201–400', test: v => v > 200 && v <= 400 }, { label: '401–600', test: v => v > 400 && v <= 600 },
+          { label: '600+', test: v => v > 600 },
+        ]),
+      },
     ]
   }
 
@@ -306,9 +313,6 @@ export function findings(cur, prev) {
   if (enough(pr) && pr.completionPct > T.powerCompletionHigh)
     out.push({ level: 'info', mode: 'Power Release', text: `ผู้ใช้เป่าครบทุกลูก ${pr.completionPct}% ซึ่งอาจง่ายเกินไป ควรพิจารณาเพิ่มจำนวนลูกโป่งหรือลดเวลา` })
 
-  const bf = d['Breathe & Focus']
-  if (enough(bf) && bf.earlyPct > T.focusEarlyHigh)
-    out.push({ level: 'warn', mode: 'Breathe & Focus', text: `${bf.earlyPct}% ของการเล่นชนสิ่งกีดขวางภายใน 15 วินาทีแรก ช่วงเริ่มต้นเกมอาจยากเกินไป` })
 
   const cf = d['Calm Flow']
   if (enough(cf) && cf.fullBloomPct < T.calmFullBloomLow)

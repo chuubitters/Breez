@@ -73,6 +73,19 @@ public static class BreezBreathPlayLayers
         return Save(gm, "Power Release");
     }
 
+    /// <summary>จัดเฉพาะ Breathe & Focus (เรียกจากเมนูผึ้งเก็บดอกไม้)</summary>
+    public static string FocusOnly()
+    {
+        regular = BreezThaiFontInstaller.EnsureFonts();
+        bold = BreezThaiFontInstaller.BoldFont;
+        if (bold == null) bold = regular;
+        pill = BreezStatusElementsBuilder.MakeSprite("ui_pill", BreezSpriteArt.RoundedRect(128, 63), 128, 63);
+        card = BreezStatusElementsBuilder.MakeSprite("ui_card", BreezSpriteArt.RoundedRect(128, 40), 128, 40);
+        arrow = BreezStatusElementsBuilder.MakeSprite("ui_arrow_left", BreezSpriteArt.ArrowLeft(128), 128, 0);
+        flower = BreezStatusElementsBuilder.MakeSprite("ui_flower", BreezSpriteArt.Flower(128), 128, 0);
+        return Focus();
+    }
+
     static string Focus()
     {
         EditorSceneManager.OpenScene(FocusPath, OpenSceneMode.Single);
@@ -92,18 +105,47 @@ public static class BreezBreathPlayLayers
         if (player != null) { var sr = player.GetComponentInChildren<SpriteRenderer>(); if (sr != null) playerSprite = sr.sprite; }
         var cloud = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/element/B&F/clound.png");
 
-        var how = HowTo(top, "เป่าตัวเครื่องเพื่อให้ตัวละครลอยขึ้น\nและข้ามสิ่งกีดขวางให้ได้มากที่สุด", out var start, art =>
+        GameObject how;
+        Button start;
+        if (gm.spawner != null)
         {
-            var cloudTint = new Color32(0xE3, 0xED, 0xF1, 255);
-            if (cloud != null)
+            // ผึ้งเก็บดอกไม้
+            if (BreezBreathFocusBee.BodySprite == null) BreezBreathFocusBee.EnsureArt();
+            var types = gm.spawner.types;
+            how = HowTo(top, $"เป่าตัวเครื่องให้ผึ้งลอยขึ้น หยุดเป่าให้ผึ้งลดระดับ\nเก็บดอกไม้ให้ได้มากที่สุดภายใน {Mathf.RoundToInt(gm.gameDuration)} วินาที", out start, art =>
             {
-                Shadow(Art(art, "CloudUpper", cloud, 110, 120, 190, 122).gameObject, 0.12f);
-                Shadow(Art(art, "CloudLower", cloud, -150, 45, 190, 122).gameObject, 0.12f);
-                foreach (Transform t in art) t.GetComponent<Image>().color = cloudTint;
-            }
-            if (playerSprite != null)
-                Art(art, "Player", playerSprite, -20, 110, 110, 88).color = new Color32(0x55, 0x55, 0x55, 255);
-        });
+                var wing = Art(art, "BeeWing", BreezBreathFocusBee.WingSprite, -205, 140, 80, 80);
+                wing.color = new Color(1f, 1f, 1f, 0.9f);
+                wing.rectTransform.localRotation = Quaternion.Euler(0, 0, 12f);
+                Art(art, "Bee", BreezBreathFocusBee.BodySprite, -190, 80, 190, 190);
+                float[] xs = { 20, 150, 280 };
+                float[] ys = { 120, 40, 150 };
+                for (int i = 0; i < types.Length && i < 3; i++)
+                {
+                    var f = Art(art, "Flower_" + types[i].id, BreezBreathFocusBee.PetalsSprite, xs[i], ys[i], 92, 92);
+                    f.color = types[i].color;
+                    var c = Art(f.transform, "Center", BreezBreathFocusBee.CenterSprite, 0, 0, 34, 34);
+                    c.color = types[i].id == "yellow" ? (Color)new Color32(0xE0, 0x8A, 0x2E, 255) : new Color32(0xFF, 0xE3, 0x7A, 255);
+                    f.gameObject.AddComponent<FlowerResultIcon>().delay = 0.1f + i * 0.15f;
+                    Text(art, "Points_" + types[i].id, $"{types[i].points} คะแนน", regular, 24, new Color32(70, 70, 70, 255), xs[i], ys[i] - 66, 160, 34);
+                }
+            });
+        }
+        else
+        {
+            how = HowTo(top, "เป่าตัวเครื่องเพื่อให้ตัวละครลอยขึ้น\nและข้ามสิ่งกีดขวางให้ได้มากที่สุด", out start, art =>
+            {
+                var cloudTint = new Color32(0xE3, 0xED, 0xF1, 255);
+                if (cloud != null)
+                {
+                    Shadow(Art(art, "CloudUpper", cloud, 110, 120, 190, 122).gameObject, 0.12f);
+                    Shadow(Art(art, "CloudLower", cloud, -150, 45, 190, 122).gameObject, 0.12f);
+                    foreach (Transform t in art) t.GetComponent<Image>().color = cloudTint;
+                }
+                if (playerSprite != null)
+                    Art(art, "Player", playerSprite, -20, 110, 110, 88).color = new Color32(0x55, 0x55, 0x55, 255);
+            });
+        }
         gm.startPanel = how;
         gm.startButton = start;
         how.SetActive(true);   // BFGameManager เปิด/ปิดเองตอนเริ่ม

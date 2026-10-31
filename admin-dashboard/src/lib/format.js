@@ -12,7 +12,7 @@ export const MODE_COLOR = {
 /** คำอธิบายสั้นของแต่ละโหมด */
 export const MODE_INFO = {
   'Power Release': 'เป่าลูกโป่งให้แตกครบทุกลูกภายในเวลาที่กำหนด',
-  'Breathe & Focus': 'ควบคุมลมหายใจเพื่อหลบสิ่งกีดขวาง',
+  'Breathe & Focus': 'ควบคุมลมหายใจให้ผึ้งลอยไปเก็บดอกไม้',
   'Calm Flow': 'หายใจออกยาวและสม่ำเสมอเพื่อให้ดอกไม้บาน',
   'Soundscape': 'หายใจเข้า 5 วินาที ออก 5 วินาที พร้อมเสียงธรรมชาติ',
   'Quick Session': 'ฝึกหายใจแบบ 4-7-8 บนอุปกรณ์ Breath Gadget',
@@ -93,7 +93,7 @@ export function sessionDetail(s) {
       if (s.balloons_total == null) return '—'
       return `ลูกโป่ง ${s.balloons_popped}/${s.balloons_total} ลูก${s.balloons_popped >= s.balloons_total && s.balloons_total > 0 ? ' · สำเร็จครบทุกลูก' : ''}`
     case 'Breathe & Focus':
-      return s.obstacles_avoided != null ? `หลบสิ่งกีดขวาง ${s.obstacles_avoided} ชิ้น` : '—'
+      return s.obstacles_avoided != null ? `เก็บดอกไม้ ${s.obstacles_avoided} ดอก` : '—'
     case 'Soundscape': {
       const parts = []
       if (s.scene) parts.push(s.scene)
