@@ -122,10 +122,14 @@ public static class BreezBreathPlayLayers
                 float[] ys = { 120, 40, 150 };
                 for (int i = 0; i < types.Length && i < 3; i++)
                 {
-                    var f = Art(art, "Flower_" + types[i].id, BreezBreathFocusBee.PetalsSprite, xs[i], ys[i], 92, 92);
-                    f.color = types[i].color;
-                    var c = Art(f.transform, "Center", BreezBreathFocusBee.CenterSprite, 0, 0, 28, 28);
-                    c.color = FlowerSpawner.CenterColor(types[i].id);
+                    bool real = types[i].sprite != null;
+                    var f = Art(art, "Flower_" + types[i].id, real ? types[i].sprite : BreezBreathFocusBee.PetalsSprite, xs[i], ys[i], 100, 100);
+                    f.color = real ? Color.white : types[i].color;
+                    if (!real)
+                    {
+                        var c = Art(f.transform, "Center", BreezBreathFocusBee.CenterSprite, 0, 0, 28, 28);
+                        c.color = FlowerSpawner.CenterColor(types[i].id);
+                    }
                     f.gameObject.AddComponent<FlowerResultIcon>().delay = 0.1f + i * 0.15f;
                     Text(art, "Points_" + types[i].id, $"{types[i].points} คะแนน", regular, 24, new Color32(70, 70, 70, 255), xs[i], ys[i] - 66, 160, 34);
                 }

@@ -7,7 +7,7 @@ using TMPro;
 // =====================================================================
 // Breathe & Focus: ผึ้งเก็บดอกไม้
 //   เป่า = ผึ้งลอยขึ้น, หยุดเป่า = ผึ้งลดระดับ เก็บดอกไม้ให้ได้มากที่สุดภายในเวลาที่กำหนด
-//   ดอกไม้ 3 สี คะแนนต่างกัน (ตั้งค่าใน FlowerSpawner)
+//   ดอกไม้ 3 แบบ (ชมพู / เหลือง / โคลเวอร์) คะแนนต่างกัน (ตั้งค่าใน FlowerSpawner)
 //   หมดเวลา => หน้าผลลัพธ์: คะแนน / เวลา / ดอกไม้ทั้งหมด + จำนวนแต่ละสี (มีแอนิเมชัน)
 // =====================================================================
 public class BFGameManager : MonoBehaviour
@@ -190,12 +190,12 @@ public class BFGameManager : MonoBehaviour
         Time.timeScale = 0f;
         StartCoroutine(CountUp(unit));
 
-        int pink = 0, yellow = 0, purple = 0;
+        int pink = 0, yellow = 0, clover = 0;
         if (spawner != null && spawner.types.Length >= 3)
         {
-            pink = CountOf(spawner.types[0].id); yellow = CountOf(spawner.types[1].id); purple = CountOf(spawner.types[2].id);
+            pink = CountOf(spawner.types[0].id); yellow = CountOf(spawner.types[1].id); clover = CountOf(spawner.types[2].id);
         }
-        GameDataRecorder.RecordBreatheFocus(currentScore, gameTime, obstaclesPassed, pink, yellow, purple);
+        GameDataRecorder.RecordBreatheFocus(currentScore, gameTime, obstaclesPassed, pink, yellow, clover);
     }
 
     // ตัวเลขหน้าผลลัพธ์นับขึ้นทีละน้อย (ทำงานตอน timeScale = 0)

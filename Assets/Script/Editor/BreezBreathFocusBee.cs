@@ -16,6 +16,33 @@ public static class BreezBreathFocusBee
     const float BodyPpu = 200f, WingPpu = 200f;
 
     public static Sprite BodySprite, WingSprite, PetalsSprite, CenterSprite;
+    const string FlowerFolder = "Assets/element/B&F/Flowers";
+    static readonly string[] FlowerFiles = { "flower_pink", "flower_yellow", "flower_clover" };   // ตามลำดับ FlowerSpawner.DefaultTypes
+
+    /// <summary>ภาพดอกไม้สีจริง 3 แบบ (ชมพู / เหลือง / โคลเวอร์)</summary>
+    public static Sprite FlowerSprite(int i)
+    {
+        string path = $"{FlowerFolder}/{FlowerFiles[i]}.png";
+        var imp = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (imp == null) return null;
+        if (imp.textureType != TextureImporterType.Sprite || imp.mipmapEnabled || !imp.alphaIsTransparency)
+        {
+            imp.textureType = TextureImporterType.Sprite;
+            imp.spriteImportMode = SpriteImportMode.Single;
+            imp.alphaIsTransparency = true;
+            imp.mipmapEnabled = false;
+            imp.spritePixelsPerUnit = 256f;
+            imp.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    public static FlowerSpawner.FlowerType[] TypesWithSprites()
+    {
+        var types = FlowerSpawner.DefaultTypes();
+        for (int i = 0; i < types.Length && i < FlowerFiles.Length; i++) types[i].sprite = FlowerSprite(i);
+        return types;
+    }
 
     [MenuItem("Breez/Breathe & Focus: ผึ้งเก็บดอกไม้")]
     public static void Run()
@@ -32,7 +59,7 @@ public static class BreezBreathFocusBee
         EditorUtility.DisplayDialog("Breez",
             "เปลี่ยน Breathe & Focus เป็นเกมผึ้งเก็บดอกไม้แล้ว\n\n" +
             "• เป่า = ผึ้งลอยขึ้น / หยุดเป่า = ผึ้งลดระดับ\n" +
-            "• ดอกชมพู 10 · เหลือง 20 · ม่วง 50 คะแนน\n" +
+            "• ดอกชมพู 10 · ดอกเหลือง 20 · โคลเวอร์ 50 คะแนน\n" +
             "• เล่น 60 วินาที (แก้ได้ที่ BFGameManager > Game Duration)\n\n" +
             "กด Play เพื่อทดสอบ (ใช้ปุ่มลูกศรขึ้นแทนการเป่าได้)", "OK");
     }
@@ -138,7 +165,7 @@ public static class BreezBreathFocusBee
         sp.font = BreezThaiFontInstaller.BoldFont != null ? BreezThaiFontInstaller.BoldFont : BreezThaiFontInstaller.EnsureFonts();
         sp.flowerSize = Mathf.Clamp(worldW * 0.8f, 0.6f, 1.4f);
         sp.sortingOrder = order + 2;
-        sp.types = FlowerSpawner.DefaultTypes();   // สีพาสเทลตามธีมเกม
+        sp.types = TypesWithSprites();   // ภาพดอกไม้ 3 แบบ (Assets/element/B&F/Flowers)
         foreach (var r in sp.GetComponentsInChildren<Transform>(true)) if (r != sp.transform) Undo.DestroyObjectImmediate(r.gameObject);
 
         gm.spawner = sp;

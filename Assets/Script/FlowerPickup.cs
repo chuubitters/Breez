@@ -39,21 +39,25 @@ public class FlowerPickup : MonoBehaviour
         petals = new GameObject("Petals").transform;
         petals.SetParent(visual, false);
         petalsSr = petals.gameObject.AddComponent<SpriteRenderer>();
-        petalsSr.sprite = spawner.petalsSprite;
-        petalsSr.color = t.color;
+        bool real = t.sprite != null;                 // ภาพดอกไม้สีจริง
+        petalsSr.sprite = real ? t.sprite : spawner.petalsSprite;
+        petalsSr.color = real ? Color.white : t.color;
         petalsSr.sortingOrder = spawner.sortingOrder;
-        Fit(petals, petalsSr.sprite, size);
+        Fit(petals, petalsSr.sprite, real ? size * 1.15f : size);
 
-        var center = new GameObject("Center").transform;
-        center.SetParent(petals, false);
-        centerSr = center.gameObject.AddComponent<SpriteRenderer>();
-        centerSr.sprite = spawner.centerSprite;
-        centerSr.color = FlowerSpawner.CenterColor(t.id);
-        centerSr.sortingOrder = spawner.sortingOrder + 1;
-        if (centerSr.sprite != null && petalsSr.sprite != null)
+        if (!real)
         {
-            float ps = petalsSr.sprite.bounds.size.x, cs = centerSr.sprite.bounds.size.x;
-            if (cs > 0f) center.localScale = Vector3.one * (ps * 0.3f / cs);
+            var center = new GameObject("Center").transform;
+            center.SetParent(petals, false);
+            centerSr = center.gameObject.AddComponent<SpriteRenderer>();
+            centerSr.sprite = spawner.centerSprite;
+            centerSr.color = FlowerSpawner.CenterColor(t.id);
+            centerSr.sortingOrder = spawner.sortingOrder + 1;
+            if (centerSr.sprite != null && petalsSr.sprite != null)
+            {
+                float ps = petalsSr.sprite.bounds.size.x, cs = centerSr.sprite.bounds.size.x;
+                if (cs > 0f) center.localScale = Vector3.one * (ps * 0.3f / cs);
+            }
         }
 
         var col = gameObject.AddComponent<CircleCollider2D>();

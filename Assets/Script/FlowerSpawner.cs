@@ -5,9 +5,9 @@ using Random = UnityEngine.Random;
 
 // =====================================================================
 // Breathe & Focus (แบบเก็บดอกไม้): สร้างดอกไม้ลอยเข้ามาจากขวาไปซ้าย
-//   • ดอกไม้ 3 สี คะแนนต่างกัน (ชมพู / เหลือง / ม่วง)
+//   • ดอกไม้ 3 แบบ คะแนนต่างกัน (ชมพู 10 / เหลือง 20 / โคลเวอร์ 50)
 //   • ความสูงของดอกถัดไปเปลี่ยนทีละน้อย ผู้เล่นตามเก็บได้ด้วยการเป่า/หยุดเป่า
-//   • ดอกสีม่วง (คะแนนสูงสุด) อยู่ใกล้ขอบบน/ล่าง ต้องควบคุมลมหายใจดีถึงจะเก็บได้
+//   • โคลเวอร์ (คะแนนสูงสุด) อยู่ใกล้ขอบบน/ล่าง ต้องควบคุมลมหายใจดีถึงจะเก็บได้
 // ตั้งค่า sprite / font ให้อัตโนมัติจากเมนู Breez > Breathe & Focus: ผึ้งเก็บดอกไม้
 // =====================================================================
 public class FlowerSpawner : MonoBehaviour
@@ -17,6 +17,9 @@ public class FlowerSpawner : MonoBehaviour
     {
         public string id = "pink";
         public string label = "ดอกสีชมพู";
+        [Tooltip("ภาพดอกไม้ (สีจริง) ถ้าไม่ใส่จะใช้ petalsSprite ย้อมด้วย color")]
+        public Sprite sprite;
+        [Tooltip("สีแสงฟุ้ง / กลีบที่กระจาย / ตัวเลขคะแนน")]
         public Color color = new Color32(0xF2, 0xBD, 0xC9, 255);
         public int points = 10;
         [Range(0f, 1f)] public float weight = 0.6f;
@@ -24,9 +27,9 @@ public class FlowerSpawner : MonoBehaviour
 
     public static FlowerType[] DefaultTypes() => new[]
     {
-        new FlowerType { id = "pink",   label = "ดอกสีชมพู",  color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
-        new FlowerType { id = "yellow", label = "ดอกสีเหลือง", color = new Color32(0xF7, 0xDC, 0x8C, 255), points = 20, weight = 0.3f },
-        new FlowerType { id = "purple", label = "ดอกสีม่วง",  color = new Color32(0xD3, 0xC2, 0xEC, 255), points = 50, weight = 0.1f },
+        new FlowerType { id = "pink",   label = "ดอกสีชมพู",   color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
+        new FlowerType { id = "yellow", label = "ดอกสีเหลือง",  color = new Color32(0xE2, 0xE6, 0x9A, 255), points = 20, weight = 0.3f },
+        new FlowerType { id = "clover", label = "ดอกโคลเวอร์", color = new Color32(0xC9, 0xDF, 0xA0, 255), points = 50, weight = 0.1f },
     };
 
     /// <summary>สีเกสรกลางดอก (โทนครีม/เหลืองอ่อน)</summary>
@@ -34,9 +37,9 @@ public class FlowerSpawner : MonoBehaviour
 
     public FlowerType[] types =
     {
-        new FlowerType { id = "pink",   label = "ดอกสีชมพู",  color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
-        new FlowerType { id = "yellow", label = "ดอกสีเหลือง", color = new Color32(0xF7, 0xDC, 0x8C, 255), points = 20, weight = 0.3f },
-        new FlowerType { id = "purple", label = "ดอกสีม่วง",  color = new Color32(0xD3, 0xC2, 0xEC, 255), points = 50, weight = 0.1f },
+        new FlowerType { id = "pink",   label = "ดอกสีชมพู",   color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
+        new FlowerType { id = "yellow", label = "ดอกสีเหลือง",  color = new Color32(0xE2, 0xE6, 0x9A, 255), points = 20, weight = 0.3f },
+        new FlowerType { id = "clover", label = "ดอกโคลเวอร์", color = new Color32(0xC9, 0xDF, 0xA0, 255), points = 50, weight = 0.1f },
     };
 
     [Header("ภาพ (ตั้งจากเมนู)")]
