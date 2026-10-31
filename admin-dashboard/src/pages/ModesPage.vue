@@ -23,6 +23,7 @@ async function load() {
 watch(() => props.days, load, { immediate: true })
 
 const counts = computed(() => Object.fromEntries(MODES.map(m => [m, data.value.cur.filter(r => r.mode === m).length])))
+const totalPlayers = computed(() => new Set(data.value.cur.map(r => r.user_id)).size)
 const d = computed(() => modeDetail(tab.value, data.value.cur))
 </script>
 
@@ -36,8 +37,8 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
   </nav>
 
   <section class="kpis" :class="{ loading }">
-    <div class="kpi"><div class="label">จำนวนครั้ง</div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ MODE_INFO[tab] }}</div></div>
-    <div class="kpi"><div class="label">ผู้เล่น</div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ d.players ? (d.sessions / d.players).toFixed(1) : 0 }} ครั้ง/คน</div></div>
+    <div class="kpi"><div class="label">จำนวนครั้ง</div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ data.cur.length ? Math.round(d.sessions / data.cur.length * 100) : 0 }}% ของทุกครั้ง · {{ MODE_INFO[tab] }}</div></div>
+    <div class="kpi"><div class="label">คนที่ฝึก</div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ totalPlayers ? Math.round(d.players / totalPlayers * 100) : 0 }}% ของคนที่ฝึกทั้งหมด</div></div>
     <div class="kpi"><div class="label">เวลาต่อครั้ง (มัธยฐาน)</div><div class="value">{{ d.sessions ? secText(d.medianDuration) : '—' }}</div><div class="foot">เฉลี่ย {{ d.sessions ? secText(d.avgDuration) : '—' }}</div></div>
     <div class="kpi"><div class="label">ประวัติ</div><div class="value" style="font-size:15px;padding-top:8px"><button class="btn-link" @click="emit('navigate', 'sessions', { mode: tab })">ดูผลการเล่นทุกครั้ง →</button></div></div>
   </section>

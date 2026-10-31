@@ -336,3 +336,58 @@ export function findings(cur, prev) {
   if (!out.length) out.push({ level: 'ok', text: 'ยังไม่พบจุดที่ต้องปรับในช่วงนี้' })
   return out
 }
+
+// ---------- อารมณ์ ----------
+// นับเป็น "คน": ใช้อารมณ์ล่าสุดของแต่ละคนในช่วงนั้น รวมกันได้ 100% พอดี
+export const MOOD_KEYS = ['Happy', 'Lovely', 'Bored', 'Stress', 'Angry']
+export const MOOD_GROUP = { Happy: 'good', Lovely: 'good', Bored: 'neutral', Stress: 'tense', Angry: 'tense' }
+
+export function moodSummary(rows) {
+  const latest = new Map()
+  const records = {}
+  for (const r of rows) {
+    records[r.mood] = (records[r.mood] || 0) + 1
+    const cur = latest.get(r.user_id)
+    if (!cur || r.recorded_at > cur.recorded_at) latest.set(r.user_id, r)
+  }
+  const people = latest.size
+  const count = {}
+  for (const r of latest.values()) count[r.mood] = (count[r.mood] || 0) + 1
+  const byMood = MOOD_KEYS.map(k => ({ key: k, people: count[k] || 0, pct: pctOf(count[k] || 0, people), records: records[k] || 0 }))
+  const group = g => byMood.filter(m => MOOD_GROUP[m.key] === g).reduce((a, m) => a + m.people, 0)
+  return {
+    records: rows.length,
+    people,
+    byMood,
+    good: group('good'), neutral: group('neutral'), tense: group('tense'),
+    goodPct: pctOf(group('good'), people),
+    neutralPct: pctOf(group('neutral'), people),
+    tensePct: pctOf(group('tense'), people),
+  }
+}
+
+// ข้อความสั้นสำหรับโพสต์ชวนคนมาฝึกหายใจ / ส่งกำลังใจ
+export function moodMessages(m, periodText) {
+  if (!m.people) return []
+  const out = []
+  if (m.tensePct > 0) out.push(`${periodText} ผู้ใช้ Breez ${m.tensePct}% บอกว่ารู้สึกเครียดหรือหงุดหงิด ถ้าวันนี้หนักเหมือนกัน ลองพักหายใจช้าๆ กับ Breez สัก 1 นาทีนะ`)
+  if (m.goodPct > 0) out.push(`${periodText} ผู้ใช้ Breez ${m.goodPct}% กำลังรู้สึกดี มาส่งพลังบวกต่อให้เพื่อนที่กำลังเหนื่อยกัน`)
+  out.push(`มีคน ${m.people} คนมาบันทึกอารมณ์กับ Breez ${periodText} คุณไม่ได้เหนื่อยอยู่คนเดียว มาหายใจไปด้วยกัน`)
+  return out
+}
+
+// โหลดบันทึกอารมณ์ช่วงนี้ + ช่วงก่อนหน้า (RPC ให้ครั้งละไม่เกิน 500 แถว)
+export async function loadMoods(days) {
+  const { rpc } = await import('./supabase')
+  const rows = []
+  for (let off = 0; off < 5000; off += 500) {
+    const page = await rpc('dashboard_moods', { p_days: days ? days * 2 : null, p_search: null, p_limit: 500, p_offset: off }) ?? []
+    rows.push(...page)
+    if (page.length < 500) break
+  }
+  const cut = days ? Date.now() - days * 864e5 : 0
+  return {
+    cur: rows.filter(r => new Date(r.recorded_at).getTime() >= cut),
+    prev: days ? rows.filter(r => new Date(r.recorded_at).getTime() < cut) : [],
+  }
+}

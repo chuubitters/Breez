@@ -5,7 +5,6 @@ import { clearSessionCache } from '../lib/stats'
 import OverviewPage from '../pages/OverviewPage.vue'
 import ModesPage from '../pages/ModesPage.vue'
 import SessionsPage from '../pages/SessionsPage.vue'
-import PlayersPage from '../pages/PlayersPage.vue'
 import MoodsPage from '../pages/MoodsPage.vue'
 import DevicesPage from '../pages/DevicesPage.vue'
 import StaffPage from '../pages/StaffPage.vue'
@@ -19,22 +18,19 @@ const ICON = {
   overview: 'M4 13h6V4H4zM14 20h6V11h-6zM4 20h6v-3H4zM14 7h6V4h-6z',
   modes: 'M6 12h4M8 10v4M15 11h.01M18 13h.01M7 6h10a5 5 0 0 1 5 5v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a5 5 0 0 1 5-5z',
   sessions: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
-  players: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
   moods: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z',
   devices: 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01',
   staff: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
 }
 const allNav = [
-  { group: 'ข้อมูลการเล่น' },
+  { group: 'ข้อมูลการฝึก' },
   { id: 'overview', label: 'ภาพรวม', desc: 'ตัวเลขหลักและจุดที่ควรปรับในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
   { id: 'modes', label: 'แต่ละโหมด', desc: 'ตัวชี้วัดความยาก/ความสนุกของแต่ละเกม ใช้ปรับสมดุลเกม', page: ModesPage, period: true },
   { id: 'sessions', label: 'ประวัติการเล่น', desc: 'ผลการเล่นทุกครั้ง ค้นหา กรอง และส่งออก CSV', page: SessionsPage, period: true },
-  { group: 'ผู้ใช้' },
-  { id: 'players', label: 'ผู้เล่น', desc: 'ใครเล่นบ่อย ใครหายไป', page: PlayersPage },
-  { id: 'moods', label: 'อารมณ์', desc: 'อารมณ์ที่ผู้เล่นบันทึก', page: MoodsPage, period: true, owner: true },
+  { id: 'moods', label: 'อารมณ์', desc: 'จำนวนคนในแต่ละอารมณ์และภาพรวมความเครียด', page: MoodsPage, period: true, owner: true },
   { group: 'ระบบ' },
   { id: 'devices', label: 'อุปกรณ์', desc: 'สถานะ Breath Gadget และแบตเตอรี่', page: DevicesPage },
-  { id: 'staff', label: 'ผู้ดูแลระบบ', desc: 'เพิ่ม/ถอนสิทธิ์ผู้ดูแล', page: StaffPage, owner: true },
+  { id: 'staff', label: 'จัดการแอดมิน', desc: 'เพิ่มแอดมินและกำหนดสิทธิ์ Super Admin / Admin', page: StaffPage, owner: true },
 ]
 const nav = computed(() => allNav.filter(n => !n.owner || isOwner.value))
 const pages = computed(() => nav.value.filter(n => n.id))
@@ -88,7 +84,7 @@ onBeforeUnmount(() => window.removeEventListener('hashchange', onHash))
         </template>
       </nav>
       <div class="side-foot">
-        <div class="row"><strong>{{ me.name }}</strong><span class="role">{{ me.role }}</span></div>
+        <div class="row"><strong>{{ me.name }}</strong><span class="role">{{ me.role === 'owner' ? 'Super Admin' : 'Admin' }}</span></div>
         <span class="muted small">{{ me.email }}</span>
         <button class="btn-link small" style="justify-self:start;margin-top:6px" @click="emit('sign-out')">ออกจากระบบ</button>
       </div>

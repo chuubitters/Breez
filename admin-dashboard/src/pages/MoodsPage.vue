@@ -1,10 +1,11 @@
 <script setup>
-// อารมณ์ (owner): สัดส่วนอารมณ์ในช่วงเวลา + บันทึกแต่ละครั้ง
+// อารมณ์ (Super Admin): จำนวนคนในแต่ละอารมณ์ + ภาพรวมความเครียด + บันทึกแต่ละครั้ง
 import { computed, ref, watch } from 'vue'
 import { rpc } from '../lib/supabase'
 import { useRemoteList } from '../lib/useRemoteList'
+import { moodSummary, loadMoods } from '../lib/stats'
 import { MOODS, downloadCsv, number, when } from '../lib/format'
-import BarList from '../components/BarList.vue'
+import MoodPulse from '../components/MoodPulse.vue'
 import Pager from '../components/Pager.vue'
 
 const props = defineProps({ days: Number })
@@ -14,53 +15,72 @@ const list = useRemoteList(
   { pageSize: 25, deps: [search, () => props.days] },
 )
 
-const all = ref([])
+// โหลดช่วงนี้ + ช่วงก่อนหน้า เพื่อเทียบว่าเครียดขึ้นหรือลดลง
+const cur = ref([])
+const prev = ref([])
+const loading = ref(true)
 async function loadAll() {
-  try { all.value = await rpc('dashboard_moods', { p_days: props.days, p_search: null, p_limit: 1000, p_offset: 0 }) ?? [] }
-  catch { all.value = [] }
+  loading.value = true
+  try {
+    ({ cur: cur.value, prev: prev.value } = await loadMoods(props.days))
+  } catch { cur.value = []; prev.value = [] }
+  finally { loading.value = false }
 }
 watch(() => props.days, loadAll, { immediate: true })
 
-const dist = computed(() => Object.entries(MOODS).map(([k, m]) => ({ label: m.th, value: all.value.filter(r => r.mood === k).length, color: m.color })))
-const people = computed(() => new Set(all.value.map(r => r.user_id)).size)
-const tense = computed(() => all.value.filter(r => r.mood === 'Stress' || r.mood === 'Angry').length)
+const m = computed(() => moodSummary(cur.value))
+const p = computed(() => (props.days ? moodSummary(prev.value) : null))
+const periodText = computed(() => (props.days ? `${props.days} วันที่ผ่านมา` : 'ที่ผ่านมา'))
+const maxPeople = computed(() => Math.max(1, ...m.value.byMood.map(x => x.people)))
 
-async function exportCsv() {
-  downloadCsv('breez-moods.csv', ['player', 'mood', 'note', 'recorded_at'], all.value.map(m => [m.player, m.mood, m.note, m.recorded_at]))
+function exportCsv() {
+  downloadCsv('breez-moods.csv', ['player', 'mood', 'note', 'recorded_at'], cur.value.map(r => [r.player, r.mood, r.note, r.recorded_at]))
 }
 </script>
 
 <template>
-  <section class="grid-3">
+  <section class="grid-2" :class="{ loading }">
     <article class="card">
-      <div class="card-head"><h2>สัดส่วนอารมณ์</h2><p>{{ number(all.length) }} ครั้ง จาก {{ number(people) }} คน</p></div>
-      <BarList :data="dist" percent />
-    </article>
-    <article class="card">
-      <div class="card-head"><h2>เครียด / โกรธ</h2></div>
-      <div class="kpi" style="border:0;padding:0">
-        <div class="value">{{ all.length ? Math.round(tense / all.length * 100) : 0 }}%</div>
-        <div class="foot">{{ number(tense) }} ครั้งในช่วงนี้ — ใช้ดูว่ากลุ่มผู้ใช้ต้องการโหมดผ่อนคลายมากแค่ไหน</div>
+      <div class="card-head"><h2>จำนวนคนในแต่ละอารมณ์</h2><p>{{ number(m.people) }} คน · {{ number(m.records) }} บันทึก</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>อารมณ์</th><th class="r">คน</th><th class="r">สัดส่วน</th><th class="r">บันทึก</th></tr></thead>
+          <tbody>
+            <tr v-for="x in m.byMood" :key="x.key">
+              <td><i class="dot" :style="{ background: MOODS[x.key].color }"></i>{{ MOODS[x.key].th }}</td>
+              <td class="r num"><b>{{ number(x.people) }}</b></td>
+              <td class="r"><div class="share-cell"><div class="track"><span :style="{ width: (x.people / maxPeople * 100) + '%', background: MOODS[x.key].color }"></span></div><b class="num">{{ x.pct }}%</b></div></td>
+              <td class="r num muted">{{ number(x.records) }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+      <p class="muted small" style="margin-top:10px">นับคนจากอารมณ์ล่าสุดที่แต่ละคนบันทึกในช่วงนี้ (1 คนนับ 1 ครั้ง) จึงรวมกันได้ 100%</p>
+    </article>
+
+    <article class="card">
+      <div class="card-head"><h2>อารมณ์โดยรวม</h2><p>ใช้ทำโพสต์ชวนคนมาฝึกหายใจหรือส่งกำลังใจ</p></div>
+      <MoodPulse :m="m" :prev="p" :period-text="periodText" />
     </article>
   </section>
 
   <section class="card">
+    <div class="card-head"><h2>บันทึกอารมณ์ล่าสุด</h2></div>
     <div class="toolbar" style="margin-bottom:12px">
-      <input v-model="search" class="input search" placeholder="ค้นหาชื่อผู้เล่น" />
+      <input v-model="search" class="input search" placeholder="ค้นหาชื่อผู้ใช้" />
       <span class="spacer"></span>
       <button class="btn" @click="exportCsv">ส่งออก CSV</button>
     </div>
     <p v-if="list.error.value" class="banner err">{{ list.error.value }}</p>
     <div class="table-wrap" :class="{ loading: list.loading.value }">
       <table>
-        <thead><tr><th>เวลา</th><th>ผู้เล่น</th><th>อารมณ์</th><th>โน้ต</th></tr></thead>
+        <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>อารมณ์</th><th>โน้ต</th></tr></thead>
         <tbody>
-          <tr v-for="m in list.rows.value" :key="m.mood_id">
-            <td class="muted" style="white-space:nowrap">{{ when(m.recorded_at) }}</td>
-            <td>{{ m.player }}</td>
-            <td><i class="dot" :style="{ background: MOODS[m.mood]?.color }"></i>{{ MOODS[m.mood]?.th ?? m.mood }}</td>
-            <td class="muted">{{ m.note || '—' }}</td>
+          <tr v-for="r in list.rows.value" :key="r.mood_id">
+            <td class="muted" style="white-space:nowrap">{{ when(r.recorded_at) }}</td>
+            <td>{{ r.player }}</td>
+            <td><i class="dot" :style="{ background: MOODS[r.mood]?.color }"></i>{{ MOODS[r.mood]?.th ?? r.mood }}</td>
+            <td class="muted">{{ r.note || '—' }}</td>
           </tr>
           <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="4" class="empty">ไม่มีบันทึกอารมณ์ในช่วงนี้</td></tr>
         </tbody>
