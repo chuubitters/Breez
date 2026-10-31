@@ -76,9 +76,11 @@
     <Compile Include="Assets/Script/Editor/BreezGadgetSettingRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezPowerReleaseRestyle.cs" />
     <Compile Include="Assets/Script/Editor/BreezStatusElementsBuilder.cs" />
+    <Compile Include="Assets/Script/Editor/BreezBeeArt.cs" />
     <Compile Include="Assets/Script/Editor/BreezMoodSceneBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezSoundscapeCountdownBuilder.cs" />
     <Compile Include="Assets/Script/Editor/BreezThaiFontInstaller.cs" />
+    <Compile Include="Assets/Script/Editor/BreezBreathFocusBee.cs" />
     <Compile Include="Assets/Script/Editor/BreezThaiTranslator.cs" />
     <Compile Include="Assets/Script/Editor/BreezCalmFlowBuilder.cs" />
   </ItemGroup>

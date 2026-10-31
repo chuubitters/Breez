@@ -83,6 +83,7 @@
     <Compile Include="Assets/Script/Backend/SerialPortAutoSelect.cs" />
     <Compile Include="Assets/Script/Backend/UI/GadgetSettingsScreen.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TMP_TextSelector_A.cs" />
+    <Compile Include="Assets/Script/FlowerSpawner.cs" />
     <Compile Include="Assets/Script/PlayerCollision.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/Benchmark01_UGUI.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/SimpleScript.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TextMeshSpawner.cs" />
     <Compile Include="Assets/Script/Backend/UI/LoginUI.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/VertexZoom.cs" />
+    <Compile Include="Assets/Script/BeeVisual.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/Benchmark02.cs" />
     <Compile Include="Assets/Script/PWGameManager.cs" />
     <Compile Include="Assets/Script/Thai/ThaiShapingTable.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Assets/Script/Backend/DeviceService.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TMP_TextSelector_B.cs" />
     <Compile Include="Assets/Script/RFAudioManager.cs" />
+    <Compile Include="Assets/Script/FlowerResultIcon.cs" />
     <Compile Include="Assets/Script/Backend/UI/GadgetStatusUI.cs" />
     <Compile Include="Assets/Script/UI/BreezUIPolish.cs" />
     <Compile Include="Assets/Script/Backend/GameDataRecorder.cs" />
@@ -144,6 +147,7 @@
     <Compile Include="Assets/Script/Backend/UI/AccountActions.cs" />
     <Compile Include="Assets/Script/Backend/BreezBackend.cs" />
     <Compile Include="Assets/Script/BFGameManager.cs" />
+    <Compile Include="Assets/Script/FlowerPickup.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TMP_TextInfoDebugTool.cs" />
   </ItemGroup>
   <ItemGroup>
