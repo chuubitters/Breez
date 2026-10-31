@@ -467,7 +467,7 @@ void loop()
   int loud = readLoudness();
   float over = loud - baseline - NOISE_GATE;
   float target = over <= 0 ? 0 : min(100.0f, over * 100.0f / FULL_SCALE);
-  level += (target - level) * (target > level ? 0.85f : 0.35f);   // ขาขึ้นเร็ว (ตอบสนองทันทีที่เป่า)
+  level += (target - level) * (target > level ? 0.85f : 0.6f);    // ขึ้นเร็ว ลงเร็ว (เป่าปุ๊บขึ้น หยุดปุ๊บลง)
   if (target == 0) baseline += (loud - baseline) * 0.01f;
   digitalWrite(LED_PIN, level > 30 ? LOW : HIGH);
 
