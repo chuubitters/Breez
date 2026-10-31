@@ -3265,7 +3265,7 @@ MonoBehaviour:
   loseText: "\u0E2B\u0E21\u0E14\u0E40\u0E27\u0E25\u0E32!"
   redBalloonPrefab: {fileID: 9120527297231347240, guid: f508a26cefeca499aa28856785e061c5, type: 3}
   blueBalloonPrefab: {fileID: 5519763689758801781, guid: 70ecadc45cc4745f78ccf26f89ff53e1, type: 3}
-  totalBalloons: 5
+  totalBalloons: 25
   timeLimit: 60
   breathThreshold: 50
   breathReceiver: {fileID: 1325516344}

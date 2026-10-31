@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b6db65ca8ab34a73823d49a5e8ff0e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointValue: 1
+  pointValue: 2
   inflateSpeed: 0.5
   maxScaleMultiplier: 2
   balloonSprites:
@@ -97,3 +97,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 7ef5f09cb6d53466ca47dabfc5564a80, type: 3}
   - {fileID: 21300000, guid: 6aa41f6adc4f74fa782a5f010564032b, type: 3}
   - {fileID: 21300000, guid: c45119699fd4c479aa37473d9333609a, type: 3}
+  animate: 1
+  bobAmount: 10
+  burstColor: {r: 0, g: 0, b: 0, a: 0}
