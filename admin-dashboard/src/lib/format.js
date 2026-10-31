@@ -11,11 +11,11 @@ export const MODE_COLOR = {
 
 /** คำอธิบายสั้นของแต่ละโหมด */
 export const MODE_INFO = {
-  'Power Release': 'เป่าลูกโป่งให้แตกครบก่อนหมดเวลา',
-  'Breathe & Focus': 'ควบคุมลมหายใจหลบสิ่งกีดขวาง',
-  'Calm Flow': 'หายใจออกยาวๆ ให้ดอกไม้บาน',
-  'Soundscape': 'หายใจเข้า 5 ออก 5 พร้อมเสียงธรรมชาติ',
-  'Quick Session': 'หายใจ 4-7-8 บนตัวเครื่อง',
+  'Power Release': 'เป่าลูกโป่งให้แตกครบทุกลูกภายในเวลาที่กำหนด',
+  'Breathe & Focus': 'ควบคุมลมหายใจเพื่อหลบสิ่งกีดขวาง',
+  'Calm Flow': 'หายใจออกยาวและสม่ำเสมอเพื่อให้ดอกไม้บาน',
+  'Soundscape': 'หายใจเข้า 5 วินาที ออก 5 วินาที พร้อมเสียงธรรมชาติ',
+  'Quick Session': 'ฝึกหายใจแบบ 4-7-8 บนอุปกรณ์ Breath Gadget',
 }
 
 export const MOODS = {
@@ -73,10 +73,10 @@ export function dayOfMonth(isoDate) {
 
 /** สถานะผู้เล่นจากวันที่ใช้งานล่าสุด */
 export function activity(lastActive) {
-  if (!lastActive) return { cls: '', text: 'ยังไม่เคยเล่น' }
+  if (!lastActive) return { cls: '', text: 'ยังไม่เคยใช้งาน' }
   const days = (Date.now() - new Date(lastActive).getTime()) / 864e5
-  if (days < 7) return { cls: 'on', text: 'ใช้งานใน 7 วัน' }
-  if (days < 30) return { cls: 'idle', text: 'หายไป 1–4 สัปดาห์' }
+  if (days < 7) return { cls: 'on', text: 'ใช้งานภายใน 7 วัน' }
+  if (days < 30) return { cls: 'idle', text: 'ไม่ได้ใช้งาน 1–4 สัปดาห์' }
   return { cls: '', text: 'ไม่ได้ใช้งานเกิน 30 วัน' }
 }
 
@@ -86,26 +86,26 @@ const sec1 = ms => (Number(ms || 0) / 1000).toFixed(1)
 export function sessionDetail(s) {
   switch (s.mode) {
     case 'Calm Flow':
-      if (s.flowers_grown > 0) return `ดอกไม้ ${s.flowers_grown} ดอก · ใหญ่สุด ${s.largest_flower_pct}% · เป่านานสุด ${sec1(s.longest_exhale_ms)} วิ`
-      if (s.flowers_grown === 0) return 'ยังไม่มีดอกไม้บาน'
+      if (s.flowers_grown > 0) return `ดอกไม้ ${s.flowers_grown} ดอก · ใหญ่สุด ${s.largest_flower_pct}% · เป่านานสุด ${sec1(s.longest_exhale_ms)} วินาที`
+      if (s.flowers_grown === 0) return 'ไม่มีดอกไม้บาน'
       return s.flame_out_count != null ? `เปลวไฟดับ ${s.flame_out_count} ครั้ง` : '—'
     case 'Power Release':
       if (s.balloons_total == null) return '—'
-      return `ลูกโป่ง ${s.balloons_popped}/${s.balloons_total} ลูก${s.balloons_popped >= s.balloons_total && s.balloons_total > 0 ? ' · สำเร็จ' : ''}`
+      return `ลูกโป่ง ${s.balloons_popped}/${s.balloons_total} ลูก${s.balloons_popped >= s.balloons_total && s.balloons_total > 0 ? ' · สำเร็จครบทุกลูก' : ''}`
     case 'Breathe & Focus':
       return s.obstacles_avoided != null ? `หลบสิ่งกีดขวาง ${s.obstacles_avoided} ชิ้น` : '—'
     case 'Soundscape': {
       const parts = []
       if (s.scene) parts.push(s.scene)
       if (s.breath_cycles > 0) parts.push(`หายใจครบ ${s.breath_cycles} รอบ`)
-      if (s.exhale_ms > 0) parts.push(`เป่า ${sec1(s.exhale_ms)} วิ`)
-      return parts.length ? parts.join(' · ') : 'ฝึกหายใจ 5-5 พร้อมเสียง'
+      if (s.exhale_ms > 0) parts.push(`หายใจออก ${sec1(s.exhale_ms)} วินาที`)
+      return parts.length ? parts.join(' · ') : 'ฝึกหายใจ 5-5 พร้อมเสียงธรรมชาติ'
     }
     case 'Quick Session': {
       const parts = []
       if (s.rounds != null) parts.push(`${s.rounds}/4 รอบ`)
-      if (s.blow_pct != null) parts.push(`เป่าได้ ${s.blow_pct}%`)
-      return parts.length ? parts.join(' · ') : 'ฝึกหายใจ 4-7-8 บนตัวเครื่อง'
+      if (s.blow_pct != null) parts.push(`หายใจออกได้ ${s.blow_pct}%`)
+      return parts.length ? parts.join(' · ') : 'ฝึกหายใจแบบ 4-7-8 บนอุปกรณ์'
     }
     default:
       return '—'

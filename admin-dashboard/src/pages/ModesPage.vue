@@ -37,15 +37,15 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
   </nav>
 
   <section class="kpis" :class="{ loading }">
-    <div class="kpi"><div class="label">จำนวนครั้ง</div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ data.cur.length ? Math.round(d.sessions / data.cur.length * 100) : 0 }}% ของทุกครั้ง · {{ MODE_INFO[tab] }}</div></div>
-    <div class="kpi"><div class="label">คนที่ฝึก</div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ totalPlayers ? Math.round(d.players / totalPlayers * 100) : 0 }}% ของคนที่ฝึกทั้งหมด</div></div>
+    <div class="kpi"><div class="label">จำนวนครั้ง</div><div class="value">{{ number(d.sessions) }}</div><div class="foot">{{ data.cur.length ? Math.round(d.sessions / data.cur.length * 100) : 0 }}% ของการฝึกทั้งหมด · {{ MODE_INFO[tab] }}</div></div>
+    <div class="kpi"><div class="label">ผู้ใช้ที่ฝึก</div><div class="value">{{ number(d.players) }}<small>คน</small></div><div class="foot">{{ totalPlayers ? Math.round(d.players / totalPlayers * 100) : 0 }}% ของผู้ใช้ทั้งหมด</div></div>
     <div class="kpi"><div class="label">เวลาต่อครั้ง (มัธยฐาน)</div><div class="value">{{ d.sessions ? secText(d.medianDuration) : '—' }}</div><div class="foot">เฉลี่ย {{ d.sessions ? secText(d.avgDuration) : '—' }}</div></div>
-    <div class="kpi"><div class="label">ประวัติ</div><div class="value" style="font-size:15px;padding-top:8px"><button class="btn-link" @click="emit('navigate', 'sessions', { mode: tab })">ดูผลการเล่นทุกครั้ง →</button></div></div>
+    <div class="kpi"><div class="label">ประวัติการเล่น</div><div class="value" style="font-size:15px;padding-top:8px"><button class="btn-link" @click="emit('navigate', 'sessions', { mode: tab })">ดูผลการเล่นทั้งหมด →</button></div></div>
   </section>
 
   <template v-if="d.sessions">
     <section class="card" :class="{ loading }">
-      <div class="card-head"><h2>ตัวชี้วัดของเกม</h2><p>ใช้ดูว่าเกมยาก/ง่ายเกินไปหรือไม่</p></div>
+      <div class="card-head"><h2>ตัวชี้วัดของเกม</h2><p>ใช้ประเมินว่าระดับความยากของเกมเหมาะสมหรือไม่</p></div>
       <div class="metrics">
         <div v-for="m in d.metrics" :key="m.label" class="metric">
           <div class="label">{{ m.label }}</div>
@@ -63,5 +63,5 @@ const d = computed(() => modeDetail(tab.value, data.value.cur))
       </article>
     </section>
   </template>
-  <section v-else class="card"><p class="empty">ยังไม่มีการเล่น {{ tab }} ในช่วงเวลานี้</p></section>
+  <section v-else class="card"><p class="empty">ยังไม่มีข้อมูลการเล่นโหมด {{ tab }} ในช่วงเวลานี้</p></section>
 </template>

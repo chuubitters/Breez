@@ -14,6 +14,6 @@ const total = computed(() => props.data.reduce((a, d) => a + d.value, 0))
       <span class="v">{{ percent ? (total ? Math.round(d.value / total * 100) : 0) + '%' : d.value.toLocaleString('th-TH') + unit }}</span>
       <span v-if="d.extra" class="extra">{{ d.extra }}</span>
     </div>
-    <p v-if="!data.length || !total" class="muted small">ยังไม่มีข้อมูล</p>
+    <p v-if="!data.length || !total" class="muted small">ยังไม่มีข้อมูลในช่วงเวลานี้</p>
   </div>
 </template>

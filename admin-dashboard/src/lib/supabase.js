@@ -21,9 +21,9 @@ export async function rpc(name, args = {}) {
 
 export function translateError(msg = '') {
   if (/Invalid login credentials/i.test(msg)) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-  if (/Email not confirmed/i.test(msg)) return 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล'
-  if (/owner only/i.test(msg)) return 'ส่วนนี้เฉพาะเจ้าของระบบ (Owner) เท่านั้น'
-  if (/staff only/i.test(msg)) return 'บัญชีนี้ไม่มีสิทธิ์เข้าหลังบ้าน'
-  if (/Failed to fetch|NetworkError/i.test(msg)) return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ต'
+  if (/Email not confirmed/i.test(msg)) return 'บัญชีนี้ยังไม่ได้ยืนยันอีเมล กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ'
+  if (/owner only/i.test(msg)) return 'ส่วนนี้สำหรับ Super Admin เท่านั้น'
+  if (/staff only/i.test(msg)) return 'บัญชีนี้ไม่มีสิทธิ์เข้าใช้ระบบผู้ดูแล'
+  if (/Failed to fetch|NetworkError/i.test(msg)) return 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง'
   return msg
 }

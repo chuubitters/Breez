@@ -51,15 +51,15 @@ watch(() => props.modeFilter, v => { if (v) mode.value = v })
         <option value="">ทุกโหมด</option>
         <option v-for="m in MODES" :key="m" :value="m">{{ m }}</option>
       </select>
-      <input v-model="search" class="input search" placeholder="ค้นหาชื่อผู้เล่น" />
-      <span v-if="playerFilter" class="chip">ผู้เล่น: {{ playerFilter.name }} <button class="btn-link" @click="emit('clear-player')">ล้าง</button></span>
+      <input v-model="search" class="input search" placeholder="ค้นหาชื่อผู้ใช้" />
+      <span v-if="playerFilter" class="chip">ผู้ใช้: {{ playerFilter.name }} <button class="btn-link" @click="emit('clear-player')">ล้าง</button></span>
       <span class="spacer"></span>
-      <button class="btn" :disabled="exporting" @click="exportCsv">{{ exporting ? 'กำลังส่งออก…' : 'ส่งออก CSV' }}</button>
+      <button class="btn" :disabled="exporting" @click="exportCsv">{{ exporting ? 'กำลังส่งออกไฟล์…' : 'ส่งออก CSV' }}</button>
     </div>
     <p v-if="list.error.value" class="banner err">{{ list.error.value }}</p>
     <div class="table-wrap" :class="{ loading: list.loading.value }">
       <table>
-        <thead><tr><th>เวลา</th><th>ผู้เล่น</th><th>โหมด</th><th>ผลการเล่น</th><th class="r">คะแนน</th><th class="r">ระยะเวลา</th></tr></thead>
+        <thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>โหมด</th><th>ผลการเล่น</th><th class="r">คะแนน</th><th class="r">ระยะเวลา</th></tr></thead>
         <tbody>
           <tr v-for="s in list.rows.value" :key="s.session_id">
             <td class="muted" style="white-space:nowrap">{{ when(s.played_at) }}</td>
@@ -69,7 +69,7 @@ watch(() => props.modeFilter, v => { if (v) mode.value = v })
             <td class="r num">{{ s.score || '—' }}</td>
             <td class="r num">{{ duration(s.duration) }}</td>
           </tr>
-          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="6" class="empty">ไม่พบผลการเล่นในเงื่อนไขนี้</td></tr>
+          <tr v-if="!list.loading.value && !list.rows.value.length"><td colspan="6" class="empty">ไม่พบข้อมูลที่ตรงกับเงื่อนไขที่เลือก</td></tr>
         </tbody>
       </table>
     </div>

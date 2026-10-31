@@ -24,13 +24,13 @@ const ICON = {
 }
 const allNav = [
   { group: 'ข้อมูลการฝึก' },
-  { id: 'overview', label: 'ภาพรวม', desc: 'ตัวเลขหลักและจุดที่ควรปรับในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
-  { id: 'modes', label: 'แต่ละโหมด', desc: 'ตัวชี้วัดความยาก/ความสนุกของแต่ละเกม ใช้ปรับสมดุลเกม', page: ModesPage, period: true },
-  { id: 'sessions', label: 'ประวัติการเล่น', desc: 'ผลการเล่นทุกครั้ง ค้นหา กรอง และส่งออก CSV', page: SessionsPage, period: true },
-  { id: 'moods', label: 'อารมณ์', desc: 'จำนวนคนในแต่ละอารมณ์และภาพรวมความเครียด', page: MoodsPage, period: true, owner: true },
+  { id: 'overview', label: 'ภาพรวม', desc: 'สรุปข้อมูลสำคัญและประเด็นที่ควรตรวจสอบในช่วงเวลาที่เลือก', page: OverviewPage, period: true },
+  { id: 'modes', label: 'ข้อมูลแต่ละโหมด', desc: 'ตัวชี้วัดของแต่ละเกม สำหรับใช้ปรับระดับความยากให้เหมาะสม', page: ModesPage, period: true },
+  { id: 'sessions', label: 'ประวัติการเล่น', desc: 'ผลการเล่นทั้งหมด พร้อมค้นหา กรองข้อมูล และส่งออกไฟล์ CSV', page: SessionsPage, period: true },
+  { id: 'moods', label: 'ข้อมูลอารมณ์', desc: 'จำนวนผู้ใช้แยกตามอารมณ์และภาพรวมความเครียด', page: MoodsPage, period: true, owner: true },
   { group: 'ระบบ' },
-  { id: 'devices', label: 'อุปกรณ์', desc: 'สถานะ Breath Gadget และแบตเตอรี่', page: DevicesPage },
-  { id: 'staff', label: 'จัดการแอดมิน', desc: 'เพิ่มแอดมินและกำหนดสิทธิ์ Super Admin / Admin', page: StaffPage, owner: true },
+  { id: 'devices', label: 'อุปกรณ์', desc: 'สถานะการเชื่อมต่อและแบตเตอรี่ของ Breath Gadget', page: DevicesPage },
+  { id: 'staff', label: 'จัดการแอดมิน', desc: 'เพิ่มแอดมินและกำหนดสิทธิ์การใช้งาน', page: StaffPage, owner: true },
 ]
 const nav = computed(() => allNav.filter(n => !n.owner || isOwner.value))
 const pages = computed(() => nav.value.filter(n => n.id))
@@ -100,7 +100,7 @@ onBeforeUnmount(() => window.removeEventListener('hashchange', onHash))
           <div v-if="current.period" class="seg" role="group" aria-label="ช่วงเวลา">
             <button v-for="p in PERIODS" :key="String(p.v)" :class="{ on: days === p.v }" @click="setDays(p.v)">{{ p.t }}</button>
           </div>
-          <button class="btn" title="โหลดข้อมูลใหม่" @click="refresh">รีเฟรช</button>
+          <button class="btn" title="โหลดข้อมูลล่าสุด" @click="refresh">อัปเดตข้อมูล</button>
         </div>
       </header>
       <div class="content">

@@ -146,14 +146,14 @@ export function modeDetail(mode, all) {
     const maxTotal = Math.max(1, ...g.map(r => r.balloons_total))
     base.completionPct = pctOf(done.length, g.length)
     base.metrics = [
-      { label: 'เล่นจบครบทุกลูก', value: `${base.completionPct}%`, hint: `${done.length} จาก ${g.length} ครั้ง` },
+      { label: 'อัตราการเป่าครบทุกลูก', value: `${base.completionPct}%`, hint: `${done.length} จาก ${g.length} ครั้ง` },
       { label: 'ลูกโป่งที่เป่าแตก (เฉลี่ย)', value: `${avg(g.map(r => r.balloons_popped)).toFixed(1)} / ${avg(g.map(r => r.balloons_total)).toFixed(1)}` },
-      { label: 'เวลาที่ใช้ตอนเล่นจบ (เฉลี่ย)', value: done.length ? secText(avg(done.map(r => r.duration))) : '—' },
+      { label: 'เวลาเฉลี่ยที่ใช้จนเป่าครบ', value: done.length ? secText(avg(done.map(r => r.duration))) : '—' },
       { label: 'คะแนนเฉลี่ย', value: avg(rs.map(r => r.score || 0)).toFixed(1) },
     ]
     base.charts = [{
       title: 'จำนวนลูกโป่งที่เป่าแตกต่อครั้ง',
-      note: 'ถ้ากองอยู่ฝั่งน้อย แปลว่าเกมยากหรือเวลาไม่พอ',
+      note: 'หากส่วนใหญ่อยู่ฝั่งจำนวนน้อย แสดงว่าเกมอาจยากเกินไปหรือเวลาไม่เพียงพอ',
       data: histogram(g.map(r => r.balloons_popped), Array.from({ length: maxTotal + 1 }, (_, i) => ({ label: `${i} ลูก`, test: v => v === i }))),
     }]
   }
@@ -163,22 +163,22 @@ export function modeDetail(mode, all) {
     const early = rs.filter(r => (r.duration || 0) < 15)
     base.earlyPct = pctOf(early.length, rs.length)
     base.metrics = [
-      { label: 'ข้ามสิ่งกีดขวาง (เฉลี่ย / มัธยฐาน)', value: `${avg(ob).toFixed(1)} / ${median(ob)}` },
-      { label: 'สถิติสูงสุด', value: `${Math.max(...ob)} ชิ้น` },
-      { label: 'อยู่รอดเฉลี่ย', value: secText(avg(durations)) },
-      { label: 'ชนภายใน 15 วินาทีแรก', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
+      { label: 'สิ่งกีดขวางที่ผ่านได้ (เฉลี่ย / มัธยฐาน)', value: `${avg(ob).toFixed(1)} / ${median(ob)}` },
+      { label: 'ผ่านได้มากที่สุด', value: `${Math.max(...ob)} ชิ้น` },
+      { label: 'ระยะเวลาเล่นเฉลี่ย', value: secText(avg(durations)) },
+      { label: 'ชนสิ่งกีดขวางภายใน 15 วินาทีแรก', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
     ]
     base.charts = [
       {
-        title: 'จำนวนสิ่งกีดขวางที่ข้ามได้ต่อครั้ง',
-        note: 'ช่วงที่คนส่วนใหญ่ชน = จุดที่ความยากเพิ่มเร็วเกินไป',
+        title: 'จำนวนสิ่งกีดขวางที่ผ่านได้ต่อครั้ง',
+        note: 'ช่วงที่ผู้ใช้ส่วนใหญ่ชน คือจุดที่ระดับความยากอาจเพิ่มขึ้นเร็วเกินไป',
         data: histogram(ob, [
           { label: '0', test: v => v === 0 }, { label: '1–2', test: v => v >= 1 && v <= 2 },
           { label: '3–5', test: v => v >= 3 && v <= 5 }, { label: '6–10', test: v => v >= 6 && v <= 10 },
           { label: '11–20', test: v => v >= 11 && v <= 20 }, { label: '21+', test: v => v >= 21 },
         ]),
       },
-      { title: 'อยู่รอดนานเท่าไร', data: histogram(durations, secBuckets([15, 30, 60, 120])) },
+      { title: 'ระยะเวลาที่เล่นได้ต่อครั้ง', data: histogram(durations, secBuckets([15, 30, 60, 120])) },
     ]
   }
 
@@ -188,23 +188,23 @@ export function modeDetail(mode, all) {
     const exhale = g.map(r => (r.longest_exhale_ms ?? 0) / 1000)
     base.fullBloomPct = pctOf(full.length, g.length)
     base.metrics = [
-      { label: 'ดอกไม้ต่อครั้ง (เฉลี่ย)', value: avg(g.map(r => r.flowers_grown)).toFixed(1) },
-      { label: 'บานเต็ม 100% อย่างน้อย 1 ดอก', value: `${base.fullBloomPct}%`, hint: `${full.length} จาก ${g.length} ครั้ง` },
-      { label: 'หายใจออกนานสุด (เฉลี่ย)', value: `${avg(exhale).toFixed(1)} วิ` },
+      { label: 'จำนวนดอกไม้ต่อครั้ง (เฉลี่ย)', value: avg(g.map(r => r.flowers_grown)).toFixed(1) },
+      { label: 'มีดอกไม้บานเต็ม 100% อย่างน้อย 1 ดอก', value: `${base.fullBloomPct}%`, hint: `${full.length} จาก ${g.length} ครั้ง` },
+      { label: 'หายใจออกนานที่สุด (เฉลี่ย)', value: `${avg(exhale).toFixed(1)} วินาที` },
       { label: 'ไม่มีดอกไม้บานเลย', value: `${pctOf(g.filter(r => r.flowers_grown === 0).length, g.length)}%` },
     ]
     base.charts = [
       {
-        title: 'หายใจออกนานสุดต่อครั้ง',
-        note: 'ใช้ตั้งค่าเวลาที่ต้องเป่าให้ดอกไม้บานเต็ม',
+        title: 'หายใจออกนานที่สุดในแต่ละครั้ง',
+        note: 'ใช้ประกอบการกำหนดระยะเวลาหายใจออกที่ทำให้ดอกไม้บานเต็ม',
         data: histogram(exhale, [
-          { label: '< 2 วิ', test: v => v < 2 }, { label: '2–4 วิ', test: v => v >= 2 && v < 4 },
-          { label: '4–6 วิ', test: v => v >= 4 && v < 6 }, { label: '6–8 วิ', test: v => v >= 6 && v < 8 },
-          { label: '8+ วิ', test: v => v >= 8 },
+          { label: '< 2 วินาที', test: v => v < 2 }, { label: '2–4 วินาที', test: v => v >= 2 && v < 4 },
+          { label: '4–6 วินาที', test: v => v >= 4 && v < 6 }, { label: '6–8 วินาที', test: v => v >= 6 && v < 8 },
+          { label: '8+ วินาที', test: v => v >= 8 },
         ]),
       },
       {
-        title: 'ระยะเวลาที่เล่นจริง',
+        title: 'ระยะเวลาที่ฝึกจริง',
         data: histogram(durations, [
           { label: '< 1 นาที', test: v => v < 55 }, { label: '≈ 1 นาที', test: v => v >= 55 && v < 100 },
           { label: '≈ 2 นาที', test: v => v >= 100 && v < 160 }, { label: '≈ 3 นาที+', test: v => v >= 160 },
@@ -223,18 +223,18 @@ export function modeDetail(mode, all) {
     const early = rs.filter(r => (r.duration || 0) < 60)
     base.earlyPct = pctOf(early.length, rs.length)
     base.metrics = [
-      { label: 'เลิกภายใน 1 นาที', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
+      { label: 'ออกก่อนครบ 1 นาที', value: `${base.earlyPct}%`, hint: `${early.length} ครั้ง` },
       { label: 'รอบหายใจต่อครั้ง (เฉลี่ย)', value: avg(rs.map(r => Math.max(0, r.breath_cycles ?? 0))).toFixed(1) },
-      { label: 'เวลาที่เป่าต่อครั้ง (เฉลี่ย)', value: `${(avg(rs.map(r => Math.max(0, r.exhale_ms ?? 0))) / 1000).toFixed(1)} วิ` },
+      { label: 'เวลาหายใจออกต่อครั้ง (เฉลี่ย)', value: `${(avg(rs.map(r => Math.max(0, r.exhale_ms ?? 0))) / 1000).toFixed(1)} วินาที` },
       { label: 'เวลาต่อครั้ง (มัธยฐาน)', value: secText(base.medianDuration) },
     ]
     base.charts = [
       {
-        title: 'แยกตามฉาก (จำนวนครั้ง)',
+        title: 'จำนวนครั้งแยกตามฉาก',
         data: [...scenes.entries()].sort((a, b) => b[1].length - a[1].length)
           .map(([k, v]) => ({ label: k, value: v.length, extra: `เฉลี่ย ${secText(avg(v.map(r => r.duration || 0)))}` })),
       },
-      { title: 'ฝึกนานเท่าไรต่อครั้ง', note: 'ถ้าส่วนใหญ่สั้นมาก ลองดูว่าเสียง/ภาพทำให้อยู่ต่อได้หรือไม่', data: histogram(durations, secBuckets([60, 180, 300, 600])) },
+      { title: 'ระยะเวลาที่ฝึกต่อครั้ง', note: 'หากส่วนใหญ่ฝึกในระยะเวลาสั้น ควรตรวจสอบว่าเสียงและภาพช่วยให้ผู้ใช้ฝึกต่อเนื่องได้หรือไม่', data: histogram(durations, secBuckets([60, 180, 300, 600])) },
     ]
   }
 
@@ -244,14 +244,14 @@ export function modeDetail(mode, all) {
     const blow = rs.filter(r => r.blow_pct != null).map(r => r.blow_pct)
     base.completionPct = pctOf(done.length, g.length)
     base.metrics = [
-      { label: 'ฝึกครบ 4 รอบ', value: g.length ? `${base.completionPct}%` : '—', hint: g.length ? `${done.length} จาก ${g.length} ครั้ง` : '' },
-      { label: 'เป่าได้ตอนหายใจออก (เฉลี่ย)', value: blow.length ? `${Math.round(avg(blow))}%` : '—', hint: 'สัดส่วนเวลาที่เป่าจริงในช่วงหายใจออก 8 วิ' },
-      { label: 'ครั้งต่อผู้เล่น', value: (rs.length / Math.max(1, base.players)).toFixed(1) },
+      { label: 'อัตราการฝึกครบ 4 รอบ', value: g.length ? `${base.completionPct}%` : '—', hint: g.length ? `${done.length} จาก ${g.length} ครั้ง` : '' },
+      { label: 'สัดส่วนการหายใจออกที่ตรวจจับได้ (เฉลี่ย)', value: blow.length ? `${Math.round(avg(blow))}%` : '—', hint: 'สัดส่วนเวลาที่ตรวจจับลมหายใจได้ในช่วงหายใจออก 8 วินาที' },
+      { label: 'จำนวนครั้งต่อผู้ใช้', value: (rs.length / Math.max(1, base.players)).toFixed(1) },
       { label: 'เวลาต่อครั้ง (เฉลี่ย)', value: secText(base.avgDuration) },
     ]
     base.charts = [{
-      title: 'เป่าได้กี่ % ตอนหายใจออก',
-      note: 'ต่ำ = ผู้ใช้อาจไม่รู้ว่าต้องเป่าใส่ไมค์ หรือไมค์ไม่ไวพอ',
+      title: 'สัดส่วนการหายใจออกที่ตรวจจับได้',
+      note: 'หากค่าต่ำ ผู้ใช้อาจยังไม่ทราบว่าต้องหายใจออกใส่ไมโครโฟน หรือไมโครโฟนอาจมีความไวไม่เพียงพอ',
       data: histogram(blow, [
         { label: '0–24%', test: v => v < 25 }, { label: '25–49%', test: v => v >= 25 && v < 50 },
         { label: '50–74%', test: v => v >= 50 && v < 75 }, { label: '75–100%', test: v => v >= 75 },
@@ -262,7 +262,7 @@ export function modeDetail(mode, all) {
 }
 
 function secBuckets(edges) {
-  const fmt = s => (s >= 60 ? `${s / 60} นาที` : `${s} วิ`)
+  const fmt = s => (s >= 60 ? `${s / 60} นาที` : `${s} วินาที`)
   const out = [{ label: `< ${fmt(edges[0])}`, test: v => v < edges[0] }]
   for (let i = 0; i < edges.length - 1; i++) {
     const a = edges[i], b = edges[i + 1]
@@ -274,8 +274,8 @@ function secBuckets(edges) {
 
 export function secText(s) {
   s = Math.round(s || 0)
-  if (s < 60) return `${s} วิ`
-  return `${Math.floor(s / 60)} นาที ${s % 60 ? (s % 60) + ' วิ' : ''}`.trim()
+  if (s < 60) return `${s} วินาที`
+  return `${Math.floor(s / 60)} นาที ${s % 60 ? (s % 60) + ' วินาที' : ''}`.trim()
 }
 
 // ---------- ข้อสังเกต (เรียงสำคัญก่อน) ----------
@@ -295,45 +295,45 @@ export function findings(cur, prev) {
   const T = THRESHOLDS
   const out = []
   const s = summarize(cur), p = summarize(prev)
-  if (!cur.length) return [{ level: 'info', text: 'ยังไม่มีการเล่นในช่วงเวลานี้' }]
+  if (!cur.length) return [{ level: 'info', text: 'ยังไม่มีข้อมูลการฝึกในช่วงเวลานี้' }]
 
   const enough = m => m.sessions >= T.minSessions
   const d = Object.fromEntries(MODES.map(m => [m, modeDetail(m, cur)]))
 
   const pr = d['Power Release']
   if (enough(pr) && pr.completionPct < T.powerCompletionLow)
-    out.push({ level: 'warn', mode: 'Power Release', text: `เล่นจบครบทุกลูกเพียง ${pr.completionPct}% — อาจยากเกินไป ลองลดจำนวนลูกโป่งหรือเพิ่มเวลา` })
+    out.push({ level: 'warn', mode: 'Power Release', text: `ผู้ใช้เป่าครบทุกลูกเพียง ${pr.completionPct}% ซึ่งอาจยากเกินไป ควรพิจารณาลดจำนวนลูกโป่งหรือเพิ่มเวลา` })
   if (enough(pr) && pr.completionPct > T.powerCompletionHigh)
-    out.push({ level: 'info', mode: 'Power Release', text: `เล่นจบครบ ${pr.completionPct}% — อาจง่ายเกินไป ลองเพิ่มลูกโป่งหรือลดเวลา` })
+    out.push({ level: 'info', mode: 'Power Release', text: `ผู้ใช้เป่าครบทุกลูก ${pr.completionPct}% ซึ่งอาจง่ายเกินไป ควรพิจารณาเพิ่มจำนวนลูกโป่งหรือลดเวลา` })
 
   const bf = d['Breathe & Focus']
   if (enough(bf) && bf.earlyPct > T.focusEarlyHigh)
-    out.push({ level: 'warn', mode: 'Breathe & Focus', text: `${bf.earlyPct}% ชนภายใน 15 วินาทีแรก — ช่วงเริ่มเกมอาจยากเกินไป` })
+    out.push({ level: 'warn', mode: 'Breathe & Focus', text: `${bf.earlyPct}% ของการเล่นชนสิ่งกีดขวางภายใน 15 วินาทีแรก ช่วงเริ่มต้นเกมอาจยากเกินไป` })
 
   const cf = d['Calm Flow']
   if (enough(cf) && cf.fullBloomPct < T.calmFullBloomLow)
-    out.push({ level: 'warn', mode: 'Calm Flow', text: `บานเต็ม 100% ได้เพียง ${cf.fullBloomPct}% ของครั้งที่เล่น — ลองลดเวลาที่ต้องเป่าให้บานเต็ม` })
+    out.push({ level: 'warn', mode: 'Calm Flow', text: `ดอกไม้บานเต็ม 100% เพียง ${cf.fullBloomPct}% ของการเล่นทั้งหมด ควรพิจารณาลดระยะเวลาหายใจออกที่กำหนด` })
 
   const ss = d['Soundscape']
   if (enough(ss) && ss.earlyPct > T.soundEarlyHigh)
-    out.push({ level: 'warn', mode: 'Soundscape', text: `${ss.earlyPct}% เลิกภายใน 1 นาที — ผู้เล่นอาจไม่เข้าใจจังหวะหายใจ หรือยังไม่อิน` })
+    out.push({ level: 'warn', mode: 'Soundscape', text: `${ss.earlyPct}% ของผู้ใช้ออกก่อนครบ 1 นาที ผู้ใช้อาจยังไม่เข้าใจจังหวะการหายใจ หรือยังไม่รู้สึกผ่อนคลาย` })
 
   const qs = d['Quick Session']
   if (enough(qs) && qs.completionPct < T.quickCompletionLow)
-    out.push({ level: 'warn', mode: 'Quick Session', text: `ฝึกครบ 4 รอบเพียง ${qs.completionPct}% — ลองดูว่าหยุดกลางคันช่วงไหน` })
+    out.push({ level: 'warn', mode: 'Quick Session', text: `ผู้ใช้ฝึกครบ 4 รอบเพียง ${qs.completionPct}% ควรตรวจสอบว่าผู้ใช้หยุดฝึกในช่วงใด` })
 
   const unused = MODES.filter(m => d[m].sessions === 0)
   if (unused.length && unused.length < MODES.length)
-    out.push({ level: 'info', text: `ไม่มีใครเล่น ${unused.join(', ')} ในช่วงนี้` })
+    out.push({ level: 'info', text: `ยังไม่มีผู้ใช้ฝึกโหมด ${unused.join(', ')} ในช่วงเวลานี้` })
 
   if (s.players >= T.minSessions && s.returningPct < T.returningLow)
-    out.push({ level: 'warn', text: `ผู้เล่นกลับมาเล่นซ้ำ (มากกว่า 1 วัน) เพียง ${s.returningPct}%` })
+    out.push({ level: 'warn', text: `ผู้ใช้ที่กลับมาฝึกซ้ำ (มากกว่า 1 วัน) มีเพียง ${s.returningPct}%` })
 
   const ch = changePct(s.sessions, p.sessions)
   if (ch !== null && p.sessions >= T.minSessions && ch <= -30)
-    out.push({ level: 'warn', text: `จำนวนครั้งที่เล่นลดลง ${Math.abs(ch)}% จากช่วงก่อนหน้า` })
+    out.push({ level: 'warn', text: `จำนวนครั้งที่ฝึกลดลง ${Math.abs(ch)}% เมื่อเทียบกับช่วงก่อนหน้า` })
 
-  if (!out.length) out.push({ level: 'ok', text: 'ยังไม่พบจุดที่ต้องปรับในช่วงนี้' })
+  if (!out.length) out.push({ level: 'ok', text: 'ยังไม่พบประเด็นที่ต้องปรับปรุงในช่วงเวลานี้' })
   return out
 }
 
@@ -370,9 +370,9 @@ export function moodSummary(rows) {
 export function moodMessages(m, periodText) {
   if (!m.people) return []
   const out = []
-  if (m.tensePct > 0) out.push(`${periodText} ผู้ใช้ Breez ${m.tensePct}% บอกว่ารู้สึกเครียดหรือหงุดหงิด ถ้าวันนี้หนักเหมือนกัน ลองพักหายใจช้าๆ กับ Breez สัก 1 นาทีนะ`)
-  if (m.goodPct > 0) out.push(`${periodText} ผู้ใช้ Breez ${m.goodPct}% กำลังรู้สึกดี มาส่งพลังบวกต่อให้เพื่อนที่กำลังเหนื่อยกัน`)
-  out.push(`มีคน ${m.people} คนมาบันทึกอารมณ์กับ Breez ${periodText} คุณไม่ได้เหนื่อยอยู่คนเดียว มาหายใจไปด้วยกัน`)
+  if (m.tensePct > 0) out.push(`ในช่วง${periodText} ผู้ใช้ Breez ${m.tensePct}% รู้สึกเครียดหรือหงุดหงิด หากวันนี้คุณรู้สึกเหนื่อยเช่นกัน ขอเชิญพักหายใจช้า ๆ กับ Breez สัก 1 นาที`)
+  if (m.goodPct > 0) out.push(`ในช่วง${periodText} ผู้ใช้ Breez ${m.goodPct}% รู้สึกดี ร่วมส่งต่อกำลังใจให้เพื่อนที่กำลังเหนื่อยกัน`)
+  out.push(`ในช่วง${periodText} มีผู้ใช้ ${m.people} คนบันทึกอารมณ์กับ Breez คุณไม่ได้เหนื่อยอยู่คนเดียว มาฝึกหายใจไปด้วยกัน`)
   return out
 }
 
@@ -412,7 +412,7 @@ export function byWeekday(rows) {
 }
 // ระยะเวลาต่อครั้ง
 export function durationBuckets(rows) {
-  const b = [['< 30 วิ', 30], ['30–60 วิ', 60], ['1–2 นาที', 120], ['2–5 นาที', 300], ['5 นาที+', Infinity]]
+  const b = [['< 30 วินาที', 30], ['30–60 วินาที', 60], ['1–2 นาที', 120], ['2–5 นาที', 300], ['5 นาที+', Infinity]]
   const n = b.map(() => 0)
   for (const r of rows) n[b.findIndex(([, max]) => (r.duration || 0) < max)]++
   return b.map(([label], i) => ({ label, value: n[i] }))
@@ -421,7 +421,7 @@ export function durationBuckets(rows) {
 export function frequencyBuckets(rows) {
   const per = new Map()
   for (const r of rows) per.set(r.user_id, (per.get(r.user_id) || 0) + 1)
-  const b = [['1 ครั้ง', 1, 1], ['2–5 ครั้ง', 2, 5], ['6–20 ครั้ง', 6, 20], ['21 ครั้งขึ้นไป', 21, Infinity]]
+  const b = [['1 ครั้ง', 1, 1], ['2–5 ครั้ง', 2, 5], ['6–20 ครั้ง', 6, 20], ['มากกว่า 20 ครั้ง', 21, Infinity]]
   return b.map(([label, lo, hi]) => ({ label, value: [...per.values()].filter(v => v >= lo && v <= hi).length }))
 }
 // คนที่ฝึกต่อวัน (ไม่ซ้ำ)
