@@ -17,16 +17,26 @@ public class FlowerSpawner : MonoBehaviour
     {
         public string id = "pink";
         public string label = "ดอกสีชมพู";
-        public Color color = new Color32(0xF2, 0xA6, 0xBC, 255);
+        public Color color = new Color32(0xF2, 0xBD, 0xC9, 255);
         public int points = 10;
         [Range(0f, 1f)] public float weight = 0.6f;
     }
 
+    public static FlowerType[] DefaultTypes() => new[]
+    {
+        new FlowerType { id = "pink",   label = "ดอกสีชมพู",  color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
+        new FlowerType { id = "yellow", label = "ดอกสีเหลือง", color = new Color32(0xF7, 0xDC, 0x8C, 255), points = 20, weight = 0.3f },
+        new FlowerType { id = "purple", label = "ดอกสีม่วง",  color = new Color32(0xD3, 0xC2, 0xEC, 255), points = 50, weight = 0.1f },
+    };
+
+    /// <summary>สีเกสรกลางดอก (โทนครีม/เหลืองอ่อน)</summary>
+    public static Color CenterColor(string id) => id == "yellow" ? (Color)new Color32(0xF0, 0xBE, 0x6E, 255) : new Color32(0xFF, 0xF1, 0xB8, 255);
+
     public FlowerType[] types =
     {
-        new FlowerType { id = "pink",   label = "ดอกสีชมพู",  color = new Color32(0xF2, 0xA6, 0xBC, 255), points = 10, weight = 0.6f },
-        new FlowerType { id = "yellow", label = "ดอกสีเหลือง", color = new Color32(0xF6, 0xCF, 0x4A, 255), points = 20, weight = 0.3f },
-        new FlowerType { id = "purple", label = "ดอกสีม่วง",  color = new Color32(0xA8, 0x8B, 0xD8, 255), points = 50, weight = 0.1f },
+        new FlowerType { id = "pink",   label = "ดอกสีชมพู",  color = new Color32(0xF2, 0xBD, 0xC9, 255), points = 10, weight = 0.6f },
+        new FlowerType { id = "yellow", label = "ดอกสีเหลือง", color = new Color32(0xF7, 0xDC, 0x8C, 255), points = 20, weight = 0.3f },
+        new FlowerType { id = "purple", label = "ดอกสีม่วง",  color = new Color32(0xD3, 0xC2, 0xEC, 255), points = 50, weight = 0.1f },
     };
 
     [Header("ภาพ (ตั้งจากเมนู)")]
@@ -64,6 +74,8 @@ public class FlowerSpawner : MonoBehaviour
         spawnX = cx + half * aspect + flowerSize;
         killX = cx - half * aspect - flowerSize * 2f;
         lastY = cy;
+        // ดอกไม้ต้องอยู่หน้าพื้นหลัง (Canvas พื้นหลัง sortingOrder 0)
+        if (sortingOrder < 1) sortingOrder = 1;
     }
 
     void Update()

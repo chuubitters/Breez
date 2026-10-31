@@ -145,8 +145,8 @@ public static class BreezBreathFocusRestyle
                 var icon = Img(row.transform, "Flower_" + ft.id, BreezBreathFocusBee.PetalsSprite, ft.color);
                 icon.preserveAspect = true;
                 Place(icon.rectTransform, x - 70, 0, 92, 92);
-                var center = Img(icon.transform, "Center", BreezBreathFocusBee.CenterSprite, ft.id == "yellow" ? (Color)new Color32(0xE0, 0x8A, 0x2E, 255) : new Color32(0xFF, 0xE3, 0x7A, 255));
-                Place(center.rectTransform, 0, 0, 34, 34);
+                var center = Img(icon.transform, "Center", BreezBreathFocusBee.CenterSprite, FlowerSpawner.CenterColor(ft.id));
+                Place(center.rectTransform, 0, 0, 28, 28);
                 icon.gameObject.AddComponent<FlowerResultIcon>().delay = 0.25f + i * 0.18f;
                 counts[i] = Left(Text(row.transform, "Count_" + ft.id, "0", bold, 50, Ink, 0, 14, 160, 60), x - 12);
                 Left(Text(row.transform, "Points_" + ft.id, $"{ft.points} คะแนน/ดอก", regular, 22, Grey, 0, -30, 200, 32), x - 12);
