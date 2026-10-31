@@ -52,7 +52,7 @@ public class FlowerSpawner : MonoBehaviour
     [Header("การเกิด")]
     public float spawnInterval = 1.15f;
     public float moveSpeed = 3.6f;
-    public float flowerSize = 0.9f;          // ขนาด (world unit)
+    public float flowerSize = 1.3f;          // ขนาด (world unit)
     [Tooltip("ระยะห่างจากขอบบน/ล่างของจอ")]
     public float edgeMargin = 0.9f;
     [Tooltip("ความสูงเปลี่ยนได้มากสุดต่อดอก")]
