@@ -10,6 +10,9 @@ public static class BreezConfig
     public const string LoginScene = "Login";
     public const string HomeScene = "Home";
 
+    // ต้อง login ก่อนเล่นทุกหน้า (ยกเว้นหน้า Login) — ดู LoginGate.cs
+    public const bool RequireLogin = true;
+
     // ส่งสถานะอุปกรณ์ทุกกี่วินาที (หลังบ้านถือว่าออนไลน์ถ้าอัปเดตภายใน 5 นาที)
     public const float DeviceHeartbeatSeconds = 60f;
 }
