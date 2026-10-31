@@ -30,7 +30,7 @@ public class FlowerPickup : MonoBehaviour
             glow.SetParent(visual, false);
             glowSr = glow.gameObject.AddComponent<SpriteRenderer>();
             glowSr.sprite = spawner.glowSprite;
-            var c = t.color; c.a = 0.45f;
+            var c = t.color; c.a = 0.28f;
             glowSr.color = c;
             glowSr.sortingOrder = spawner.sortingOrder - 1;
             Fit(glow, glowSr.sprite, size * 1.9f);
@@ -48,12 +48,12 @@ public class FlowerPickup : MonoBehaviour
         center.SetParent(petals, false);
         centerSr = center.gameObject.AddComponent<SpriteRenderer>();
         centerSr.sprite = spawner.centerSprite;
-        centerSr.color = t.id == "yellow" ? new Color32(0xE0, 0x8A, 0x2E, 255) : new Color32(0xFF, 0xE3, 0x7A, 255);
+        centerSr.color = FlowerSpawner.CenterColor(t.id);
         centerSr.sortingOrder = spawner.sortingOrder + 1;
         if (centerSr.sprite != null && petalsSr.sprite != null)
         {
             float ps = petalsSr.sprite.bounds.size.x, cs = centerSr.sprite.bounds.size.x;
-            if (cs > 0f) center.localScale = Vector3.one * (ps * 0.36f / cs);
+            if (cs > 0f) center.localScale = Vector3.one * (ps * 0.3f / cs);
         }
 
         var col = gameObject.AddComponent<CircleCollider2D>();
@@ -121,7 +121,7 @@ public class FlowerPickup : MonoBehaviour
             float k = t / d;
             visual.localScale = s0 * (1f + 0.7f * k);
             float a = 1f - k;
-            SetAlpha(petalsSr, a); SetAlpha(centerSr, a); if (glowSr != null) SetAlpha(glowSr, a * 0.45f);
+            SetAlpha(petalsSr, a); SetAlpha(centerSr, a); if (glowSr != null) SetAlpha(glowSr, a * 0.28f);
             petals.Rotate(0, 0, 360f * Time.deltaTime);
             yield return null;
         }
@@ -159,9 +159,7 @@ public class FlowerPickup : MonoBehaviour
         tmp.fontSize = 6f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.Lerp(type.color, new Color(0.25f, 0.25f, 0.25f), 0.35f);
-        tmp.outlineWidth = 0.18f;
-        tmp.outlineColor = new Color32(255, 255, 255, 255);
+        tmp.color = Color.Lerp(type.color, new Color32(0x6E, 0x5F, 0x58, 255), 0.55f);   // ไม่มีเส้นขอบ
         tmp.sortingOrder = owner.sortingOrder + 3;
         go.AddComponent<FloatingText>();
     }

@@ -21,70 +21,73 @@ public static class BreezBeeArt
     }
     delegate bool Shape(float x, float y);
 
-    // ---------------- ผึ้ง (หันขวา) ----------------
+    // ---------------- ผึ้ง (หันขวา) โทนพาสเทล ไม่มีเส้นขอบ ----------------
     public static float[] BeeBody(int s)
     {
         var px = new float[s * s * 4];
-        var ink = new C(0x3A3233);
-        var yellow = new C(0xF8C83A);
-        var light = new C(0xFFE07A);
+        var body = new C(0xFBE3A0);      // เหลืองอ่อน
+        var shade = new C(0xF3CF7E);     // เงาด้านล่าง
+        var stripe = new C(0xB49E8E);    // แถบน้ำตาลอมเทาอ่อน
+        var eye = new C(0x5E4E47);
         // เหล็กใน
-        Paint(px, s, (x, y) => Tri(x, y, -0.62f, 0.08f, -0.62f, -0.12f, -0.86f, -0.04f), ink);
-        // ขอบลำตัว + หัว
-        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.62f, 0.47f) || Dot(x, y, 0.5f, 0.04f, 0.33f), ink);
-        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.56f, 0.41f), yellow);
-        // แถบดำ
-        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.56f, 0.41f) && (Math.Abs(x + 0.3f) < 0.07f || Math.Abs(x - 0.04f) < 0.07f), ink);
-        // ไฮไลต์
-        Paint(px, s, (x, y) => Ell(x, y, -0.1f, 0.2f, 0.3f, 0.08f), new C(0xFFFFFF, 0.45f));
+        Paint(px, s, (x, y) => Tri(x, y, -0.6f, 0.05f, -0.6f, -0.11f, -0.78f, -0.04f), stripe);
+        // ลำตัว + เงาล่าง + ไฮไลต์บน
+        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.57f, 0.42f), body);
+        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.57f, 0.42f) && !Ell(x, y, -0.1f, 0.06f, 0.56f, 0.4f), shade);
+        Paint(px, s, (x, y) => Ell(x, y, -0.08f, -0.02f, 0.57f, 0.42f) && (Math.Abs(x + 0.3f) < 0.075f || Math.Abs(x - 0.05f) < 0.075f), stripe);
+        Paint(px, s, (x, y) => Ell(x, y, -0.16f, 0.2f, 0.26f, 0.07f), new C(0xFFFFFF, 0.55f));
         // หัว
-        Paint(px, s, (x, y) => Dot(x, y, 0.5f, 0.04f, 0.27f), yellow);
-        Paint(px, s, (x, y) => Dot(x, y, 0.44f, 0.15f, 0.1f), light);
-        // ตา + แก้ม + ปาก
-        Paint(px, s, (x, y) => Dot(x, y, 0.6f, 0.1f, 0.065f), ink);
-        Paint(px, s, (x, y) => Dot(x, y, 0.62f, 0.13f, 0.022f), new C(0xFFFFFF));
-        Paint(px, s, (x, y) => Ell(x, y, 0.56f, -0.07f, 0.07f, 0.045f), new C(0xF29BB0, 0.9f));
-        Paint(px, s, (x, y) => Arc(x, y, 0.68f, -0.02f, 0.07f, 0.018f, 220, 320), ink);
+        Paint(px, s, (x, y) => Dot(x, y, 0.5f, 0.04f, 0.29f), body);
+        Paint(px, s, (x, y) => Dot(x, y, 0.5f, 0.04f, 0.29f) && !Dot(x, y, 0.48f, 0.08f, 0.28f), shade);
+        Paint(px, s, (x, y) => Ell(x, y, 0.44f, 0.18f, 0.1f, 0.05f), new C(0xFFFFFF, 0.6f));
+        // ตา แก้ม ยิ้ม
+        Paint(px, s, (x, y) => Ell(x, y, 0.61f, 0.09f, 0.045f, 0.06f), eye);
+        Paint(px, s, (x, y) => Dot(x, y, 0.625f, 0.115f, 0.017f), new C(0xFFFFFF));
+        Paint(px, s, (x, y) => Ell(x, y, 0.57f, -0.07f, 0.07f, 0.045f), new C(0xF2BDC9, 0.95f));
+        Paint(px, s, (x, y) => Arc(x, y, 0.68f, -0.01f, 0.06f, 0.014f, 225, 315), eye);
         // หนวด
-        Paint(px, s, (x, y) => Line(x, y, 0.5f, 0.3f, 0.6f, 0.62f, 0.022f) || Line(x, y, 0.58f, 0.28f, 0.76f, 0.56f, 0.022f), ink);
-        Paint(px, s, (x, y) => Dot(x, y, 0.6f, 0.64f, 0.05f) || Dot(x, y, 0.77f, 0.58f, 0.05f), ink);
+        Paint(px, s, (x, y) => Line(x, y, 0.5f, 0.3f, 0.58f, 0.58f, 0.018f) || Line(x, y, 0.58f, 0.28f, 0.74f, 0.52f, 0.018f), stripe);
+        Paint(px, s, (x, y) => Dot(x, y, 0.58f, 0.6f, 0.045f) || Dot(x, y, 0.75f, 0.54f, 0.045f), stripe);
         return px;
     }
 
-    /// <summary>ปีก: ฐานอยู่ล่างกลาง (pivot 0.5, 0.05) เพื่อกระพือด้วยการย่อแกน Y</summary>
+    /// <summary>ปีกใส สีขาวอมฟ้า ไม่มีขอบ ฐานอยู่ล่างกลาง (pivot 0.5, 0.05)</summary>
     public static float[] BeeWing(int s)
     {
         var px = new float[s * s * 4];
-        Paint(px, s, (x, y) => Ell(x, y, 0f, 0.05f, 0.55f, 0.92f), new C(0x9FC6DA, 0.9f));
-        Paint(px, s, (x, y) => Ell(x, y, 0f, 0.05f, 0.47f, 0.84f), new C(0xFFFFFF, 0.85f));
-        Paint(px, s, (x, y) => Ell(x, y, -0.12f, 0.35f, 0.14f, 0.3f), new C(0xFFFFFF, 0.9f));
+        Paint(px, s, (x, y) => Ell(x, y, 0f, 0.05f, 0.52f, 0.9f), new C(0xD8EAF2, 0.9f));
+        Paint(px, s, (x, y) => Ell(x, y, -0.12f, 0.32f, 0.16f, 0.32f), new C(0xFFFFFF, 0.9f));
         Erase(px, s, (x, y) => y < -0.9f);
         return px;
     }
 
-    // ---------------- ดอกไม้ (สีขาว ย้อมด้วย SpriteRenderer.color) ----------------
+    // ---------------- ดอกไม้ 5 กลีบ แบบเดียวกับ Calm Flow / ไอคอนดอกไม้ในเกม (สีขาว ย้อมด้วย color) ----------------
     public static float[] FlowerPetals(int s)
     {
         var px = new float[s * s * 4];
-        const int n = 6;
+        const int n = 5;
         for (int i = 0; i < n; i++)
         {
             double a = Math.PI / 2 + i * 2 * Math.PI / n;
-            float cx = (float)Math.Cos(a) * 0.5f, cy = (float)Math.Sin(a) * 0.5f;
-            float ca = (float)Math.Cos(-a), sa = (float)Math.Sin(-a);
+            float ux = (float)Math.Cos(a), uy = (float)Math.Sin(a);
             Paint(px, s, (x, y) =>
             {
-                float dx = x - cx, dy = y - cy;
-                float rx = dx * ca - dy * sa, ry = dx * sa + dy * ca;   // หมุนให้แกนยาวชี้ออกจากกลางดอก
-                return (rx * rx) / (0.46f * 0.46f) + (ry * ry) / (0.3f * 0.3f) <= 1f;
-            }, new C(0xE6E6E6));
-            Paint(px, s, (x, y) =>
-            {
-                float dx = x - cx * 1.08f, dy = y - cy * 1.08f;
-                float rx = dx * ca - dy * sa, ry = dx * sa + dy * ca;
-                return (rx * rx) / (0.36f * 0.36f) + (ry * ry) / (0.22f * 0.22f) <= 1f;
+                float along = x * ux + y * uy - 0.5f;     // กลีบกลมรี กึ่งกลางห่างจากกลางดอก 0.5
+                float across = -x * uy + y * ux;
+                return (along * along) / (0.45f * 0.45f) + (across * across) / (0.33f * 0.33f) <= 1f;
             }, new C(0xFFFFFF));
         }
+        // ไล่เฉด: โคนกลีบเข้มกว่าเล็กน้อย ปลายกลีบสว่าง (ไม่มีเส้นขอบ)
+        for (int j = 0; j < s; j++)
+            for (int i = 0; i < s; i++)
+            {
+                int k = (j * s + i) * 4;
+                if (px[k + 3] <= 0f) continue;
+                float x = (i + 0.5f) / s * 2f - 1f, y = (j + 0.5f) / s * 2f - 1f;
+                float d = (float)Math.Sqrt(x * x + y * y);
+                float v = 0.86f + 0.14f * Math.Min(1f, d / 0.8f);
+                px[k] = px[k + 1] = px[k + 2] = v;
+            }
         return px;
     }
 
@@ -92,13 +95,7 @@ public static class BreezBeeArt
     {
         var px = new float[s * s * 4];
         Paint(px, s, (x, y) => Dot(x, y, 0, 0, 0.95f), new C(0xFFFFFF));
-        Paint(px, s, (x, y) => Dot(x, y, -0.25f, 0.28f, 0.28f), new C(0xFFFFFF, 0.6f));
-        for (int i = 0; i < 6; i++)
-        {
-            double a = i * Math.PI / 3 + 0.3;
-            float cx = (float)Math.Cos(a) * 0.5f, cy = (float)Math.Sin(a) * 0.5f;
-            Paint(px, s, (x, y) => Dot(x, y, cx, cy, 0.1f), new C(0xC9C9C9));
-        }
+        Paint(px, s, (x, y) => Dot(x, y, -0.22f, 0.25f, 0.32f), new C(0xFFFFFF, 0.5f));
         return px;
     }
 

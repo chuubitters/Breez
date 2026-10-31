@@ -75,7 +75,7 @@ public static class BreezBreathFocusBee
         {
             var b = oldBee.Find("Body");
             var bs = b != null ? b.GetComponent<SpriteRenderer>() : null;
-            if (bs != null) { worldW = bs.bounds.size.x * 0.85f; order = bs.sortingOrder; layer = bs.sortingLayerName; }
+            if (bs != null) { worldW = bs.bounds.size.x * 0.85f; order = Mathf.Max(0, bs.sortingOrder - 10); layer = bs.sortingLayerName; }
             Undo.DestroyObjectImmediate(oldBee.gameObject);
         }
         else
@@ -102,9 +102,10 @@ public static class BreezBreathFocusBee
         bee.SetParent(tr, false);
         bee.localScale = Vector3.one * scale;
 
-        var wingBack = Part(bee, "WingBack", WingSprite, new Vector3(-0.14f, 0.16f, 0f), 18f, 0.85f, order - 1, layer, new Color(1f, 1f, 1f, 0.75f));
-        var body = Part(bee, "Body", BodySprite, Vector3.zero, 0f, 1f, order, layer, Color.white);
-        var wingFront = Part(bee, "WingFront", WingSprite, new Vector3(0.0f, 0.18f, 0f), -6f, 0.9f, order + 1, layer, Color.white);
+        // ลำดับการวาด: พื้นหลัง (Canvas order 0) < ดอกไม้ (order+2..+5) < ผึ้ง (order+9..+11)
+        var wingBack = Part(bee, "WingBack", WingSprite, new Vector3(-0.16f, 0.17f, 0f), 22f, 1.0f, order + 9, layer, new Color(1f, 1f, 1f, 0.8f));
+        var body = Part(bee, "Body", BodySprite, Vector3.zero, 0f, 1f, order + 10, layer, Color.white);
+        var wingFront = Part(bee, "WingFront", WingSprite, new Vector3(-0.02f, 0.19f, 0f), -4f, 1.05f, order + 11, layer, new Color(1f, 1f, 1f, 0.95f));
         wingBack.SetParent(body, true); wingFront.SetParent(body, true);
 
         var visual = player.GetComponent<BeeVisual>();
@@ -136,7 +137,8 @@ public static class BreezBreathFocusBee
         BreezThaiFontInstaller.EnsureFonts();
         sp.font = BreezThaiFontInstaller.BoldFont != null ? BreezThaiFontInstaller.BoldFont : BreezThaiFontInstaller.EnsureFonts();
         sp.flowerSize = Mathf.Clamp(worldW * 0.8f, 0.6f, 1.4f);
-        sp.sortingOrder = order - 4;
+        sp.sortingOrder = order + 2;
+        sp.types = FlowerSpawner.DefaultTypes();   // สีพาสเทลตามธีมเกม
         foreach (var r in sp.GetComponentsInChildren<Transform>(true)) if (r != sp.transform) Undo.DestroyObjectImmediate(r.gameObject);
 
         gm.spawner = sp;

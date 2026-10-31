@@ -124,8 +124,8 @@ public static class BreezBreathPlayLayers
                 {
                     var f = Art(art, "Flower_" + types[i].id, BreezBreathFocusBee.PetalsSprite, xs[i], ys[i], 92, 92);
                     f.color = types[i].color;
-                    var c = Art(f.transform, "Center", BreezBreathFocusBee.CenterSprite, 0, 0, 34, 34);
-                    c.color = types[i].id == "yellow" ? (Color)new Color32(0xE0, 0x8A, 0x2E, 255) : new Color32(0xFF, 0xE3, 0x7A, 255);
+                    var c = Art(f.transform, "Center", BreezBreathFocusBee.CenterSprite, 0, 0, 28, 28);
+                    c.color = FlowerSpawner.CenterColor(types[i].id);
                     f.gameObject.AddComponent<FlowerResultIcon>().delay = 0.1f + i * 0.15f;
                     Text(art, "Points_" + types[i].id, $"{types[i].points} คะแนน", regular, 24, new Color32(70, 70, 70, 255), xs[i], ys[i] - 66, 160, 34);
                 }
