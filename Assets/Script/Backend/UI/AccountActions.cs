@@ -19,7 +19,7 @@ public class AccountActions : MonoBehaviour
         var backend = BreezBackend.Instance;
         if (requireLogin && !backend.IsLoggedIn)
         {
-            SceneManager.LoadScene(BreezConfig.LoginScene);
+            LoginGate.GoToLogin();
             return;
         }
         if (playerNameText != null) playerNameText.text = string.Format(greetingFormat, backend.DisplayName);
@@ -34,12 +34,12 @@ public class AccountActions : MonoBehaviour
     void OnLoginStateChanged(bool loggedIn)
     {
         // session หมดอายุระหว่างเล่น
-        if (!loggedIn && requireLogin) SceneManager.LoadScene(BreezConfig.LoginScene);
+        if (!loggedIn && requireLogin) LoginGate.GoToLogin();
     }
 
     public void SignOut()
     {
         BreezBackend.Instance.SignOut();
-        SceneManager.LoadScene(BreezConfig.LoginScene);
+        LoginGate.GoToLogin();
     }
 }
